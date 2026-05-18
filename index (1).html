@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#0a0a0f"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Habit Tracker"/>
+  <meta name="description" content="Suivi personnel cannabis & cigarettes"/>
+  <link rel="manifest" href="manifest.json"/>
+  <!-- Apple touch icons -->
+  <link rel="apple-touch-icon" href="icon-192.png"/>
+  <link rel="icon" type="image/png" href="icon-192.png"/>
+  <title>Habit Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: rgba(255,255,255,0.035);
+      --border: rgba(255,255,255,0.07);
+      --text: #e8e8f0;
+      --muted: #6b7280;
+      --green: #22c55e;
+      --orange: #f97316;
+      --purple: #a855f7;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bot: env(safe-area-inset-bottom, 0px);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', system-ui, sans-serif; overflow: hidden; }
+    #root { height: 100%; display: flex; flex-direction: column; }
+
+    /* Scrollable main */
+    .app-shell { display: flex; flex-direction: column; height: 100%; padding-top: var(--safe-top); }
+    .app-header { padding: 20px 20px 0; flex-shrink: 0; }
+    .app-content { flex: 1; overflow-y: auto; padding: 16px 20px calc(80px + var(--safe-bot)); -webkit-overflow-scrolling: touch; }
+    .app-tabs { position: fixed; bottom: 0; left: 0; right: 0; padding: 8px 12px calc(8px + var(--safe-bot)); background: rgba(10,10,15,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; gap: 4px; z-index: 50; }
+
+    /* Tab buttons */
+    .tab-btn { flex: 1; padding: 8px 4px; border-radius: 10px; font-size: 11px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; background: transparent; color: var(--muted); font-family: inherit; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .tab-btn.active { background: rgba(168,85,247,0.15); color: #d8b4fe; }
+    .tab-btn svg { width: 18px; height: 18px; }
+
+    /* Calendar */
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 6px; }
+    .cal-day-label { text-align: center; font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: .05em; padding: 4px 0; }
+    .day-cell { aspect-ratio: 1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: transform 0.15s ease; border: 1.5px solid transparent; font-size: 13px; font-weight: 500; user-select: none; }
+    .day-cell:active { transform: scale(0.92); }
+    .day-cell.today { border-color: rgba(168,85,247,0.55) !important; }
+    .day-dot { position: absolute; top: 3px; right: 3px; width: 4px; height: 4px; border-radius: 50%; background: var(--purple); }
+
+    /* Cards */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 10px; }
+    .card-label { font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+
+    /* Stat grid */
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .stat-mini { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px; text-align: center; }
+    .stat-mini .val { font-size: 26px; font-weight: 700; font-family: 'DM Serif Display', serif; }
+    .stat-mini .lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+    .stat-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 14px; }
+    .stat-strip .mini { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 6px; text-align: center; }
+    .stat-strip .mini .v { font-size: 18px; font-weight: 700; }
+    .stat-strip .mini .l { font-size: 9px; color: var(--muted); margin-top: 1px; }
+
+    /* Progress */
+    .progress-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; margin-top: 6px; }
+    .progress-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+    .progress-bar.thick { height: 10px; }
+
+    /* Bar chart */
+    .bar-row { margin-bottom: 10px; }
+    .bar-row:last-child { margin-bottom: 0; }
+    .bar-label { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
+    .bar-label span:first-child { color: #9ca3af; }
+
+    /* Sparkline */
+    .spark-wrap { width: 100%; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); z-index: 200; display: flex; align-items: flex-end; animation: fadeIn .2s ease; }
+    .modal-box { background: #13131d; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px 24px 0 0; padding: 24px 20px calc(24px + var(--safe-bot)); width: 100%; animation: slideUp .28s cubic-bezier(.22,1,.36,1); max-height: 90vh; overflow-y: auto; }
+    @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+    @keyframes slideUp { from { transform:translateY(100%) } to { transform:translateY(0) } }
+
+    .modal-handle { width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.15); margin: 0 auto 20px; }
+    .type-btn { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid transparent; cursor: pointer; font-size: 14px; font-weight: 500; text-align: left; display: flex; align-items: center; gap: 12px; transition: all 0.15s; background: rgba(255,255,255,0.04); color: var(--text); margin-bottom: 8px; font-family: inherit; }
+    .type-btn:active { transform: scale(0.98); }
+    .type-btn.active { border-color: currentColor; }
+
+    textarea { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: var(--text); font-family: inherit; font-size: 14px; padding: 12px; width: 100%; outline: none; resize: none; margin-top: 6px; }
+    textarea:focus { border-color: rgba(168,85,247,0.5); }
+    input[type="number"] { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text); font-family: inherit; font-size: 14px; padding: 8px 10px; width: 90px; outline: none; }
+    input[type="number"]:focus { border-color: rgba(168,85,247,0.5); }
+
+    .btn-primary { width: 100%; padding: 14px; border-radius: 12px; background: rgba(168,85,247,0.18); border: 1.5px solid rgba(168,85,247,0.35); color: #d8b4fe; font-family: inherit; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 16px; transition: background .2s; }
+    .btn-primary:active { background: rgba(168,85,247,0.3); }
+
+    .nav-wrap { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .nav-btn { background: rgba(255,255,255,0.07); border: 1px solid var(--border); color: var(--text); border-radius: 10px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: background .15s; }
+    .nav-btn:active { background: rgba(255,255,255,0.14); }
+
+    .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 14px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #9ca3af; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .export-btn { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.25); color: #d8b4fe; border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 12px; font-weight: 600; font-family: inherit; transition: background .2s; }
+    .export-btn:active { background: rgba(168,85,247,0.25); }
+
+    .goal-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .goal-row span { font-size: 13px; color: #9ca3af; }
+
+    .motivation { background: rgba(59,130,246,0.07); border: 1px solid rgba(59,130,246,0.15); border-radius: 14px; padding: 16px; margin-bottom: 10px; }
+    .motivation .title { font-size: 11px; color: #60a5fa; font-weight: 600; margin-bottom: 6px; }
+    .motivation p { font-size: 13px; color: #93c5fd; line-height: 1.6; font-style: italic; }
+
+    .success-banner { margin-top: 10px; padding: 10px 14px; background: rgba(34,197,94,0.1); border-radius: 10px; font-size: 12px; color: #4ade80; text-align: center; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+
+// ── Constants ─────────────────────────────────────────────────────────────
+const TYPES = {
+  none:  { label:"Clean",           color:"#22c55e", bg:"rgba(34,197,94,0.18)",  emoji:"✦" },
+  cigs:  { label:"Cigarettes",      color:"#f97316", bg:"rgba(249,115,22,0.18)", emoji:"🚬" },
+  weed:  { label:"Cannabis",        color:"#a855f7", bg:"rgba(168,85,247,0.18)", emoji:"🍃" },
+  both:  { label:"Cannabis + Cigs", color:"#ef4444", bg:"rgba(239,68,68,0.18)",  emoji:"⚠" },
+};
+const MONTHS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+const DAYS   = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+const STORE  = "habit_tracker_v1";
+const GSTORE = "habit_goals_v1";
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+const dk = (y,m,d) => `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+const daysInMonth = (y,m) => new Date(y,m+1,0).getDate();
+const firstOffset = (y,m) => { const d=new Date(y,m,1).getDay(); return d===0?6:d-1; };
+const load = (k,def) => { try { return JSON.parse(localStorage.getItem(k))||def; } catch { return def; } };
+
+// ── Sparkline SVG ─────────────────────────────────────────────────────────
+function Spark({ data }) {
+  if (!data?.length) return null;
+  const W=320, H=55, p=8;
+  const max = Math.max(...data.map(d=>d.v),1);
+  const pts = data.map((d,i) => ({
+    x: p + (i/Math.max(data.length-1,1))*(W-p*2),
+    y: H - p - (d.v/max)*(H-p*2),
+    c: TYPES[d.type]?.color || "#6b7280"
+  }));
+  const path = pts.map((p,i)=>`${i===0?"M":"L"} ${p.x} ${p.y}`).join(" ");
+  const area = `${path} L ${pts[pts.length-1].x} ${H} L ${pts[0].x} ${H} Z`;
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:H}}>
+      <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#a855f7" stopOpacity=".3"/>
+        <stop offset="100%" stopColor="#a855f7" stopOpacity="0"/>
+      </linearGradient></defs>
+      <path d={area} fill="url(#sg)"/>
+      <path d={path} fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      {pts.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={2.5} fill={p.c} stroke="#0a0a0f" strokeWidth="1.5"/>)}
+    </svg>
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────────────────
+function App() {
+  const today = new Date();
+  const [year,  setYear]  = useState(today.getFullYear());
+  const [month, setMonth] = useState(today.getMonth());
+  const [data,  setData]  = useState(() => load(STORE, {}));
+  const [goals, setGoals] = useState(() => load(GSTORE, { cig:10, weed:15, target:20 }));
+  const [tab,   setTab]   = useState("cal");
+  const [modal, setModal] = useState(null); // {y,m,d}
+
+  useEffect(() => { try { localStorage.setItem(STORE, JSON.stringify(data)); } catch {} }, [data]);
+  useEffect(() => { try { localStorage.setItem(GSTORE, JSON.stringify(goals)); } catch {} }, [goals]);
+
+  // Calendar cells
+  const dim = daysInMonth(year, month);
+  const off = firstOffset(year, month);
+  const cells = [];
+  for(let i=0;i<off;i++) cells.push(null);
+  for(let d=1;d<=dim;d++) cells.push(d);
+  while(cells.length%7!==0) cells.push(null);
+
+  const getEntry = d => data[dk(year,month,d)] || null;
+
+  // Stats
+  const entries = Array.from({length:dim},(_,i)=>({d:i+1, e:data[dk(year,month,i+1)]}));
+  const logged  = entries.filter(x=>x.e?.type).length;
+  const nClean  = entries.filter(x=>x.e?.type==="none").length;
+  const nCigs   = entries.filter(x=>x.e?.type==="cigs"||x.e?.type==="both").length;
+  const nWeed   = entries.filter(x=>x.e?.type==="weed"||x.e?.type==="both").length;
+  const nBoth   = entries.filter(x=>x.e?.type==="both").length;
+  const pct     = logged ? Math.round((nClean/logged)*100) : 0;
+
+  // Streak (all-time)
+  let streak=0, cur=new Date(today);
+  while(true) {
+    const k=dk(cur.getFullYear(),cur.getMonth(),cur.getDate());
+    if(data[k]?.type==="none"){streak++;cur.setDate(cur.getDate()-1);}else break;
+  }
+
+  // Longest streak
+  let longest=0, run=0, prev=null;
+  for(const k of Object.keys(data).sort()) {
+    if(data[k]?.type==="none"){
+      const d=new Date(k);
+      if(prev&&(d-prev)/86400000===1){run++;}else{run=1;}
+      longest=Math.max(longest,run); prev=d;
+    } else { run=0; prev=null; }
+  }
+
+  // Money saved
+  const cigSaved  = entries.filter(x=>x.e?.type==="none"||x.e?.type==="weed").length;
+  const weedSaved = entries.filter(x=>x.e?.type==="none"||x.e?.type==="cigs").length;
+  const money     = (cigSaved*goals.cig + weedSaved*goals.weed).toFixed(0);
+
+  // Sparkline
+  const spark = Array.from({length:28},(_,i)=>{
+    const d=new Date(today); d.setDate(d.getDate()-(27-i));
+    const k=dk(d.getFullYear(),d.getMonth(),d.getDate());
+    const t=data[k]?.type;
+    return {v:t==="none"?3:t==="cigs"?1:t==="weed"?1:t==="both"?0:2, type:t||"none"};
+  });
+
+  const barMax = Math.max(nClean,nCigs,nWeed,nBoth,1);
+
+  function setType(type) {
+    if(!modal) return;
+    const key = dk(modal.y, modal.m, modal.d);
+    setData(prev => {
+      const next = {...prev};
+      if(type===null) delete next[key];
+      else next[key] = { type, note: prev[key]?.note||"" };
+      return next;
+    });
+  }
+  function setNote(note) {
+    if(!modal) return;
+    const key = dk(modal.y, modal.m, modal.d);
+    setData(prev => ({...prev, [key]:{...(prev[key]||{type:null}),note}}));
+  }
+
+  const selKey   = modal ? dk(modal.y, modal.m, modal.d) : null;
+  const selEntry = selKey ? data[selKey] : null;
+
+  function exportJSON() {
+    const blob = new Blob([JSON.stringify({data,goals},null,2)],{type:"application/json"});
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+    a.download="habit_tracker.json"; a.click();
+  }
+
+  function prevMonth() { if(month===0){setMonth(11);setYear(y=>y-1);}else setMonth(m=>m-1); }
+  function nextMonth() { if(month===11){setMonth(0);setYear(y=>y+1);}else setMonth(m=>m+1); }
+
+  return (
+    <div className="app-shell">
+      {/* Header */}
+      <div className="app-header">
+        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:16}}>
+          <div>
+            <div style={{fontSize:10,letterSpacing:".15em",color:"#6b7280",textTransform:"uppercase",fontWeight:600}}>Suivi Personnel</div>
+            <h1 style={{fontSize:22,fontFamily:"'DM Serif Display',serif",fontWeight:400,color:"#f0f0f8",lineHeight:1.2}}>Habit Tracker</h1>
+          </div>
+          <button className="export-btn" onClick={exportJSON}>↓ JSON</button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="app-content">
+
+        {/* ── CALENDRIER ─────────────────────────────── */}
+        {tab==="cal" && <>
+          <div className="nav-wrap">
+            <button className="nav-btn" onClick={prevMonth}>‹</button>
+            <span style={{fontSize:15,fontWeight:600}}>{MONTHS[month]} {year}</span>
+            <button className="nav-btn" onClick={nextMonth}>›</button>
+          </div>
+
+          <div className="cal-header">
+            {DAYS.map(d=><div key={d} className="cal-day-label">{d}</div>)}
+          </div>
+
+          <div className="cal-grid">
+            {cells.map((d,i)=>{
+              if(!d) return <div key={`e${i}`}/>;
+              const e = getEntry(d);
+              const t = e?.type;
+              const conf = t ? TYPES[t] : null;
+              const isToday = d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();
+              return (
+                <div key={d} className={`day-cell${isToday?" today":""}`}
+                  style={{
+                    background: conf?conf.bg:"rgba(255,255,255,0.03)",
+                    borderColor: conf?conf.color:(isToday?"rgba(168,85,247,0.5)":"transparent"),
+                    color: conf?conf.color:"#6b7280",
+                  }}
+                  onClick={()=>setModal({y:year,m:month,d})}
+                >
+                  <span style={{fontSize:12,fontWeight:isToday?700:500}}>{d}</span>
+                  {conf&&<span style={{fontSize:9,marginTop:1}}>{conf.emoji}</span>}
+                  {e?.note&&<div className="day-dot"/>}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="legend">
+            {Object.entries(TYPES).map(([k,v])=>(
+              <div key={k} className="legend-item">
+                <div className="legend-dot" style={{background:v.color}}/>
+                {v.label}
+              </div>
+            ))}
+          </div>
+
+          <div className="stat-strip">
+            {[
+              {l:"Jours clean",v:nClean,c:"#22c55e"},
+              {l:"Streak actuel",v:`${streak}j`,c:"#a855f7"},
+              {l:"Taux clean",v:`${pct}%`,c:"#3b82f6"},
+            ].map(s=>(
+              <div key={s.l} className="mini">
+                <div className="v" style={{color:s.c}}>{s.v}</div>
+                <div className="l">{s.l}</div>
+              </div>
+            ))}
+          </div>
+        </>}
+
+        {/* ── STATS ──────────────────────────────────── */}
+        {tab==="stats" && <>
+          <div className="stat-grid">
+            {[
+              {l:"Jours clean",v:nClean,c:"#22c55e"},
+              {l:"Cigarettes",v:nCigs,c:"#f97316"},
+              {l:"Cannabis",v:nWeed,c:"#a855f7"},
+              {l:"Les deux",v:nBoth,c:"#ef4444"},
+            ].map(s=>(
+              <div key={s.l} className="stat-mini">
+                <div className="val" style={{color:s.c}}>{s.v}</div>
+                <div className="lbl">{s.l}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="card">
+            <div className="card-label">Streaks</div>
+            <div style={{display:"flex",justifyContent:"space-between"}}>
+              <div>
+                <div style={{fontSize:11,color:"#9ca3af"}}>Actuel</div>
+                <div style={{fontSize:24,fontWeight:700,color:"#22c55e",fontFamily:"'DM Serif Display',serif"}}>{streak} <span style={{fontSize:13}}>jours</span></div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontSize:11,color:"#9ca3af"}}>Record</div>
+                <div style={{fontSize:24,fontWeight:700,color:"#a855f7",fontFamily:"'DM Serif Display',serif"}}>{longest} <span style={{fontSize:13}}>jours</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+              <span style={{fontSize:12,color:"#9ca3af"}}>Taux de réussite</span>
+              <span style={{fontSize:13,fontWeight:700,color:"#22c55e"}}>{pct}%</span>
+            </div>
+            <div className="progress-bar thick">
+              <div className="progress-fill" style={{width:`${pct}%`,background:"linear-gradient(90deg,#22c55e,#4ade80)"}}/>
+            </div>
+            <div style={{fontSize:10,color:"#4b5563",marginTop:6}}>{logged} jours renseignés sur {dim}</div>
+          </div>
+
+          <div className="card">
+            <div className="card-label">Répartition du mois</div>
+            {[
+              {l:"Clean",v:nClean,c:"#22c55e"},
+              {l:"Cigarettes",v:nCigs,c:"#f97316"},
+              {l:"Cannabis",v:nWeed,c:"#a855f7"},
+              {l:"Les deux",v:nBoth,c:"#ef4444"},
+            ].map(b=>(
+              <div key={b.l} className="bar-row">
+                <div className="bar-label">
+                  <span>{b.l}</span>
+                  <span style={{fontWeight:700,color:b.c}}>{b.v}j</span>
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{width:`${(b.v/barMax)*100}%`,background:b.c,opacity:.85}}/>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="card">
+            <div className="card-label">Tendance 28 jours</div>
+            <Spark data={spark}/>
+            <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
+              <span style={{fontSize:10,color:"#4b5563"}}>Il y a 28j</span>
+              <span style={{fontSize:10,color:"#4b5563"}}>Aujourd'hui</span>
+            </div>
+          </div>
+
+          <div className="card" style={{background:"rgba(168,85,247,0.08)",borderColor:"rgba(168,85,247,0.2)"}}>
+            <div style={{fontSize:11,color:"#a855f7",fontWeight:600,marginBottom:4}}>💰 Économies ce mois</div>
+            <div style={{fontSize:34,fontWeight:700,color:"#d8b4fe",fontFamily:"'DM Serif Display',serif"}}>{money}€</div>
+            <div style={{fontSize:10,color:"#9ca3af",marginTop:2}}>{cigSaved}j sans cigs · {weedSaved}j sans cannabis</div>
+          </div>
+        </>}
+
+        {/* ── OBJECTIFS ──────────────────────────────── */}
+        {tab==="goals" && <>
+          <div className="card">
+            <div className="card-label">Paramètres</div>
+            {[
+              {l:"Coût cigs / paquet (€)", k:"cig"},
+              {l:"Coût cannabis / g (€)", k:"weed"},
+              {l:"Objectif jours clean / mois", k:"target"},
+            ].map(g=>(
+              <div key={g.k} className="goal-row">
+                <span>{g.l}</span>
+                <input type="number" value={goals[g.k]}
+                  onChange={e=>setGoals(p=>({...p,[g.k]:+e.target.value}))}
+                  min="0" step="0.5"/>
+              </div>
+            ))}
+          </div>
+
+          <div className="card">
+            <div className="card-label">Progression objectif mensuel</div>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+              <span style={{fontSize:13,color:"#e8e8f0"}}>Jours clean</span>
+              <span style={{fontSize:14,fontWeight:700,color:"#22c55e"}}>{nClean} / {goals.target}</span>
+            </div>
+            <div className="progress-bar thick">
+              <div className="progress-fill" style={{width:`${Math.min((nClean/Math.max(goals.target,1))*100,100)}%`,background:"linear-gradient(90deg,#22c55e,#86efac)"}}/>
+            </div>
+            {nClean>=goals.target&&<div className="success-banner">🎉 Objectif atteint ce mois !</div>}
+          </div>
+
+          <div className="stat-grid">
+            <div className="stat-mini">
+              <div className="val" style={{color:"#fbbf24"}}>{money}€</div>
+              <div className="lbl">économisés</div>
+            </div>
+            <div className="stat-mini">
+              <div className="val" style={{color:"#22c55e"}}>{streak}</div>
+              <div className="lbl">jours de streak</div>
+            </div>
+          </div>
+
+          <div className="motivation">
+            <div className="title">✦ Mindset</div>
+            <p>
+              {streak>=14?`${streak} jours. Tu as prouvé que tu peux le faire. Continue.`:
+               streak>=7?`${streak} jours de suite. Le momentum est là. Garde le cap.`:
+               streak>=3?`${streak} jours. Le début d'une nouvelle habitude.`:
+               "Chaque jour clean est une victoire. Commence par aujourd'hui."}
+            </p>
+          </div>
+        </>}
+      </div>
+
+      {/* Bottom tabs */}
+      <div className="app-tabs">
+        {[
+          ["cal","📅","Calendrier"],
+          ["stats","📊","Stats"],
+          ["goals","🎯","Objectifs"],
+        ].map(([k,icon,label])=>(
+          <button key={k} className={`tab-btn${tab===k?" active":""}`} onClick={()=>setTab(k)}>
+            <span style={{fontSize:18}}>{icon}</span>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Modal */}
+      {modal&&(
+        <div className="modal-overlay" onClick={()=>setModal(null)}>
+          <div className="modal-box" onClick={e=>e.stopPropagation()}>
+            <div className="modal-handle"/>
+            <div style={{marginBottom:20}}>
+              <div style={{fontSize:10,color:"#6b7280",letterSpacing:".1em",textTransform:"uppercase"}}>Journal</div>
+              <div style={{fontSize:18,fontFamily:"'DM Serif Display',serif",color:"#f0f0f8"}}>
+                {modal.d} {MONTHS[modal.m]} {modal.y}
+              </div>
+            </div>
+
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:10,color:"#6b7280",marginBottom:10,fontWeight:600,letterSpacing:".05em",textTransform:"uppercase"}}>Consommation</div>
+              {Object.entries(TYPES).map(([k,v])=>(
+                <button key={k} className={`type-btn${selEntry?.type===k?" active":""}`}
+                  style={{color:v.color,borderColor:selEntry?.type===k?v.color:"transparent",background:selEntry?.type===k?v.bg:"rgba(255,255,255,0.04)"}}
+                  onClick={()=>setType(k)}>
+                  <span style={{fontSize:18}}>{v.emoji}</span>
+                  {v.label}
+                  {selEntry?.type===k&&<span style={{marginLeft:"auto"}}>✓</span>}
+                </button>
+              ))}
+              {selEntry?.type&&(
+                <button className="type-btn" style={{color:"#4b5563"}} onClick={()=>setType(null)}>
+                  <span style={{fontSize:18}}>✕</span> Effacer
+                </button>
+              )}
+            </div>
+
+            <div>
+              <div style={{fontSize:10,color:"#6b7280",fontWeight:600,letterSpacing:".05em",textTransform:"uppercase"}}>Note du jour</div>
+              <textarea rows={3} placeholder="Comment tu te sens aujourd'hui ?"
+                value={selEntry?.note||""}
+                onChange={e=>setNote(e.target.value)}/>
+            </div>
+
+            <button className="btn-primary" onClick={()=>setModal(null)}>Enregistrer</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+
+<!-- Service Worker registration -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(r => console.log('SW registered'))
+      .catch(e => console.log('SW error', e));
+  });
+}
+</script>
+</body>
+</html>
