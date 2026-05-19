@@ -3,59 +3,84 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <meta name="theme-color" content="#0a0a0f" media="(prefers-color-scheme: dark)"/>
-  <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)"/>
+  <meta name="theme-color" content="#0a0a0f" media="(prefers-color-scheme:dark)"/>
+  <meta name="theme-color" content="#f0f4f8" media="(prefers-color-scheme:light)"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="Recovery"/>
+  <meta name="apple-mobile-web-app-title" content="Habit Tracker"/>
   <link rel="manifest" href="manifest.json"/>
   <link rel="apple-touch-icon" href="icon-192.png"/>
-  <title>Recovery Tracker</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+  <title>Habit Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap" rel="stylesheet"/>
   <style>
-    /* ── Theme tokens ── */
     :root{
-      --bg:#0a0a0f; --bg2:#12121c; --bg3:#1a1a28;
-      --s:rgba(255,255,255,0.04); --s2:rgba(255,255,255,0.07);
-      --b:rgba(255,255,255,0.08); --b2:rgba(255,255,255,0.12);
-      --t:#e8e8f0; --t2:#9ca3af; --t3:#6b7280;
-      --green:#22c55e; --green2:#4ade80; --green3:rgba(34,197,94,0.12);
-      --shadow:0 4px 24px rgba(0,0,0,0.4);
+      --bg:#0a0a0f;--bg2:#12121c;--bg3:#1a1a28;
+      --s:rgba(255,255,255,0.04);--s2:rgba(255,255,255,0.08);
+      --b:rgba(255,255,255,0.08);--b2:rgba(255,255,255,0.14);
+      --t:#e8e8f0;--t2:#9ca3af;--t3:#6b7280;
+      --green:#22c55e;--green2:#4ade80;--green3:rgba(34,197,94,0.12);
+      --sh:0 2px 16px rgba(0,0,0,0.35);
     }
-    @media(prefers-color-scheme:light){
-      :root{
-        --bg:#f0f4f8; --bg2:#ffffff; --bg3:#e8edf4;
-        --s:rgba(0,0,0,0.04); --s2:rgba(0,0,0,0.07);
-        --b:rgba(0,0,0,0.08); --b2:rgba(0,0,0,0.12);
-        --t:#0f172a; --t2:#475569; --t3:#94a3b8;
-        --green:#16a34a; --green2:#15803d; --green3:rgba(22,163,74,0.1);
-        --shadow:0 4px 24px rgba(0,0,0,0.1);
-      }
-    }
+    @media(prefers-color-scheme:light){:root{
+      --bg:#f0f4f8;--bg2:#ffffff;--bg3:#e8edf4;
+      --s:rgba(0,0,0,0.04);--s2:rgba(0,0,0,0.08);
+      --b:rgba(0,0,0,0.08);--b2:rgba(0,0,0,0.14);
+      --t:#0f172a;--t2:#475569;--t3:#94a3b8;
+      --green:#16a34a;--green2:#15803d;--green3:rgba(22,163,74,0.1);
+      --sh:0 2px 12px rgba(0,0,0,0.08);
+    }}
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-    html,body{height:100%;background:var(--bg);color:var(--t);font-family:'DM Sans',system-ui,sans-serif;overflow:hidden;}
-    #root{height:100%;display:flex;flex-direction:column;}
+    html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Inter',system-ui,sans-serif;overflow:hidden;}
+    #root{height:100%;}
     .shell{display:flex;flex-direction:column;height:100%;padding-top:env(safe-area-inset-top,0px);}
     .hdr{padding:10px 16px 0;flex-shrink:0;}
     .content{flex:1;overflow-y:auto;padding:8px 16px 160px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
     .content::-webkit-scrollbar{display:none;}
-    .tabs{position:fixed;bottom:0;left:0;right:0;padding:6px 6px 0;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));background:rgba(10,10,15,0.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--b);display:flex;gap:2px;z-index:50;}
-    @media(prefers-color-scheme:light){.tabs{background:rgba(240,244,248,0.95);}}
+    .tabs{position:fixed;bottom:0;left:0;right:0;padding:6px 6px 0;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));background:rgba(10,10,15,0.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--b);display:flex;gap:2px;z-index:50;}
+    @media(prefers-color-scheme:light){.tabs{background:rgba(240,244,248,0.96);}}
+    /* Tab icon bounce on active */
     .tb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 1px;border-radius:9px;border:none;background:transparent;cursor:pointer;font-family:inherit;font-size:9px;font-weight:600;color:var(--t3);transition:all .22s cubic-bezier(.34,1.56,.64,1);}
     .tb.on{background:var(--green3);color:var(--green2);}
-    .tb svg{transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
-    .tb.on svg{transform:scale(1.12);}
-    .tc{animation:tIn .2s ease;}
+    .tb svg{transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+    .tb.on svg{animation:iconBounce .4s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes iconBounce{0%{transform:scale(1)}40%{transform:scale(1.35)}70%{transform:scale(0.9)}100%{transform:scale(1.1)}}
+    .tc{animation:tIn .22s ease;}
     @keyframes tIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-    /* ── Calendar ── */
+    /* Cards */
+    .card{background:var(--bg2);border:1px solid var(--b);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:var(--sh);}
+    .xcard{background:var(--bg2);border:1px solid var(--b);border-radius:16px;padding:14px;margin-bottom:10px;position:relative;box-shadow:var(--sh);}
+    .xbtn{position:absolute;top:11px;right:11px;background:var(--s);border:1px solid var(--b);border-radius:7px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+    .clbl{font-size:10px;color:var(--t3);font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-bottom:9px;}
+    .sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+    .sm{background:var(--bg2);border:1px solid var(--b);border-radius:14px;padding:12px;text-align:center;box-shadow:var(--sh);}
+    .sm .v{font-size:22px;font-weight:700;}
+    .sm .l{font-size:9px;color:var(--t3);margin-top:2px;}
+    .pb{height:5px;border-radius:3px;background:var(--s2);overflow:hidden;margin-top:5px;}
+    .pf{height:100%;border-radius:3px;width:0;transition:width .9s cubic-bezier(.4,0,.2,1);}
+    .pb.t{height:9px;}
+    .pulse{animation:sp .5s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes sp{0%{transform:scale(1)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
+    .gr{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;}
+    .gr span{font-size:12px;color:var(--t2);}
+    .sban{margin-top:8px;padding:8px 12px;background:rgba(34,197,94,0.1);border-radius:8px;font-size:11px;color:var(--green2);text-align:center;}
+
+    /* Playfair for big numbers only */
+    .big-num{font-family:'Playfair Display',serif;font-weight:700;}
+
+    /* Nav */
+    .nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+    .nbtn{background:var(--s);border:1px solid var(--b);color:var(--t);border-radius:9px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:background .14s,transform .14s;}
+    .nbtn:active{background:var(--s2);transform:scale(0.88);}
     .vpill{display:flex;background:var(--s);border-radius:8px;padding:2px;gap:2px;}
     .vbtn{padding:4px 9px;border-radius:6px;border:none;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;background:transparent;color:var(--t3);transition:all .18s;display:flex;align-items:center;gap:3px;}
     .vbtn.on{background:var(--green3);color:var(--green2);}
+
+    /* Calendar */
     .cal-hdr{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px;}
-    .cdl{text-align:center;font-size:10px;font-weight:600;color:var(--t3);letter-spacing:.04em;padding:3px 0;}
+    .cdl{text-align:center;font-size:10px;font-weight:600;color:var(--t3);padding:3px 0;}
     .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
-    .day{aspect-ratio:1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;border:1.5px solid transparent;font-size:11px;font-weight:500;user-select:none;opacity:0;animation:cPop forwards;transition:transform .14s ease,background .2s,border-color .2s;}
+    .day{aspect-ratio:1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;border:1.5px solid transparent;font-size:11px;font-weight:500;user-select:none;opacity:0;animation:cPop forwards;transition:transform .14s,background .2s,border-color .2s;}
     .day:active{transform:scale(0.87)!important;}
     .day.td{border-color:rgba(34,197,94,0.6)!important;}
     .day.bop{animation:cBop .36s cubic-bezier(.34,1.56,.64,1) forwards!important;}
@@ -63,33 +88,62 @@
     @keyframes cPop{0%{opacity:0;transform:scale(0.5)}100%{opacity:1;transform:scale(1)}}
     @keyframes cBop{0%{transform:scale(1)}35%{transform:scale(1.26)}65%{transform:scale(0.93)}100%{transform:scale(1)}}
     .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
-    .wday{border-radius:12px;display:flex;flex-direction:column;align-items:center;padding:7px 2px;cursor:pointer;border:1.5px solid transparent;user-select:none;transition:transform .14s,background .2s;animation:tIn .25s ease;}
+    .wday{border-radius:12px;display:flex;flex-direction:column;align-items:center;padding:10px 2px;cursor:pointer;border:1.5px solid transparent;user-select:none;transition:transform .14s,background .2s;animation:tIn .2s ease;}
     .wday:active{transform:scale(0.92);}
-    .nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-    .nbtn{background:var(--s);border:1px solid var(--b);color:var(--t);border-radius:9px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:background .14s,transform .14s;}
-    .nbtn:active{background:var(--s2);transform:scale(0.88);}
+    .wday.td{border-color:rgba(34,197,94,0.6)!important;}
+    .year-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+    .ym-card{background:var(--bg2);border:1px solid var(--b);border-radius:12px;padding:8px 6px;cursor:pointer;transition:all .15s;}
+    .ym-card:active{transform:scale(0.96);}
+    .ym-name{font-size:10px;font-weight:700;color:var(--t2);text-align:center;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em;}
+    .ym-dots{display:grid;grid-template-columns:repeat(7,1fr);gap:1.5px;}
+    .yd{aspect-ratio:1;border-radius:2px;}
 
-    /* ── Cards ── */
-    .card{background:var(--bg2);border:1px solid var(--b);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);}
-    .clbl{font-size:10px;color:var(--t3);font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-bottom:9px;}
-    .xcard{background:var(--bg2);border:1px solid var(--b);border-radius:16px;padding:14px;margin-bottom:10px;position:relative;box-shadow:var(--shadow);}
-    .xbtn{position:absolute;top:11px;right:11px;background:var(--s);border:1px solid var(--b);border-radius:7px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
-    .sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-    .sm{background:var(--bg2);border:1px solid var(--b);border-radius:14px;padding:12px;text-align:center;box-shadow:var(--shadow);}
-    .sm .v{font-size:22px;font-weight:700;font-family:'DM Serif Display',serif;}
-    .sm .l{font-size:9px;color:var(--t3);margin-top:2px;}
-    .pb{height:5px;border-radius:3px;background:var(--s2);overflow:hidden;margin-top:5px;}
-    .pf{height:100%;border-radius:3px;width:0;transition:width .9s cubic-bezier(.4,0,.2,1);}
-    .pb.t{height:9px;}
-    .pulse{animation:sp .5s cubic-bezier(.34,1.56,.64,1);}
-    @keyframes sp{0%{transform:scale(1)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
+    /* Organ flip */
+    .organ-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+    .organ-flip{perspective:900px;height:130px;cursor:pointer;}
+    .organ-flip-inner{position:relative;width:100%;height:100%;transition:transform .6s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d;}
+    .organ-flip.flipped .organ-flip-inner{transform:rotateY(180deg);}
+    .organ-face{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;border:1px solid var(--b);background:var(--bg2);box-shadow:var(--sh);}
+    .organ-back{transform:rotateY(180deg);background:var(--bg3);padding:10px 9px;justify-content:flex-start;align-items:flex-start;}
+    .organ-pb{height:4px;border-radius:2px;background:var(--s2);margin-top:6px;overflow:hidden;width:100%;}
+    .organ-pf{height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
 
-    /* ── Modal ── */
+    /* Timeline */
+    .drug-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+    .drug-tab{padding:4px 10px;border-radius:20px;border:1px solid var(--b);background:var(--s);color:var(--t3);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
+    .drug-tab.on{border-color:currentColor;}
+    .rec-step{display:flex;gap:10px;margin-bottom:8px;align-items:flex-start;}
+
+    /* Milestone */
+    .milestone-card{background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(168,85,247,0.06));border:1px solid rgba(34,197,94,0.25);border-radius:16px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden;}
+    .mg{position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(34,197,94,0.2),transparent);pointer-events:none;}
+
+    /* Week bars */
+    .wbar-wrap{display:flex;align-items:flex-end;justify-content:space-between;gap:3px;height:70px;}
+    .wbar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+    .wbar{width:100%;border-radius:3px 3px 0 0;min-height:3px;}
+    .wbar-lbl{font-size:9px;color:var(--t3);font-weight:600;}
+    .wbar-val{font-size:8px;font-weight:700;}
+
+    /* AI box */
+    .ai-box{background:var(--green3);border:1px solid rgba(34,197,94,0.2);border-radius:13px;padding:13px;margin-top:8px;}
+    .ai-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:aiP 2s infinite;flex-shrink:0;}
+    @keyframes aiP{0%,100%{opacity:1}50%{opacity:.3}}
+    .ai-text{font-size:12px;color:var(--t);line-height:1.65;}
+    .ai-loading{display:flex;gap:4px;align-items:center;padding:6px 0;}
+    .ai-loading span{width:5px;height:5px;border-radius:50%;background:var(--green);animation:dots 1.2s infinite;}
+    .ai-loading span:nth-child(2){animation-delay:.2s;}
+    .ai-loading span:nth-child(3){animation-delay:.4s;}
+    @keyframes dots{0%,80%,100%{transform:scale(0);opacity:.4}40%{transform:scale(1);opacity:1}}
+    .ai-sec{margin-top:8px;padding-top:8px;border-top:1px solid rgba(34,197,94,0.15);}
+    .ai-sec-t{font-size:9px;color:var(--green);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;}
+
+    /* Modal — swipe down to close */
     .mo{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:200;display:flex;align-items:flex-end;animation:fadeIn .18s ease;}
-    .mb{background:var(--bg2);border:1px solid var(--b);border-radius:22px 22px 0 0;padding:18px 15px;padding-bottom:max(24px,calc(16px + env(safe-area-inset-bottom,0px)));width:100%;animation:sUp .28s cubic-bezier(.22,1,.36,1);max-height:88vh;overflow-y:auto;}
+    .mb{background:var(--bg2);border:1px solid var(--b);border-radius:22px 22px 0 0;padding:18px 15px;padding-bottom:max(24px,calc(16px + env(safe-area-inset-bottom,0px)));width:100%;animation:sUp .28s cubic-bezier(.22,1,.36,1);max-height:90vh;overflow-y:auto;touch-action:pan-y;}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     @keyframes sUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
-    .mh{width:36px;height:4px;border-radius:2px;background:var(--b2);margin:0 auto 14px;}
+    .mh{width:36px;height:4px;border-radius:2px;background:var(--b2);margin:0 auto 14px;cursor:grab;}
     .ctr-row{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-radius:11px;border:1.5px solid transparent;margin-bottom:6px;}
     .ctr-row.active{border-color:currentColor;}
     .ctr-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
@@ -97,9 +151,9 @@
     .ctr-lbl{font-size:13px;font-weight:500;}
     .ctr-sub{font-size:10px;color:var(--t3);margin-top:1px;}
     .ctr-right{display:flex;align-items:center;flex-shrink:0;}
-    .ctr-btn{width:36px;height:36px;border-radius:9px;border:1.5px solid var(--b2);background:var(--s);color:var(--t);font-size:20px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;line-height:1;}
+    .ctr-btn{width:36px;height:36px;border-radius:9px;border:1.5px solid var(--b2);background:var(--s);color:var(--t);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;line-height:1;}
     .ctr-btn:active{background:var(--s2);}
-    .ctr-val{min-width:36px;text-align:center;font-size:17px;font-weight:700;font-family:'DM Serif Display',serif;}
+    .ctr-val{min-width:36px;text-align:center;font-size:17px;font-weight:700;}
     .slbl{font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;margin-top:8px;}
     .tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
     .tag{padding:5px 10px;border-radius:18px;border:1px solid var(--b);background:var(--s);font-size:11px;font-weight:500;cursor:pointer;color:var(--t3);}
@@ -112,13 +166,10 @@
     textarea{background:var(--s);border:1px solid var(--b);border-radius:10px;color:var(--t);font-family:inherit;font-size:13px;padding:9px;width:100%;outline:none;resize:none;margin-top:4px;}
     textarea:focus{border-color:rgba(34,197,94,0.4);}
     input[type="number"],input[type="time"],input[type="text"]{background:var(--s);border:1px solid var(--b);border-radius:8px;color:var(--t);font-family:inherit;font-size:13px;padding:7px 9px;outline:none;}
-    input[type="number"],input[type="text"]{width:84px;}
+    input[type="number"],input[type="text"]{width:88px;}
     input[type="time"]{width:auto;}
     .bprim{width:100%;padding:13px;border-radius:11px;background:rgba(34,197,94,0.15);border:1.5px solid rgba(34,197,94,0.3);color:var(--green2);font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;margin-top:12px;}
     .bprim:active{background:rgba(34,197,94,0.25);}
-    .expbtn{background:var(--green3);border:1px solid rgba(34,197,94,0.2);color:var(--green2);border-radius:8px;padding:5px 11px;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;}
-    .gr{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;}
-    .gr span{font-size:12px;color:var(--t2);}
     .leg{display:flex;flex-wrap:wrap;gap:5px 10px;margin-top:8px;}
     .li{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--t3);}
     .ld{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
@@ -126,11 +177,8 @@
     .ss .m{background:var(--bg2);border:1px solid var(--b);border-radius:9px;padding:8px 4px;text-align:center;}
     .ss .m .v{font-size:15px;font-weight:700;}
     .ss .m .l{font-size:9px;color:var(--t3);margin-top:1px;}
-    .sban{margin-top:8px;padding:8px 12px;background:rgba(34,197,94,0.1);border-radius:8px;font-size:11px;color:var(--green2);text-align:center;}
     .drug-chip{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:11px;border:1.5px solid transparent;margin-bottom:7px;cursor:pointer;background:var(--s);}
     .drug-chip.on{background:var(--green3);border-color:rgba(34,197,94,0.25);}
-    .drug-chip-ico{font-size:18px;width:26px;text-align:center;}
-    .drug-chip-risk{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;}
     .toggle{width:42px;height:24px;border-radius:12px;border:none;cursor:pointer;position:relative;}
     .toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;}
     .toggle.on{background:var(--green);}.toggle.on::after{transform:translateX(18px);}
@@ -142,82 +190,22 @@
     .badge-name{font-size:12px;font-weight:600;}
     .badge-desc{font-size:10px;color:var(--t3);margin-top:1px;}
     .badge-cat{font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:14px 0 6px;padding-left:2px;}
-    .wbar-wrap{display:flex;align-items:flex-end;justify-content:space-between;gap:3px;height:60px;}
-    .wbar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
-    .wbar{width:100%;border-radius:3px 3px 0 0;min-height:3px;}
-    .wbar-lbl{font-size:9px;color:var(--t3);font-weight:600;}
-    .wbar-val{font-size:8px;font-weight:700;}
-
-    /* ── Expand overlay ── */
-    .exp-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:300;display:flex;flex-direction:column;animation:fadeIn .2s ease;padding:env(safe-area-inset-top,16px) 14px 16px;}
+    .exp-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.93);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:300;display:flex;flex-direction:column;animation:fadeIn .2s ease;padding:env(safe-area-inset-top,16px) 14px 16px;}
     @media(prefers-color-scheme:light){.exp-overlay{background:rgba(240,244,248,0.97);}}
     .exp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-top:2px;}
-    .exp-title{font-size:16px;font-family:'DM Serif Display',serif;color:var(--t);}
+    .exp-title{font-size:16px;font-weight:600;color:var(--t);}
     .exp-close{background:var(--s);border:1px solid var(--b);border-radius:9px;color:var(--t);width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
     .exp-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;}
-
-    /* ── AI box ── */
-    .ai-box{background:var(--green3);border:1px solid rgba(34,197,94,0.2);border-radius:13px;padding:13px;margin-top:8px;}
-    .ai-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:aiP 2s infinite;}
-    @keyframes aiP{0%,100%{opacity:1}50%{opacity:.3}}
-    .ai-text{font-size:12px;color:var(--t);line-height:1.65;}
-    .ai-loading{display:flex;gap:4px;align-items:center;padding:6px 0;}
-    .ai-loading span{width:5px;height:5px;border-radius:50%;background:var(--green);animation:dots 1.2s infinite;}
-    .ai-loading span:nth-child(2){animation-delay:.2s;}
-    .ai-loading span:nth-child(3){animation-delay:.4s;}
-    @keyframes dots{0%,80%,100%{transform:scale(0);opacity:.4}40%{transform:scale(1);opacity:1}}
-    .ai-sec{margin-top:8px;padding-top:8px;border-top:1px solid rgba(34,197,94,0.15);}
-    .ai-sec-t{font-size:9px;color:var(--green);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;}
-
-    /* ── HEALING TAB ── */
-    /* Flame animation */
-    .flame-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;}
-    .flame{position:relative;display:inline-flex;align-items:center;justify-content:center;}
-    .flame-svg{animation:flameWave 2s ease-in-out infinite;}
-    @keyframes flameWave{0%,100%{transform:scaleY(1) scaleX(1)}25%{transform:scaleY(1.06) scaleX(0.97)}75%{transform:scaleY(0.96) scaleX(1.03)}}
-    .flame-num{position:absolute;font-size:22px;font-weight:700;font-family:'DM Serif Display',serif;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.5);}
-
-    /* Organ recovery cards */
-    .organ-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-    .organ-card{background:var(--bg2);border:1px solid var(--b);border-radius:14px;padding:12px;text-align:center;position:relative;overflow:hidden;}
-    .organ-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 14px 14px;}
-    .organ-emoji{font-size:24px;margin-bottom:4px;display:block;}
-    .organ-name{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px;}
-    .organ-pct{font-size:20px;font-weight:700;font-family:'DM Serif Display',serif;margin-bottom:4px;}
-    .organ-status{font-size:9px;color:var(--t3);line-height:1.3;}
-    .organ-bar{height:4px;border-radius:2px;background:var(--s2);margin-top:6px;overflow:hidden;}
-    .organ-fill{height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
-
-    /* Milestone card */
-    .milestone-card{background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(168,85,247,0.06));border:1px solid rgba(34,197,94,0.25);border-radius:16px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden;}
-    .milestone-glow{position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(34,197,94,0.2),transparent);pointer-events:none;}
-    .milestone-label{font-size:9px;color:var(--green2);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
-    .milestone-title{font-size:16px;font-weight:700;color:var(--t);margin-bottom:4px;}
-    .milestone-desc{font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.5;}
-    .milestone-days{font-size:11px;color:var(--green2);font-weight:600;}
-
-    /* Avoided substances */
-    .avoided-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--b);}
-    .avoided-row:last-child{border-bottom:none;}
-    .avoided-num{font-size:22px;font-weight:700;font-family:'DM Serif Display',serif;min-width:44px;text-align:right;}
-    .avoided-label{font-size:12px;font-weight:500;color:var(--t);}
-    .avoided-equiv{font-size:10px;color:var(--t3);margin-top:2px;}
-
-    /* Interactive chart */
-    .chart-touch{touch-action:pan-y;user-select:none;-webkit-user-select:none;}
-    .chart-tooltip{position:absolute;background:var(--bg2);border:1px solid var(--b);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;pointer-events:none;z-index:10;white-space:nowrap;box-shadow:var(--shadow);}
-
-    /* Radar chart */
-    .radar-wrap{display:flex;justify-content:center;align-items:center;padding:8px 0;}
-
-    /* Profile section */
-    .profile-section{background:var(--bg2);border:1px solid var(--b);border-radius:18px;padding:20px;margin-bottom:10px;box-shadow:var(--shadow);}
-    .profile-avatar{width:72px;height:72px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid rgba(34,197,94,0.4);}
-    .profile-avatar-placeholder{width:72px;height:72px;border-radius:50%;background:var(--s2);border:2px dashed var(--b2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:28px;flex-shrink:0;}
-    .social-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:11px;border:1px solid var(--b);background:var(--s);cursor:pointer;margin-bottom:7px;width:100%;font-family:inherit;font-size:13px;font-weight:500;color:var(--t);transition:background .15s;}
+    .chart-tip{position:absolute;background:var(--bg2);border:1px solid var(--b);border-radius:8px;padding:5px 9px;font-size:11px;font-weight:600;pointer-events:none;z-index:10;white-space:nowrap;box-shadow:var(--sh);color:var(--t);}
+    .social-btn{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:1px solid var(--b);background:var(--s);cursor:pointer;margin-bottom:8px;width:100%;font-family:inherit;font-size:13px;font-weight:500;color:var(--t);}
     .social-btn:active{background:var(--s2);}
+    .profile-avatar{width:64px;height:64px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid rgba(34,197,94,0.4);}
+    .avatar-icon{width:64px;height:64px;border-radius:50%;background:var(--s2);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:var(--t2);}
     .motiv-area{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:12px;min-height:80px;color:var(--t);font-family:inherit;font-size:13px;line-height:1.6;width:100%;outline:none;resize:none;}
     .motiv-area:focus{border-color:rgba(34,197,94,0.4);}
+    .widget-item{background:var(--bg2);border:1px solid var(--b);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;box-shadow:var(--sh);margin-bottom:8px;}
+    .flame-svg{animation:fw 2s ease-in-out infinite;}
+    @keyframes fw{0%,100%{transform:scaleY(1) scaleX(1)}25%{transform:scaleY(1.06) scaleX(0.97)}75%{transform:scaleY(0.96) scaleX(1.03)}}
   </style>
 </head>
 <body>
@@ -230,28 +218,31 @@ const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
 // ── Drug DB ───────────────────────────────────────────────────────────────────
 const ALL_DRUGS={
-  tabac:   {name:"Tabac",emoji:"🚬",color:"#f97316",risk:"Élevé",riskColor:"#f97316",unit:"cigarettes",unitShort:"cig",defaultOn:true,
-    recovery:[{t:"20 min",d:"Tension artérielle normalisée",days:0},{t:"8h",d:"CO sanguin divisé par 2",days:0},{t:"48h",d:"Nicotine éliminée",days:2},{t:"72h",d:"Bronches dilatées",days:3},{t:"1 sem.",d:"Circulation améliorée",days:7},{t:"1 mois",d:"Risque cardio en baisse",days:30},{t:"3 mois",d:"+30% capacité pulmonaire",days:90},{t:"1 an",d:"Risque infarctus ÷2",days:365}],
-    organs:{poumons:80,coeur:70,cerveau:60,foie:20}},
+  tabac:{name:"Tabac",emoji:"🚬",color:"#f97316",risk:"Élevé",riskColor:"#f97316",unit:"cigarettes",unitShort:"cig",defaultOn:true,
+    recovery:[{t:"20 min",d:"Tension artérielle normalisée",days:0},{t:"8h",d:"CO sanguin ÷2",days:0},{t:"48h",d:"Nicotine éliminée",days:2},{t:"72h",d:"Bronches dilatées",days:3},{t:"1 sem.",d:"Circulation améliorée",days:7},{t:"1 mois",d:"Risque cardio en baisse",days:30},{t:"3 mois",d:"+30% capacité pulmonaire",days:90},{t:"1 an",d:"Risque infarctus ÷2",days:365}],
+    organs:{poumons:80,coeur:70,cerveau:55,foie:15},
+    organTexts:{poumons:{low:"Les goudrons obstruent les alvéoles. Capacité réduite de 20-40%.",mid:"Cils bronchiques en repousse. Toux productive = nettoyage.",high:"Poumons en bonne récupération. Dommages réversibles en réparation."},coeur:{low:"Vasoconstriction chronique. Risque infarctus ×2.",mid:"Pression artérielle en normalisation.",high:"Risque cardiovasculaire proche de la normale."},cerveau:{low:"Nicotine crée une dépendance forte. Irritabilité, manque de concentration.",mid:"Récepteurs nicotiniques en désensibilisation.",high:"Circuits en récupération. Concentration améliorée."},foie:{low:"Légère exposition aux toxines.",mid:"Élimination progressive.",high:"Foie peu affecté — bonne nouvelle."}}},
   cannabis:{name:"Cannabis",emoji:"🍃",color:"#a855f7",risk:"Modéré",riskColor:"#a855f7",unit:"joints",unitShort:"joint",defaultOn:true,gramPerUnit:0.3,
-    recovery:[{t:"72h",d:"THC sanguin en baisse",days:3},{t:"1 sem.",d:"Sommeil restauré",days:7},{t:"2 sem.",d:"Mémoire en récupération",days:14},{t:"1 mois",d:"Endocannabinoïde rétabli",days:30},{t:"3 mois",d:"Cognition restaurée",days:90}],
-    organs:{poumons:70,coeur:30,cerveau:85,foie:20}},
-  alcool:  {name:"Alcool",emoji:"🍺",color:"#3b82f6",risk:"Modéré",riskColor:"#3b82f6",unit:"verres",unitShort:"verre",defaultOn:true,
-    recovery:[{t:"24h",d:"Foie élimine les métabolites",days:1},{t:"72h",d:"Pic sevrage si dépendant",days:3},{t:"1 sem.",d:"Sommeil restauré",days:7},{t:"2 sem.",d:"Tension normalisée",days:14},{t:"1 mois",d:"Foie partiellement régénéré",days:30},{t:"3 mois",d:"Mémoire améliorée",days:90}],
-    organs:{poumons:20,coeur:60,cerveau:70,foie:95}},
-  cocaine: {name:"Cocaïne",emoji:"🤍",color:"#e5e7eb",risk:"Très élevé",riskColor:"#ef4444",unit:"lignes",unitShort:"ligne",defaultOn:false,recovery:[{t:"1h",d:"Crash commence",days:0},{t:"24h",d:"Craving intense",days:1},{t:"3 mois",d:"Circuits récompense récupèrent",days:90},{t:"1 an",d:"Risque cardio réduit",days:365}],organs:{poumons:40,coeur:90,cerveau:80,foie:30}},
-  mdma:    {name:"MDMA",emoji:"💗",color:"#ec4899",risk:"Élevé",riskColor:"#f97316",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"3 jours",d:"Dépression sérotoninergique",days:3},{t:"1 mois",d:"Sérotonine en régénération",days:30},{t:"1 an",d:"Récupération neurologique",days:365}],organs:{poumons:10,coeur:40,cerveau:90,foie:50}},
-  amphet:  {name:"Amphétamines",emoji:"⚡",color:"#fbbf24",risk:"Très élevé",riskColor:"#ef4444",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"24h",d:"Crash et hypersomnie",days:1},{t:"6 mois",d:"Circuits dopaminergiques restaurés",days:180}],organs:{poumons:30,coeur:80,cerveau:85,foie:40}},
-  heroine: {name:"Héroïne",emoji:"💉",color:"#dc2626",risk:"Extrême",riskColor:"#dc2626",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"24h",d:"Début sevrage physique",days:1},{t:"3 jours",d:"Pic du sevrage",days:3},{t:"1 sem.",d:"Sevrage physique terminé",days:7},{t:"1 an",d:"Vigilance rechute",days:365}],organs:{poumons:50,coeur:60,cerveau:75,foie:70}},
-  ketamine:{name:"Kétamine",emoji:"🌀",color:"#818cf8",risk:"Élevé",riskColor:"#f97316",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"1 sem.",d:"Dissociation en régression",days:7},{t:"6 mois",d:"Stabilisation complète",days:180}],organs:{poumons:10,coeur:20,cerveau:60,foie:30}},
-  lsd:     {name:"LSD",emoji:"🔮",color:"#8b5cf6",risk:"Modéré",riskColor:"#a855f7",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"12h",d:"Effets aigus terminés",days:0},{t:"1 mois",d:"HPPD en régression",days:30}],organs:{poumons:5,coeur:10,cerveau:40,foie:10}},
-  champi:  {name:"Champignons",emoji:"🍄",color:"#84cc16",risk:"Faible",riskColor:"#22c55e",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"6h",d:"Effets terminés",days:0},{t:"3 jours",d:"Intégration complète",days:3}],organs:{poumons:5,coeur:5,cerveau:20,foie:5}},
-  crack:   {name:"Crack",emoji:"🪨",color:"#92400e",risk:"Extrême",riskColor:"#dc2626",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"24h",d:"Crash intense",days:1},{t:"6 mois",d:"Dopamine en récupération",days:180}],organs:{poumons:90,coeur:85,cerveau:80,foie:50}},
-  benzo:   {name:"Benzodiazépines",emoji:"💊",color:"#06b6d4",risk:"Élevé",riskColor:"#f97316",unit:"comprimés",unitShort:"cp",defaultOn:false,recovery:[{t:"72h",d:"Début sevrage",days:3},{t:"3-6 mois",d:"Récupération cognitive",days:120}],organs:{poumons:10,coeur:20,cerveau:70,foie:40}},
-  meth:    {name:"Méthamphétamine",emoji:"💎",color:"#f43f5e",risk:"Extrême",riskColor:"#dc2626",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"24h",d:"Crash et dépression",days:1},{t:"2 ans",d:"Récupération dopaminergique",days:730}],organs:{poumons:40,coeur:90,cerveau:95,foie:60}},
-  poppers: {name:"Poppers",emoji:"🧪",color:"#f59e0b",risk:"Faible",riskColor:"#22c55e",unit:"inhalations",unitShort:"inhal.",defaultOn:false,recovery:[{t:"30 min",d:"Effets terminés",days:0}],organs:{poumons:20,coeur:15,cerveau:10,foie:5}},
-  ghb:     {name:"GHB / GBL",emoji:"🥤",color:"#0ea5e9",risk:"Très élevé",riskColor:"#ef4444",unit:"doses",unitShort:"dose",defaultOn:false,recovery:[{t:"6h",d:"Effets terminés",days:0},{t:"72h",d:"Sevrage intense si dépendant",days:3}],organs:{poumons:10,coeur:30,cerveau:60,foie:40}},
-  proto:   {name:"Protoxyde d'azote",emoji:"🎈",color:"#a3e635",risk:"Modéré",riskColor:"#a855f7",unit:"cartouches",unitShort:"cart.",defaultOn:false,recovery:[{t:"30 min",d:"Effets terminés",days:0},{t:"3 mois",d:"Neuropathie peut régresser",days:90}],organs:{poumons:10,coeur:5,cerveau:30,foie:5}},
+    recovery:[{t:"72h",d:"THC sanguin en baisse",days:3},{t:"1 sem.",d:"Sommeil profond restauré",days:7},{t:"2 sem.",d:"Mémoire en récupération",days:14},{t:"1 mois",d:"Endocannabinoïde rétabli",days:30},{t:"3 mois",d:"Cognition restaurée",days:90}],
+    organs:{poumons:70,coeur:30,cerveau:85,foie:20},
+    organTexts:{poumons:{low:"4× plus de goudron que le tabac. Risque bronchique.",mid:"Inflammation bronchique en régression.",high:"Poumons en bonne récupération."},coeur:{low:"Tachycardie post-prise.",mid:"Fréquence cardiaque se normalise.",high:"Impact cardiaque limité."},cerveau:{low:"THC altère mémoire et motivation. Risque anxieux.",mid:"Endocannabinoïde se rééquilibre.",high:"Cognition en récupération."},foie:{low:"Légère surcharge hépatique.",mid:"Foie élimine le THC.",high:"Foie peu affecté."}}},
+  alcool:{name:"Alcool",emoji:"🍺",color:"#3b82f6",risk:"Modéré",riskColor:"#3b82f6",unit:"verres",unitShort:"verre",defaultOn:true,
+    recovery:[{t:"24h",d:"Foie élimine les métabolites",days:1},{t:"72h",d:"Pic sevrage si dépendant",days:3},{t:"1 sem.",d:"Sommeil restauré",days:7},{t:"2 sem.",d:"Tension normalisée",days:14},{t:"1 mois",d:"Foie partiellement régénéré",days:30},{t:"3 mois",d:"Cognition améliorée",days:90}],
+    organs:{poumons:15,coeur:60,cerveau:70,foie:95},
+    organTexts:{poumons:{low:"Fragilise l'immunité pulmonaire.",mid:"Risque respiratoire en diminution.",high:"Poumons peu affectés."},coeur:{low:"Arythmies, cardiomyopathie possible.",mid:"Rythme cardiaque se stabilise.",high:"Cœur en bonne récupération."},cerveau:{low:"Dépression du SNC, altération mémoire.",mid:"Neurotransmetteurs en rééquilibrage.",high:"Cognition en récupération."},foie:{low:"Stéatose hépatique dès 14 verres/sem.",mid:"Foie se régénère activement.",high:"Foie en bonne récupération."}}},
+  cocaine:{name:"Cocaïne",emoji:"🤍",color:"#e5e7eb",risk:"Très élevé",riskColor:"#ef4444",unit:"lignes",unitShort:"ligne",defaultOn:false,recovery:[{t:"24h",d:"Crash, craving",days:1},{t:"3 mois",d:"Circuits dopaminergiques en récupération",days:90},{t:"1 an",d:"Risque cardio réduit",days:365}],organs:{poumons:45,coeur:92,cerveau:82,foie:35},organTexts:{poumons:{low:"Dommages nasaux et pulmonaires.",mid:"Muqueuses en réparation.",high:"En récupération."},coeur:{low:"Risque infarctus ×24 dans l'heure post-prise.",mid:"Vasoconstriction en diminution.",high:"Risque en baisse significative."},cerveau:{low:"Déplétion dopaminergique sévère. Paranoïa.",mid:"Dopamine en normalisation.",high:"Circuits de récompense en récupération."},foie:{low:"Surcharge hépatique.",mid:"En récupération.",high:"Partiellement régénéré."}}},
+  mdma:{name:"MDMA",emoji:"💗",color:"#ec4899",risk:"Élevé",riskColor:"#f97316",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"3 jours",d:"Pic dépression sérotoninergique",days:3},{t:"1 mois",d:"Sérotonine en régénération",days:30},{t:"1 an",d:"Récupération neurologique",days:365}],organs:{poumons:10,coeur:45,cerveau:90,foie:55},organTexts:{poumons:{low:"Peu affectés.",mid:"Sains.",high:"Sains."},coeur:{low:"Hyperthermie, tachycardie.",mid:"Rythme se normalise.",high:"En récupération."},cerveau:{low:"Neurotoxicité sérotoninergique. Dépression post-prise.",mid:"Sérotonine en régénération.",high:"Axones en récupération."},foie:{low:"Hépatotoxicité possible.",mid:"En récupération.",high:"Partiellement régénéré."}}},
+  amphet:{name:"Amphétamines",emoji:"⚡",color:"#fbbf24",risk:"Très élevé",riskColor:"#ef4444",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"24h",d:"Crash",days:1},{t:"6 mois",d:"Dopamine partiellement restaurée",days:180}],organs:{poumons:30,coeur:82,cerveau:88,foie:42},organTexts:{poumons:{low:"Tension vasculaire pulmonaire.",mid:"En amélioration.",high:"En récupération."},coeur:{low:"HTA sévère, arythmies.",mid:"Tension en normalisation.",high:"Risque en baisse."},cerveau:{low:"Destruction terminaisons dopaminergiques.",mid:"Dopamine en récupération.",high:"Partiellement restauré."},foie:{low:"Surcharge.",mid:"En récupération.",high:"Partiellement régénéré."}}},
+  heroine:{name:"Héroïne",emoji:"💉",color:"#dc2626",risk:"Extrême",riskColor:"#dc2626",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"24h",d:"Début sevrage physique",days:1},{t:"3 jours",d:"Pic du sevrage",days:3},{t:"1 sem.",d:"Sevrage physique terminé",days:7},{t:"1 an",d:"Vigilance rechute",days:365}],organs:{poumons:55,coeur:60,cerveau:78,foie:72},organTexts:{poumons:{low:"Dépression respiratoire, infections.",mid:"En amélioration.",high:"En récupération."},coeur:{low:"Endocardite possible.",mid:"Se stabilise.",high:"En récupération."},cerveau:{low:"Dépendance physique extrême, déplétion endorphines.",mid:"Endorphines en régénération.",high:"Circuits opioïdes en récupération."},foie:{low:"Hépatite C/B fréquente.",mid:"En récupération.",high:"Partiellement régénéré."}}},
+  ketamine:{name:"Kétamine",emoji:"🌀",color:"#818cf8",risk:"Élevé",riskColor:"#f97316",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"1 sem.",d:"Dissociation en régression",days:7},{t:"6 mois",d:"Stabilisation complète",days:180}],organs:{poumons:10,coeur:20,cerveau:62,foie:32},organTexts:{poumons:{low:"Peu affectés.",mid:"Sains.",high:"Sains."},coeur:{low:"Légère tachycardie.",mid:"Normal.",high:"En récupération."},cerveau:{low:"Dissociation chronique.",mid:"Cognition en amélioration.",high:"Stabilisation."},foie:{low:"Cystite kétaminique.",mid:"En récupération.",high:"Partiellement récupéré."}}},
+  lsd:{name:"LSD",emoji:"🔮",color:"#8b5cf6",risk:"Modéré",riskColor:"#a855f7",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"12h",d:"Effets terminés",days:0},{t:"1 mois",d:"HPPD en régression si présent",days:30}],organs:{poumons:5,coeur:10,cerveau:40,foie:8},organTexts:{poumons:{low:"Pas de toxicité directe.",mid:"Sains.",high:"Sains."},coeur:{low:"Légère tachycardie.",mid:"Normal.",high:"Sain."},cerveau:{low:"Risque HPPD, décompensation si prédisposé.",mid:"HPPD en régression.",high:"En bonne récupération."},foie:{low:"Peu impacté.",mid:"Sain.",high:"Sain."}}},
+  champi:{name:"Champignons",emoji:"🍄",color:"#84cc16",risk:"Faible",riskColor:"#22c55e",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"6h",d:"Effets terminés",days:0},{t:"3 jours",d:"Intégration complète",days:3}],organs:{poumons:5,coeur:5,cerveau:22,foie:5},organTexts:{poumons:{low:"Pas de toxicité.",mid:"Sains.",high:"Sains."},coeur:{low:"Légère tachycardie.",mid:"Normal.",high:"Sain."},cerveau:{low:"Risque psychose si prédisposé.",mid:"Intégration.",high:"En bonne santé."},foie:{low:"Peu impacté.",mid:"Sain.",high:"Sain."}}},
+  crack:{name:"Crack",emoji:"🪨",color:"#92400e",risk:"Extrême",riskColor:"#dc2626",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"24h",d:"Crash, craving",days:1},{t:"6 mois",d:"Dopamine en récupération",days:180}],organs:{poumons:90,coeur:88,cerveau:83,foie:52},organTexts:{poumons:{low:"Crack lung : bronchospasme, hémorragies.",mid:"En régression.",high:"En récupération."},coeur:{low:"Infarctus, AVC, arythmies fatales possibles.",mid:"En baisse.",high:"Récupération cardiovasculaire."},cerveau:{low:"Dépendance la plus rapide connue. Psychose.",mid:"Dopamine en normalisation.",high:"En récupération."},foie:{low:"Surcharge.",mid:"En récupération.",high:"Partiellement régénéré."}}},
+  benzo:{name:"Benzodiazépines",emoji:"💊",color:"#06b6d4",risk:"Élevé",riskColor:"#f97316",unit:"comprimés",unitShort:"cp",defaultOn:false,recovery:[{t:"72h",d:"Sevrage — NE PAS arrêter seul",days:3},{t:"3-6 mois",d:"Récupération cognitive",days:120}],organs:{poumons:12,coeur:22,cerveau:72,foie:42},organTexts:{poumons:{low:"Dépression respiratoire possible.",mid:"En amélioration.",high:"Peu affectés."},coeur:{low:"Bradycardie, hypotension.",mid:"En normalisation.",high:"En récupération."},cerveau:{low:"Amnésie, dépendance en 2-4 sem.",mid:"GABA/Glutamate se rééquilibrent.",high:"Cognition en amélioration."},foie:{low:"Surcharge.",mid:"En récupération.",high:"Partiellement régénéré."}}},
+  meth:{name:"Méthamphétamine",emoji:"💎",color:"#f43f5e",risk:"Extrême",riskColor:"#dc2626",unit:"prises",unitShort:"prise",defaultOn:false,recovery:[{t:"24h",d:"Crash sévère",days:1},{t:"2 ans",d:"Récupération dopaminergique",days:730}],organs:{poumons:42,coeur:92,cerveau:96,foie:62},organTexts:{poumons:{low:"Tension vasculaire.",mid:"En amélioration.",high:"En récupération."},coeur:{low:"Cardiomyopathie, arythmies létales.",mid:"En baisse.",high:"Récupération cardiovasculaire."},cerveau:{low:"Destruction massive DA et 5HT. Psychose quasi-certaine.",mid:"Récupération lente.",high:"Dopamine partiellement restaurée."},foie:{low:"Hépatotoxicité.",mid:"En récupération.",high:"Partiellement régénéré."}}},
+  poppers:{name:"Poppers",emoji:"🧪",color:"#f59e0b",risk:"Faible",riskColor:"#22c55e",unit:"inhalations",unitShort:"inhal.",defaultOn:false,recovery:[{t:"30 min",d:"Effets terminés",days:0}],organs:{poumons:22,coeur:15,cerveau:12,foie:5},organTexts:{poumons:{low:"Irritation voies aériennes.",mid:"En amélioration.",high:"Sains."},coeur:{low:"Hypotension brutale.",mid:"Normal.",high:"Sain."},cerveau:{low:"Rétinopathie possible.",mid:"En amélioration.",high:"Sain."},foie:{low:"Peu impacté.",mid:"Sain.",high:"Sain."}}},
+  ghb:{name:"GHB / GBL",emoji:"🥤",color:"#0ea5e9",risk:"Très élevé",riskColor:"#ef4444",unit:"doses",unitShort:"dose",defaultOn:false,recovery:[{t:"6h",d:"Effets terminés",days:0},{t:"72h",d:"Sevrage intense si dépendant",days:3}],organs:{poumons:12,coeur:32,cerveau:62,foie:42},organTexts:{poumons:{low:"Dépression respiratoire.",mid:"En amélioration.",high:"Sains."},coeur:{low:"Bradycardie.",mid:"En normalisation.",high:"En récupération."},cerveau:{low:"Amnésie, dépendance rapide.",mid:"GABA se rééquilibre.",high:"En récupération."},foie:{low:"Surcharge.",mid:"En récupération.",high:"Partiellement régénéré."}}},
+  proto:{name:"Protoxyde d'azote",emoji:"🎈",color:"#a3e635",risk:"Modéré",riskColor:"#a855f7",unit:"cartouches",unitShort:"cart.",defaultOn:false,recovery:[{t:"30 min",d:"Effets terminés",days:0},{t:"3 mois",d:"Neuropathie peut régresser",days:90}],organs:{poumons:12,coeur:5,cerveau:32,foie:5},organTexts:{poumons:{low:"Frostbite voies aériennes.",mid:"En amélioration.",high:"Sains."},coeur:{low:"Peu impacté.",mid:"Sain.",high:"Sain."},cerveau:{low:"Destruction B12, neuropathie irréversible possible.",mid:"Avec B12 : amélioration.",high:"En récupération."},foie:{low:"Peu impacté.",mid:"Sain.",high:"Sain."}}},
 };
 
 const MONTHS=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
@@ -259,29 +250,43 @@ const MONTHS_S=["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","N
 const DAYS=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
 const DAYS_S=["L","M","M","J","V","S","D"];
 const MOODS=[{e:"😣",l:"Dur",c:"#ef4444"},{e:"😕",l:"Moyen",c:"#f97316"},{e:"😐",l:"Ok",c:"#6b7280"},{e:"🙂",l:"Bien",c:"#22c55e"},{e:"😊",l:"Top",c:"#4ade80"}];
-const CTXS=["Stress","Ennui","Soirée","Social","Seul","Après repas","Au réveil","Travail","Anxiété","Fatigue","Craving","Douleur"];
-const STORE="rec_v3",GSTORE="rec_goals_v3",DSTORE="rec_drugs_v3",PSTORE="rec_profile_v1";
+const CTXS=["Stress","Ennui","Soirée","Social","Seul","Après repas","Au réveil","Travail","Anxiété","Craving"];
+const STORE="ht_v6",GSTORE="ht_goals_v6",DSTORE="ht_drugs_v6",PSTORE="ht_profile_v3",WSTORE="ht_widgets_v1";
 const dk=(y,m,d)=>`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
 const daysIn=(y,m)=>new Date(y,m+1,0).getDate();
 const firstOff=(y,m)=>{const d=new Date(y,m,1).getDay();return d===0?6:d-1;};
 const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k))||def;}catch{return def;}};
 const DEFAULT_ACTIVE=Object.fromEntries(Object.entries(ALL_DRUGS).map(([k,v])=>[k,v.defaultOn]));
+const DEFAULT_WIDGETS=[{id:"streak",label:"Streak & Score",enabled:true},{id:"lastdays",label:"7 derniers jours",enabled:true},{id:"stats",label:"Stats du mois",enabled:true},{id:"milestone",label:"Prochain cap",enabled:true},{id:"money",label:"Économies",enabled:false},{id:"fact",label:"Fait médical",enabled:true}];
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function isClean(e,active){if(!e)return false;if(e.clean)return true;if(!e.logged)return false;return Object.keys(active).filter(k=>active[k]).every(k=>(e[k]||0)===0);}
 function dayColor(e,active){if(!e)return null;if(isClean(e,active))return"#22c55e";const u=Object.keys(active).filter(k=>active[k]&&(e[k]||0)>0);if(!u.length)return null;if(u.length>=3)return"#9f1239";if(u.length===2)return"#ef4444";return ALL_DRUGS[u[0]]?.color||"#6b7280";}
 function dayEmoji(e,active){if(!e)return"·";if(isClean(e,active))return"✦";const u=Object.keys(active).filter(k=>active[k]&&(e[k]||0)>0);if(!u.length)return"·";if(u.length>=3)return"💀";if(u.length===2)return"⚠";return ALL_DRUGS[u[0]]?.emoji||"·";}
+
+// ── Score — fixed formula, 100 when all clean ─────────────────────────────────
+// Score = weighted: 40pts clean%, 30pts streak, 20pts longest, 10pts logged
+function sevrageScore(streak,longest,pct,nClean,daysCount,loggedDays){
+  const cleanPct=pct; // already 0-100
+  const streakPts=Math.min(streak/30*100,100); // 30j streak = 100pts
+  const longestPts=Math.min(longest/30*100,100);
+  const loggedPts=daysCount>0?Math.min(loggedDays/daysCount*100,100):0;
+  return Math.round(cleanPct*0.4+streakPts*0.3+longestPts*0.2+loggedPts*0.1);
+}
 
 // ── SVG Icons ─────────────────────────────────────────────────────────────────
 const Ico=(d,w=18)=>()=><svg width={w} height={w} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{__html:d}}/>;
 const IcoCalendar=Ico('<rect x="3" y="4" width="18" height="18" rx="3"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><circle cx="8" cy="14" r="1" fill="currentColor"/><circle cx="12" cy="14" r="1" fill="currentColor"/><circle cx="16" cy="14" r="1" fill="currentColor"/>');
 const IcoHeart=Ico('<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>');
-const IcoBadge=Ico('<path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>');
-const IcoSettings=Ico('<circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>');
-const IcoUser=Ico('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>');
+const IcoBadge=Ico('<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>');
+const IcoSettings=Ico('<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>');
+const IcoUser=Ico('<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>');
 const IcoExpand=Ico('<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>',13);
 const IcoClose=Ico('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',14);
 const IcoWeek=Ico('<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="4" x2="9" y2="20"/><line x1="15" y1="4" x2="15" y2="20"/>',12);
 const IcoMonth=Ico('<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="7" y1="4" x2="7" y2="9"/><line x1="12" y1="4" x2="12" y2="9"/><line x1="17" y1="4" x2="17" y2="9"/>',12);
+const IcoYear=Ico('<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="3" y1="14" x2="21" y2="14"/>',12);
+const IcoDrag=Ico('<line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/>',16);
 
 // ── Components ────────────────────────────────────────────────────────────────
 function Bar({pct,color,thick}){
@@ -289,348 +294,243 @@ function Bar({pct,color,thick}){
   useEffect(()=>{if(!ref.current)return;ref.current.style.width="0%";const t=setTimeout(()=>{if(ref.current)ref.current.style.width=pct+"%";},80);return()=>clearTimeout(t);},[pct]);
   return<div className={`pb${thick?" t":""}`}><div ref={ref} className="pf" style={{background:color}}/></div>;
 }
+function OBar({pct,color}){
+  const ref=useRef(null);
+  useEffect(()=>{if(!ref.current)return;ref.current.style.width="0%";const t=setTimeout(()=>{if(ref.current)ref.current.style.width=pct+"%";},280);return()=>clearTimeout(t);},[pct]);
+  return<div ref={ref} className="organ-pf" style={{background:color}}/>;
+}
 function ExpandView({title,onClose,children}){
   return<div className="exp-overlay"><div className="exp-hdr"><div className="exp-title">{title}</div><button className="exp-close" onClick={onClose}><IcoClose/></button></div><div className="exp-body">{children}</div></div>;
 }
 function WeekBars({weeks,metric,color}){
   const max=Math.max(...weeks.map(w=>w[metric]||0),1);
-  return<div className="wbar-wrap">{weeks.map((w,i)=>{const v=w[metric]||0;const h=Math.max((v/max)*54,v>0?4:2);return<div key={i} className="wbar-col"><div className="wbar-val" style={{color:v>0?color:"var(--t3)"}}>{v>0?v:""}</div><div className="wbar" style={{height:h,background:v>0?color:"var(--s2)"}}/><div className="wbar-lbl">S{i+1}</div></div>;})}</div>;
+  return<div className="wbar-wrap">{weeks.map((w,i)=>{const v=w[metric]||0;const h=Math.max((v/max)*62,v>0?4:2);return<div key={i} className="wbar-col"><div className="wbar-val" style={{color:v>0?color:"var(--t3)"}}>{v>0?v:""}</div><div className="wbar" style={{height:h,background:v>0?color:"var(--s2)"}}/><div className="wbar-lbl">S{i+1}</div></div>;})}</div>;
 }
 
-// ── Flame component ───────────────────────────────────────────────────────────
-function FlameStreak({streak}){
-  const size=streak>=30?90:streak>=14?78:streak>=7?68:streak>=3?58:50;
-  const intensity=streak>=30?1:streak>=14?0.85:streak>=7?0.7:streak>=3?0.55:0.4;
-  const c1=`rgba(251,191,36,${intensity})`;
-  const c2=`rgba(249,115,22,${intensity})`;
-  const c3=`rgba(239,68,68,${intensity*0.6})`;
-  return(
-    <div className="flame-wrap">
-      <div className="flame">
-        <svg className="flame-svg" width={size} height={size+10} viewBox="0 0 60 70">
-          <defs>
-            <radialGradient id="fg" cx="50%" cy="80%" r="60%">
-              <stop offset="0%" stopColor={c1}/>
-              <stop offset="50%" stopColor={c2}/>
-              <stop offset="100%" stopColor={c3}/>
-            </radialGradient>
-            <filter id="blur2">
-              <feGaussianBlur stdDeviation="1.5"/>
-            </filter>
-          </defs>
-          {/* Glow */}
-          <ellipse cx="30" cy="58" rx="18" ry="8" fill={c2} filter="url(#blur2)" opacity="0.5"/>
-          {/* Main flame */}
-          <path d="M30 5 C30 5 48 22 48 40 C48 52 40 65 30 65 C20 65 12 52 12 40 C12 22 30 5 30 5Z" fill="url(#fg)"/>
-          {/* Inner bright */}
-          <path d="M30 25 C30 25 40 35 40 45 C40 52 36 58 30 58 C24 58 20 52 20 45 C20 35 30 25 30 25Z" fill={c1} opacity="0.6"/>
-          {/* Core */}
-          <ellipse cx="30" cy="50" rx="7" ry="9" fill="rgba(255,255,255,0.35)"/>
-        </svg>
-        <div className="flame-num">{streak}</div>
-      </div>
-      <div style={{fontSize:11,color:"var(--t3)",marginTop:4,fontWeight:600}}>{streak===1?"jour":"jours"} de streak</div>
+// ── Swipe hook ────────────────────────────────────────────────────────────────
+function useSwipe(onLeft,onRight){
+  const ref=useRef(null);
+  useEffect(()=>{
+    const el=ref.current;if(!el)return;
+    let sx=0,sy=0;
+    const ts=e=>{const t=e.touches[0];sx=t.clientX;sy=t.clientY;};
+    const te=e=>{const t=e.changedTouches[0];const dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)>Math.abs(dy)*1.4&&Math.abs(dx)>40){if(dx<0)onLeft();else onRight();}};
+    el.addEventListener("touchstart",ts,{passive:true});el.addEventListener("touchend",te,{passive:true});
+    return()=>{el.removeEventListener("touchstart",ts);el.removeEventListener("touchend",te);};
+  },[onLeft,onRight]);
+  return ref;
+}
+
+// ── Flame ─────────────────────────────────────────────────────────────────────
+function Flame({streak}){
+  const sz=streak>=30?82:streak>=14?70:streak>=7?60:streak>=3?52:44;
+  const op=Math.min(0.35+streak*0.022,1);
+  const c1=`rgba(251,191,36,${op})`,c2=`rgba(249,115,22,${op})`,c3=`rgba(239,68,68,${op*0.6})`;
+  return<div style={{display:"flex",flexDirection:"column",alignItems:"center"}}>
+    <div style={{position:"relative",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+      <svg className="flame-svg" width={sz} height={sz+8} viewBox="0 0 60 70">
+        <defs><radialGradient id="fg3" cx="50%" cy="80%" r="60%"><stop offset="0%" stopColor={c1}/><stop offset="50%" stopColor={c2}/><stop offset="100%" stopColor={c3}/></radialGradient><filter id="bl3"><feGaussianBlur stdDeviation="1.5"/></filter></defs>
+        <ellipse cx="30" cy="58" rx="18" ry="8" fill={c2} filter="url(#bl3)" opacity="0.5"/>
+        <path d="M30 5C30 5 48 22 48 40C48 52 40 65 30 65C20 65 12 52 12 40C12 22 30 5 30 5Z" fill="url(#fg3)"/>
+        <path d="M30 25C30 25 40 35 40 45C40 52 36 58 30 58C24 58 20 52 20 45C20 35 30 25 30 25Z" fill={c1} opacity="0.55"/>
+        <ellipse cx="30" cy="50" rx="7" ry="9" fill="rgba(255,255,255,0.28)"/>
+      </svg>
+      <div style={{position:"absolute",fontSize:Math.round(sz*0.26),fontWeight:700,color:"#fff",textShadow:"0 1px 4px rgba(0,0,0,0.5)"}}>{streak}</div>
     </div>
-  );
+    <div style={{fontSize:9,color:"var(--t3)",marginTop:2,fontWeight:600}}>{streak===1?"jour":"jours"}</div>
+  </div>;
 }
 
-// ── Organ recovery ────────────────────────────────────────────────────────────
-function OrganCards({streak,activeDrugs}){
-  const organs=[
-    {key:"poumons",emoji:"🫁",name:"Poumons"},
-    {key:"coeur",emoji:"🫀",name:"Cœur"},
-    {key:"cerveau",emoji:"🧠",name:"Cerveau"},
-    {key:"foie",emoji:"🟤",name:"Foie"},
-  ];
+// ── Organ flip card ───────────────────────────────────────────────────────────
+function OrganCard({organKey,emoji,name,streak,activeDrugs}){
+  const [flipped,setFlipped]=useState(false);
   const active=Object.keys(activeDrugs).filter(k=>activeDrugs[k]);
-  return(
-    <div className="organ-grid">
-      {organs.map(({key,emoji,name})=>{
-        // Max damage from active drugs
-        const maxDamage=active.reduce((mx,k)=>{const d=ALL_DRUGS[k];return Math.max(mx,d?.organs?.[key]||0);},0);
-        // Recovery based on streak (0-100 = healed)
-        const healRate=streak>=90?1:streak>=30?0.7:streak>=14?0.5:streak>=7?0.35:streak>=3?0.2:streak>=1?0.1:0;
-        const damage=maxDamage*(1-healRate);
-        const health=Math.round(100-damage);
-        const color=health>=80?"#22c55e":health>=60?"#4ade80":health>=40?"#f97316":"#ef4444";
-        const status=health>=80?"Bon état":health>=60?"En récupération":health>=40?"Endommagé":"Critique";
-        return(
-          <div key={key} className="organ-card">
-            <div className="organ-card" style={{background:"transparent",border:"none",padding:0}}>
-              <span className="organ-emoji">{emoji}</span>
-              <div className="organ-name">{name}</div>
-              <div className="organ-pct" style={{color}}>{health}%</div>
-              <div className="organ-status" style={{color}}>{status}</div>
-              <div className="organ-bar">
-                <OrgBar pct={health} color={color}/>
-              </div>
-            </div>
+  // Damage: max damage from all active drugs for this organ
+  const maxD=active.reduce((mx,k)=>Math.max(mx,ALL_DRUGS[k]?.organs?.[organKey]||0),0);
+  // Heal rate based on streak — 0% at streak 0, 100% at streak 365
+  const hr=Math.min(streak/365,1);
+  // If no active drug targets this organ, health is 100
+  const health=maxD===0?100:Math.round(100-maxD*(1-hr));
+  const color=health>=80?"#22c55e":health>=60?"#4ade80":health>=40?"#f97316":"#ef4444";
+  const status=health>=80?"Bon état":health>=60?"En récupération":health>=40?"Endommagé":"Critique";
+  const tier=health>=70?"high":health>=40?"mid":"low";
+  const texts=active.map(k=>ALL_DRUGS[k]?.organTexts?.[organKey]?.[tier]).filter(Boolean);
+  const text=texts.length>0?texts[0]:`Santé estimée à ${health}% en fonction de ton streak.`;
+  return<div className={`organ-flip${flipped?" flipped":""}`} onClick={()=>setFlipped(f=>!f)}>
+    <div className="organ-flip-inner">
+      <div className="organ-face">
+        <div style={{fontSize:26,marginBottom:4}}>{emoji}</div>
+        <div style={{fontSize:11,fontWeight:600,color:"var(--t2)",marginBottom:5}}>{name}</div>
+        <div style={{fontSize:20,fontWeight:700,color,lineHeight:1}}>{health}%</div>
+        <div style={{fontSize:9,color,marginTop:2}}>{status}</div>
+        <div className="organ-pb"><OBar pct={health} color={color}/></div>
+        <div style={{position:"absolute",bottom:6,right:8,opacity:.35,color:"var(--t3)"}}><svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></div>
+      </div>
+      <div className="organ-face organ-back">
+        <div style={{fontSize:11,fontWeight:700,color,marginBottom:7}}>{name} — {health}%</div>
+        <p style={{fontSize:11,color:"var(--t)",lineHeight:1.6}}>{text}</p>
+        <div style={{fontSize:9,color:"var(--t3)",marginTop:8}}>Tap pour retourner</div>
+      </div>
+    </div>
+  </div>;
+}
+
+// ── Drug Timeline slider ──────────────────────────────────────────────────────
+function DrugTimeline({streak,activeDrugs}){
+  const drugs=Object.keys(activeDrugs).filter(k=>activeDrugs[k]&&ALL_DRUGS[k]?.recovery?.length>0);
+  const [sel,setSel]=useState(()=>drugs[0]||null);
+  useEffect(()=>{if(drugs.length>0&&!drugs.includes(sel))setSel(drugs[0]);},[drugs.join(",")]);
+  if(!drugs.length||!sel)return null;
+  const d=ALL_DRUGS[sel];
+  const swRef=useSwipe(()=>{const i=drugs.indexOf(sel);if(i<drugs.length-1)setSel(drugs[i+1]);},()=>{const i=drugs.indexOf(sel);if(i>0)setSel(drugs[i-1]);});
+  return<div className="card">
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+      <div className="clbl" style={{margin:0}}>Timeline de récupération</div>
+      {drugs.length>1&&<div style={{fontSize:10,color:"var(--t3)"}}>{drugs.indexOf(sel)+1}/{drugs.length}</div>}
+    </div>
+    {drugs.length>1&&<div className="drug-tabs">{drugs.map(k=><button key={k} className={`drug-tab${k===sel?" on":""}`} style={{color:k===sel?ALL_DRUGS[k].color:"var(--t3)",borderColor:k===sel?ALL_DRUGS[k].color:"var(--b)"}} onClick={()=>setSel(k)}>{ALL_DRUGS[k].emoji} {ALL_DRUGS[k].name}</button>)}</div>}
+    <div ref={swRef} style={{touchAction:"pan-y"}}>
+      <div style={{fontSize:10,color:"var(--t3)",marginBottom:10}}>Streak : <span style={{color:d.color,fontWeight:700}}>{streak}j</span></div>
+      {d.recovery.map((s,i)=>{
+        const done=streak>=s.days;
+        return<div key={i} className="rec-step">
+          <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}>
+            <div style={{width:9,height:9,borderRadius:"50%",flexShrink:0,marginTop:4,background:done?d.color:"var(--s2)",boxShadow:done?`0 0 8px ${d.color}55`:"",border:`1.5px solid ${done?d.color:"var(--b2)"}`}}/>
+            {i<d.recovery.length-1&&<div style={{width:2,height:18,background:"var(--b)",marginTop:2}}/>}
           </div>
-        );
+          <div style={{paddingBottom:i<d.recovery.length-1?4:0}}>
+            <div style={{fontSize:11,fontWeight:700,color:done?d.color:"var(--t3)",marginBottom:1}}>{s.t}</div>
+            <div style={{fontSize:11,color:done?"var(--t)":"var(--t3)",lineHeight:1.4}}>{s.d}</div>
+          </div>
+        </div>;
       })}
     </div>
-  );
-}
-function OrgBar({pct,color}){
-  const ref=useRef(null);
-  useEffect(()=>{if(!ref.current)return;ref.current.style.width="0%";const t=setTimeout(()=>{if(ref.current)ref.current.style.width=pct+"%";},200);return()=>clearTimeout(t);},[pct]);
-  return<div ref={ref} className="organ-fill" style={{background:color}}/>;
+  </div>;
 }
 
 // ── Next milestone ────────────────────────────────────────────────────────────
 function NextMilestone({streak,activeDrugs}){
   const primary=Object.keys(activeDrugs).find(k=>activeDrugs[k]&&ALL_DRUGS[k]?.recovery?.length>0);
   if(!primary)return null;
-  const steps=ALL_DRUGS[primary].recovery;
-  const next=steps.find(s=>s.days>streak);
-  const prev=steps.filter(s=>s.days<=streak).pop();
-  if(!next)return(
-    <div className="milestone-card">
-      <div className="milestone-glow"/>
-      <div className="milestone-label">🏆 Tous les caps atteints</div>
-      <div className="milestone-title">Tu es au maximum de la récupération</div>
-      <div className="milestone-desc">{prev?.d}</div>
-    </div>
-  );
-  const pct=prev?Math.round(((streak-prev.days)/(next.days-prev.days))*100):Math.round((streak/next.days)*100);
-  const daysLeft=next.days-streak;
-  return(
-    <div className="milestone-card">
-      <div className="milestone-glow"/>
-      <div className="milestone-label">🎯 Prochain cap — {next.t}</div>
-      <div className="milestone-title">{next.d}</div>
-      <div className="milestone-desc">{ALL_DRUGS[primary].name} · {daysLeft} jour{daysLeft>1?"s":""} restant{daysLeft>1?"s":""}</div>
-      <Bar pct={Math.max(pct,3)} color="linear-gradient(90deg,#22c55e,#4ade80)"/>
-      <div className="milestone-days" style={{marginTop:6}}>{pct}% vers ce cap</div>
-    </div>
-  );
+  const steps=ALL_DRUGS[primary].recovery,d=ALL_DRUGS[primary];
+  const next=steps.find(s=>s.days>streak),prev=steps.filter(s=>s.days<=streak).pop();
+  if(!next)return<div className="milestone-card"><div className="mg"/><div style={{fontSize:9,color:"var(--green2)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>Tous les caps atteints</div><div style={{fontSize:15,fontWeight:600,color:"var(--t)"}}>Maximum de récupération</div></div>;
+  const pct=prev?Math.round(((streak-prev.days)/(next.days-prev.days))*100):Math.round((streak/Math.max(next.days,1))*100);
+  const left=next.days-streak;
+  return<div className="milestone-card"><div className="mg"/>
+    <div style={{fontSize:9,color:"var(--green2)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>Prochain cap — {next.t}</div>
+    <div style={{fontSize:15,fontWeight:600,color:"var(--t)",marginBottom:4}}>{next.d}</div>
+    <div style={{fontSize:12,color:"var(--t2)",marginBottom:10}}>{d.name} · <span style={{color:d.color,fontWeight:600}}>{left} jour{left>1?"s":""}</span></div>
+    <Bar pct={Math.max(pct,3)} color="linear-gradient(90deg,#22c55e,#4ade80)"/>
+    <div style={{fontSize:10,color:"var(--green2)",fontWeight:600,marginTop:5}}>{pct}% vers ce cap</div>
+  </div>;
 }
 
-// ── Interactive 30-day chart ──────────────────────────────────────────────────
-function InteractiveChart({spark,onExpand}){
-  const [tooltip,setTooltip]=useState(null);
+// ── Interactive chart ─────────────────────────────────────────────────────────
+function Chart({spark}){
+  const [tip,setTip]=useState(null);
   const svgRef=useRef(null);
-  const W=300,H=90,p=8;
-  const max=Math.max(...spark.map(d=>d.v),1);
-  const pts=spark.map((d,i)=>({x:p+(i/Math.max(spark.length-1,1))*(W-p*2),y:H-p-(d.v/max)*(H-p*2),c:d.color||"#22c55e",v:d.v,label:d.label}));
+  const W=300,H=90,p=8,max=Math.max(...spark.map(d=>d.v),1);
+  const pts=spark.map((d,i)=>({x:p+(i/Math.max(spark.length-1,1))*(W-p*2),y:H-p-(d.v/max)*(H-p*2),c:d.color||"#22c55e",label:d.label}));
   const path=pts.map((p,i)=>`${i===0?"M":"L"} ${p.x} ${p.y}`).join(" ");
   const area=`${path} L ${pts[pts.length-1].x} ${H} L ${pts[0].x} ${H} Z`;
-  function handleTouch(e){
-    e.preventDefault();
-    const rect=svgRef.current?.getBoundingClientRect();
-    if(!rect)return;
-    const touch=e.touches[0]||e.changedTouches[0];
-    const x=(touch.clientX-rect.left)*(W/rect.width);
-    const idx=Math.round(((x-p)/(W-p*2))*(spark.length-1));
-    if(idx>=0&&idx<pts.length)setTooltip({x:pts[idx].x*(rect.width/W)+rect.left-rect.left,idx,pt:pts[idx]});
-  }
-  return(
-    <div style={{position:"relative"}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-        <div className="clbl" style={{margin:0}}>Tendance 30 jours</div>
-        <button className="xbtn" style={{position:"relative",top:0,right:0}} onClick={onExpand}><IcoExpand/></button>
-      </div>
-      {tooltip&&<div className="chart-tooltip" style={{left:Math.min(tooltip.x,220),top:0,transform:"translateX(-50%)",color:tooltip.pt.c}}>
-        {tooltip.pt.label}
-      </div>}
-      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:H,touchAction:"none"}}
-        onTouchStart={handleTouch} onTouchMove={handleTouch} onTouchEnd={()=>setTimeout(()=>setTooltip(null),1500)}
-        onClick={e=>{const rect=svgRef.current?.getBoundingClientRect();const x=(e.clientX-rect.left)*(W/rect.width);const idx=Math.round(((x-p)/(W-p*2))*(spark.length-1));if(idx>=0&&idx<pts.length)setTooltip({x:pts[idx].x*(rect.width/W),idx,pt:pts[idx]});}}>
-        <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity=".25"/><stop offset="100%" stopColor="#22c55e" stopOpacity="0"/></linearGradient></defs>
-        <path d={area} fill="url(#cg)"/>
-        <path d={path} fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        {pts.map((p,i)=>tooltip?.idx===i
-          ?<circle key={i} cx={p.x} cy={p.y} r={5} fill={p.c} stroke="var(--bg2)" strokeWidth="2"/>
-          :<circle key={i} cx={p.x} cy={p.y} r={2} fill={p.c} stroke="var(--bg2)" strokeWidth="1.5"/>
-        )}
-        {/* Grid lines */}
-        {[0.25,0.5,0.75].map(f=>{
-          const y=H-p-(f/1)*(H-p*2);
-          return<line key={f} x1={p} y1={y} x2={W-p} y2={y} stroke="var(--b)" strokeWidth="1" strokeDasharray="3,3"/>;
-        })}
-      </svg>
-      <div style={{display:"flex",justifyContent:"space-between",marginTop:3}}>
-        <span style={{fontSize:9,color:"var(--t3)"}}>Il y a 30j</span>
-        <span style={{fontSize:9,color:"var(--t3)"}}>Aujourd'hui</span>
-      </div>
-    </div>
-  );
+  function handle(cx){const rect=svgRef.current?.getBoundingClientRect();if(!rect)return;const x=(cx-rect.left)*(W/rect.width);const i=Math.max(0,Math.min(Math.round(((x-p)/(W-p*2))*(spark.length-1)),spark.length-1));setTip({i,pt:pts[i],px:(pts[i].x/W)*rect.width});}
+  return<div style={{position:"relative"}}>
+    {tip&&<div className="chart-tip" style={{left:Math.min(Math.max(tip.px-55,0),200),top:-28,color:tip.pt.c}}>{tip.pt.label}</div>}
+    <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:H,touchAction:"none"}}
+      onTouchStart={e=>handle(e.touches[0].clientX)} onTouchMove={e=>handle(e.touches[0].clientX)}
+      onTouchEnd={()=>setTimeout(()=>setTip(null),2500)} onClick={e=>handle(e.clientX)}>
+      <defs><linearGradient id="cg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity=".28"/><stop offset="100%" stopColor="#22c55e" stopOpacity="0"/></linearGradient></defs>
+      <path d={area} fill="url(#cg3)"/>
+      <path d={path} fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      {[0.33,0.66].map(f=>{const y=H-p-f*(H-p*2);return<line key={f} x1={p} y1={y} x2={W-p} y2={y} stroke="var(--b)" strokeWidth="1" strokeDasharray="3,3"/>;})}
+      {pts.map((p,i)=>tip?.i===i?<circle key={i} cx={p.x} cy={p.y} r={5} fill={p.c} stroke="var(--bg2)" strokeWidth="2"/>:<circle key={i} cx={p.x} cy={p.y} r={2} fill={p.c} stroke="var(--bg2)" strokeWidth="1.5"/>)}
+    </svg>
+    <div style={{display:"flex",justifyContent:"space-between",marginTop:3}}><span style={{fontSize:9,color:"var(--t3)"}}>Il y a 30j</span><span style={{fontSize:9,color:"var(--t3)"}}>Aujourd'hui</span></div>
+  </div>;
 }
 
-// ── Radar chart ───────────────────────────────────────────────────────────────
-function RadarChart({streak,moodAvg,nClean,daysCount,totalCigs,totalJoints,moneyTotal}){
-  const labels=["Sommeil","Énergie","Humeur","Finances","Clarté"];
-  const vals=[
-    Math.min(streak>=14?90:streak>=7?70:streak>=3?50:streak>=1?35:20,100),
-    Math.min(streak>=7?80:streak>=3?60:streak>=1?40:25,100),
-    Math.min(moodAvg>0?moodAvg*20:streak>=3?50:30,100),
-    Math.min(moneyTotal>0?Math.min(moneyTotal*2,90):20,100),
-    Math.min(daysCount>0?(nClean/daysCount)*100:20,100),
-  ];
-  const cx=120,cy=110,r=80;
-  const angles=labels.map((_,i)=>(i/labels.length)*Math.PI*2-Math.PI/2);
-  const pts=vals.map((v,i)=>{const a=angles[i];const rv=r*(v/100);return{x:cx+Math.cos(a)*rv,y:cy+Math.sin(a)*rv};});
-  const outer=angles.map(a=>({x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r}));
-  const polyPath=pts.map((p,i)=>`${i===0?"M":"L"} ${p.x} ${p.y}`).join(" ")+" Z";
-  const outerPath=outer.map((p,i)=>`${i===0?"M":"L"} ${p.x} ${p.y}`).join(" ")+" Z";
-  return(
-    <div className="radar-wrap">
-      <svg width={240} height={220} viewBox="0 0 240 220">
-        <defs>
-          <linearGradient id="rg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#22c55e" stopOpacity=".4"/>
-            <stop offset="100%" stopColor="#4ade80" stopOpacity=".1"/>
-          </linearGradient>
-        </defs>
-        {/* Grid */}
-        {[0.25,0.5,0.75,1].map(f=>{
-          const gPts=angles.map(a=>({x:cx+Math.cos(a)*r*f,y:cy+Math.sin(a)*r*f}));
-          return<polygon key={f} points={gPts.map(p=>`${p.x},${p.y}`).join(" ")} fill="none" stroke="var(--b)" strokeWidth="1"/>;
-        })}
-        {/* Axes */}
-        {outer.map((p,i)=><line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="var(--b)" strokeWidth="1"/>)}
-        {/* Data */}
-        <path d={polyPath} fill="url(#rg)" stroke="#22c55e" strokeWidth="2"/>
-        {pts.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={3} fill="#22c55e" stroke="var(--bg2)" strokeWidth="1.5"/>)}
-        {/* Labels */}
-        {labels.map((l,i)=>{
-          const a=angles[i];const lx=cx+Math.cos(a)*(r+16);const ly=cy+Math.sin(a)*(r+16);
-          return<text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize="10" fill="var(--t2)" fontFamily="DM Sans">{l}</text>;
-        })}
-      </svg>
-    </div>
-  );
-}
-
-// ── Avoided substances ────────────────────────────────────────────────────────
-function AvoidedSection({data,activeDrugs,goals}){
-  const allVals=Object.values(data);
-  const active=Object.keys(activeDrugs).filter(k=>activeDrugs[k]);
-  const totalConsumed={};active.forEach(k=>{totalConsumed[k]=allVals.reduce((s,e)=>s+(e?.[k]||0),0);});
-  const loggedDays=allVals.filter(e=>e?.logged).length;
-  const rows=active.map(k=>{
-    const d=ALL_DRUGS[k];if(!d)return null;
-    const consumed=totalConsumed[k]||0;
-    const daysActive=allVals.filter(e=>e?.[k]>0).length;
-    const avgPerDay=daysActive>0?consumed/daysActive:1;
-    const cleanDays=allVals.filter(e=>e?.logged&&(e[k]||0)===0).length;
-    const avoided=Math.round(cleanDays*avgPerDay);
-    if(avoided<=0)return null;
-    let equiv="";
-    if(k==="tabac")equiv=`≈ ${(avoided*6/60).toFixed(1)}h de vie regagnées`;
-    if(k==="cannabis")equiv=`≈ ${(avoided*0.3).toFixed(1)}g de THC non consommé`;
-    if(k==="alcool")equiv=`≈ ${(avoided*10).toFixed(0)} calories évitées`;
-    const moneySaved=k==="tabac"?(cleanDays*(goals.cigCost||10)).toFixed(0):k==="cannabis"?(cleanDays*(goals.weedCost||15)*0.3).toFixed(0):null;
-    return{key:k,d,avoided,equiv,moneySaved};
-  }).filter(Boolean);
-  if(!rows.length)return null;
-  return(
-    <div className="card">
-      <div className="clbl">Ce que tu as évité</div>
-      {rows.map(r=>(
-        <div key={r.key} className="avoided-row">
-          <div style={{fontSize:20}}>{r.d.emoji}</div>
-          <div className="avoided-num" style={{color:r.d.color}}>{r.avoided}</div>
-          <div style={{flex:1}}>
-            <div className="avoided-label">{r.d.unit} non consommé{r.avoided>1?"s":""}</div>
-            {r.equiv&&<div className="avoided-equiv">{r.equiv}</div>}
-            {r.moneySaved&&<div className="avoided-equiv" style={{color:"#22c55e"}}>≈ {r.moneySaved}€ économisés</div>}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ── AI Analysis ───────────────────────────────────────────────────────────────
+// ── AI Analysis — direct browser header ──────────────────────────────────────
 function AIAnalysis({stats,activeDrugs}){
   const [text,setText]=useState(null);
   const [loading,setLoading]=useState(true);
   const [err,setErr]=useState(null);
   useEffect(()=>{
     const active=Object.keys(activeDrugs).filter(k=>activeDrugs[k]);
-    const consumed=active.filter(k=>(stats.totals[k]||0)>0);
-    const lines=consumed.map(k=>`- ${ALL_DRUGS[k].name}: ${stats.totals[k]} ${ALL_DRUGS[k].unit}`).join('\n')||"Aucune consommation ce mois";
-    const prompt=`Tu es médecin addictologue. Analyse factuelle et directe (pas de condescendance).
+    const consumed=active.filter(k=>(stats.totals?.[k]||0)>0);
+    const lines=consumed.length>0?consumed.map(k=>`- ${ALL_DRUGS[k].name}: ${stats.totals[k]} ${ALL_DRUGS[k].unit} ce mois`).join('\n'):"Aucune consommation ce mois — patient en sevrage";
+    const prompt=`Tu es médecin addictologue. Analyse factuelle et directe.
 ${lines}
-Jours clean: ${stats.nClean}/${stats.daysCount} (${stats.pct}%) | Streak: ${stats.streak}j | Record: ${stats.longest}j
-Réponds UNIQUEMENT en JSON valide sans backticks :
-{"physique":"3-4 phrases effets physiques","mental":"2-3 phrases effets cognitifs","sevrage":"2-3 phrases bilan de progression","conseil":"1 conseil précis et actionnable","alerte":null}`;
-    fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:700,messages:[{role:"user",content:prompt}]})})
-      .then(r=>r.json()).then(d=>{setText(JSON.parse((d.content?.find(b=>b.type==="text")?.text||"{}").replace(/```json|```/g,"").trim()));setLoading(false);})
-      .catch(()=>{setErr("Analyse IA indisponible.");setLoading(false);});
+Jours clean: ${stats.nClean||0}/${stats.daysCount||30} (${stats.pct||0}%) | Streak: ${stats.streak||0}j | Record: ${stats.longest||0}j
+
+Réponds UNIQUEMENT avec un JSON valide sur une seule ligne, sans backticks :
+{"physique":"3 phrases effets physiques","mental":"2 phrases effets cognitifs","sevrage":"2 phrases bilan","conseil":"1 conseil précis cette semaine","alerte":null}`;
+    fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":"","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,messages:[{role:"user",content:prompt}]})})
+    .then(r=>{if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(d=>{const raw=d.content?.find(b=>b.type==="text")?.text||"";const m=raw.match(/\{[\s\S]*\}/);if(!m)throw new Error("no json");setText(JSON.parse(m[0]));setLoading(false);})
+    .catch(e=>{setErr("Analyse IA disponible après déploiement sur Vercel.");setLoading(false);});
   },[]);
-  if(loading)return<div className="ai-box"><div style={{display:"flex",alignItems:"center",gap:7,marginBottom:9}}><div className="ai-dot"/><span style={{fontSize:11,color:"var(--green)",fontWeight:600}}>Analyse médicale...</span></div><div className="ai-loading"><span/><span/><span/></div></div>;
-  if(err)return<div className="ai-box"><p style={{fontSize:12,color:"var(--t3)"}}>{err}</p></div>;
+  if(loading)return<div className="ai-box"><div style={{display:"flex",alignItems:"center",gap:7,marginBottom:9}}><div className="ai-dot"/><span style={{fontSize:11,color:"var(--green)",fontWeight:600}}>Analyse en cours...</span></div><div className="ai-loading"><span/><span/><span/></div></div>;
+  if(err)return<div className="ai-box"><div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}><div className="ai-dot"/><span style={{fontSize:10,color:"var(--green)",fontWeight:600}}>ANALYSE IA</span></div><p style={{fontSize:11,color:"var(--t3)"}}>{err}</p></div>;
   if(!text)return null;
   return<div className="ai-box">
     <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:9}}><div className="ai-dot"/><span style={{fontSize:10,color:"var(--green)",fontWeight:700,letterSpacing:".06em"}}>ANALYSE MÉDICALE IA</span></div>
-    {text.alerte&&<div style={{padding:"8px 10px",background:"rgba(239,68,68,0.12)",borderRadius:8,border:"1px solid rgba(239,68,68,0.25)",marginBottom:8}}><div style={{fontSize:9,color:"#ef4444",fontWeight:700,marginBottom:3}}>⚠ ALERTE</div><p style={{fontSize:12,color:"#fca5a5"}}>{text.alerte}</p></div>}
-    <div className="ai-sec"><div className="ai-sec-t">🫀 Physique</div><p className="ai-text">{text.physique}</p></div>
-    <div className="ai-sec"><div className="ai-sec-t">🧠 Cognitif & mental</div><p className="ai-text">{text.mental}</p></div>
-    <div className="ai-sec"><div className="ai-sec-t">📈 Sevrage</div><p className="ai-text">{text.sevrage}</p></div>
-    <div className="ai-sec"><div style={{padding:"9px 11px",background:"rgba(34,197,94,0.1)",borderRadius:9,border:"1px solid rgba(34,197,94,0.2)"}}><div style={{fontSize:9,color:"var(--green)",fontWeight:700,marginBottom:3}}>CONSEIL CETTE SEMAINE</div><p className="ai-text" style={{color:"var(--t)"}}>{text.conseil}</p></div></div>
+    {text.alerte&&<div style={{padding:"8px 10px",background:"rgba(239,68,68,0.12)",borderRadius:8,border:"1px solid rgba(239,68,68,0.25)",marginBottom:8}}><div style={{fontSize:9,color:"#ef4444",fontWeight:700,marginBottom:3}}>ALERTE</div><p className="ai-text" style={{color:"#fca5a5"}}>{text.alerte}</p></div>}
+    <div className="ai-sec"><div className="ai-sec-t">Effets physiques</div><p className="ai-text">{text.physique}</p></div>
+    <div className="ai-sec"><div className="ai-sec-t">Cognitif & mental</div><p className="ai-text">{text.mental}</p></div>
+    <div className="ai-sec"><div className="ai-sec-t">Bilan sevrage</div><p className="ai-text">{text.sevrage}</p></div>
+    <div className="ai-sec"><div style={{padding:"9px 11px",background:"rgba(34,197,94,0.1)",borderRadius:9,border:"1px solid rgba(34,197,94,0.2)"}}><div style={{fontSize:9,color:"var(--green)",fontWeight:700,marginBottom:3}}>CONSEIL CETTE SEMAINE</div><p className="ai-text">{text.conseil}</p></div></div>
   </div>;
 }
 
-// ── Score ─────────────────────────────────────────────────────────────────────
-function sevrageScore(streak,longest,pct,nClean,dc){return Math.round(Math.min(Math.min(streak*3,30)+Math.min(longest*1.5,25)+pct*0.3+Math.min((nClean/Math.max(dc,1))*15,15),100));}
-
 // ── Badges ────────────────────────────────────────────────────────────────────
 function computeBadges(data,active){
-  const vals=Object.values(data);
-  const today=new Date();
-  const cleanFn=e=>e&&isClean(e,active);
-  const cleanDays=vals.filter(cleanFn).length;
-  const loggedDays=vals.filter(e=>e?.logged).length;
-  let longest=0,run=0,prevD=null;
-  for(const k of Object.keys(data).sort()){if(cleanFn(data[k])){const d=new Date(k);if(prevD&&(d-prevD)/86400000===1){run++;}else{run=1;}longest=Math.max(longest,run);prevD=d;}else{run=0;prevD=null;}}
-  function consecNo(drug){let s=0,c=new Date(today);for(let i=0;i<999;i++){const k=dk(c.getFullYear(),c.getMonth(),c.getDate());const e=data[k];if(e&&e.logged){if((e[drug]||0)===0)s++;else break;}c.setDate(c.getDate()-1);}return s;}
+  const vals=Object.values(data),today=new Date();
+  const cf=e=>e&&isClean(e,active);
+  const cd=vals.filter(cf).length,ld=vals.filter(e=>e?.logged).length;
+  let longest=0,run=0,pd=null;
+  for(const k of Object.keys(data).sort()){if(cf(data[k])){const d=new Date(k);if(pd&&(d-pd)/86400000===1){run++;}else{run=1;}longest=Math.max(longest,run);pd=d;}else{run=0;pd=null;}}
+  function cn(drug){let s=0,c=new Date(today);for(let i=0;i<999;i++){const k=dk(c.getFullYear(),c.getMonth(),c.getDate());const e=data[k];if(e&&e.logged){if((e[drug]||0)===0)s++;else break;}c.setDate(c.getDate()-1);}return s;}
   const gm=vals.filter(e=>e?.mood>=3).length;
-  const trip=vals.filter(e=>e&&Object.keys(active).filter(k=>active[k]&&(e[k]||0)>0).length>=3).length;
   return[
-    {cat:"🌱 Premiers pas",id:"f1",icon:"📓",name:"Premier journal",desc:"Premier jour renseigné",earned:loggedDays>=1},
-    {cat:null,id:"f2",icon:"🌿",name:"Premier jour clean",desc:"Ta première journée sans aucune substance",earned:cleanDays>=1},
-    {cat:null,id:"f3",icon:"📅",name:"7 jours trackés",earned:loggedDays>=7,desc:"Une semaine de données"},
-    {cat:null,id:"f4",icon:"📚",name:"30 jours trackés",earned:loggedDays>=30,desc:"Un mois complet"},
-    {cat:null,id:"f5",icon:"🏛️",name:"100 jours de suivi",earned:loggedDays>=100,desc:"La constance comme mode de vie"},
-    {cat:null,id:"f6",icon:"💫",name:"1 an de suivi",earned:loggedDays>=365,desc:"365 jours de données"},
-    {cat:"🔥 Streaks clean",id:"s1",icon:"✨",name:"Première étincelle",earned:longest>=1,desc:"1 jour sans aucune substance"},
-    {cat:null,id:"s2",icon:"🔥",name:"3 jours",earned:longest>=3,desc:"72h — nicotine éliminée"},
-    {cat:null,id:"s3",icon:"⚡",name:"1 semaine",earned:longest>=7,desc:"Circulation sanguine améliorée"},
-    {cat:null,id:"s4",icon:"💎",name:"2 semaines",earned:longest>=14,desc:"14 jours consécutifs"},
-    {cat:null,id:"s5",icon:"🌙",name:"3 semaines",earned:longest>=21,desc:"Nouvelles habitudes neurologiques"},
-    {cat:null,id:"s6",icon:"👑",name:"1 mois clean",earned:longest>=30,desc:"Risque cardiovasculaire en baisse"},
-    {cat:null,id:"s7",icon:"🏆",name:"2 mois",earned:longest>=60,desc:"Ton corps se régénère"},
-    {cat:null,id:"s8",icon:"🦋",name:"3 mois — Renaissance",earned:longest>=90,desc:"Poumons restaurés, cognition rétablie"},
-    {cat:null,id:"s9",icon:"🌍",name:"6 mois",earned:longest>=180,desc:"180 jours de liberté"},
-    {cat:null,id:"s10",icon:"🌟",name:"1 an clean",earned:longest>=365,desc:"365 jours — transformation complète"},
-    {cat:"🚭 Tabac",id:"t1",icon:"🚭",name:"3 jours sans tabac",earned:consecNo("tabac")>=3,desc:"La nicotine quitte ton sang"},
-    {cat:null,id:"t2",icon:"💨",name:"1 semaine sans fumer",earned:consecNo("tabac")>=7,desc:"Cils bronchiques qui repoussent"},
-    {cat:null,id:"t3",icon:"🫁",name:"1 mois sans tabac",earned:consecNo("tabac")>=30,desc:"Risque cardio réduit"},
-    {cat:null,id:"t4",icon:"❤️",name:"3 mois sans tabac",earned:consecNo("tabac")>=90,desc:"+30% capacité pulmonaire"},
-    {cat:"🍃 Cannabis",id:"w1",icon:"🍃",name:"3 jours sans joints",earned:consecNo("cannabis")>=3,desc:"THC sanguin en baisse"},
-    {cat:null,id:"w2",icon:"🧠",name:"1 semaine sans weed",earned:consecNo("cannabis")>=7,desc:"Mémoire en récupération"},
-    {cat:null,id:"w3",icon:"💡",name:"2 sem. sans cannabis",earned:consecNo("cannabis")>=14,desc:"Cognition et sommeil améliorés"},
-    {cat:null,id:"w4",icon:"🌟",name:"1 mois sans cannabis",earned:consecNo("cannabis")>=30,desc:"Endocannabinoïde rétabli"},
-    {cat:"🍺 Alcool",id:"a1",icon:"💧",name:"3 jours sans alcool",earned:consecNo("alcool")>=3,desc:"Foie en récupération"},
-    {cat:null,id:"a2",icon:"🫀",name:"2 sem. sans alcool",earned:consecNo("alcool")>=14,desc:"Tension normalisée"},
-    {cat:null,id:"a3",icon:"🌊",name:"1 mois sans alcool",earned:consecNo("alcool")>=30,desc:"Foie régénéré"},
-    {cat:"✦ Cumulés",id:"c1",icon:"🌱",name:"10 jours clean",earned:cleanDays>=10,desc:"Au total"},
-    {cat:null,id:"c2",icon:"🌿",name:"25 jours clean",earned:cleanDays>=25,desc:"Au total"},
-    {cat:null,id:"c3",icon:"🌳",name:"50 jours clean",earned:cleanDays>=50,desc:"Au total"},
-    {cat:null,id:"c4",icon:"🏔️",name:"100 jours clean",earned:cleanDays>=100,desc:"Un cap majeur"},
-    {cat:null,id:"c5",icon:"🌍",name:"200 jours clean",earned:cleanDays>=200,desc:"Tu as changé ta vie"},
-    {cat:"😊 Bien-être",id:"b1",icon:"😊",name:"5 jours positifs",earned:gm>=5,desc:"5 jours avec humeur ≥ 4"},
-    {cat:null,id:"b2",icon:"🌈",name:"20 jours positifs",earned:gm>=20,desc:"20 jours avec humeur positive"},
-    {cat:null,id:"b3",icon:"🛡️",name:"Jamais les 3 ensemble",earned:loggedDays>=7&&trip===0,desc:"Aucun jour avec 3+ substances"},
-    {cat:"🔒 Secrets",id:"x1",icon:"🦅",name:"Phénix",earned:(()=>{const keys=Object.keys(data).sort();let rel=false;for(let i=0;i<keys.length;i++){const e=data[keys[i]];if(e&&!cleanFn(e)&&e.logged)rel=true;if(rel){let s=0;for(let j=i;j<keys.length&&j<i+7;j++){if(cleanFn(data[keys[j]]))s++;}if(s===7)return true;}}return false;})(),desc:"Rechute puis 7 jours clean"},
-    {cat:null,id:"x2",icon:"🌅",name:"Week-end propre",earned:(()=>{const d=new Date(today);const dow=d.getDay()===0?6:d.getDay()-1;const sat=new Date(d);sat.setDate(d.getDate()-(dow-5+7)%7);const sun=new Date(sat);sun.setDate(sat.getDate()+1);return cleanFn(data[dk(sat.getFullYear(),sat.getMonth(),sat.getDate())])&&cleanFn(data[dk(sun.getFullYear(),sun.getMonth(),sun.getDate())]);})(),desc:"Samedi ET dimanche clean"},
-    {cat:null,id:"x3",icon:"📆",name:"4 lundis clean",earned:(()=>{const d=new Date(today);const dow=d.getDay()===0?6:d.getDay()-1;let c=0;for(let w=0;w<4;w++){const lun=new Date(d);lun.setDate(d.getDate()-dow-w*7);if(cleanFn(data[dk(lun.getFullYear(),lun.getMonth(),lun.getDate())]))c++;}return c>=4;})(),desc:"4 lundis consécutifs clean"},
+    {cat:"Premiers pas",id:"f1",icon:"📓",name:"Premier journal",desc:"Premier jour renseigné",earned:ld>=1},
+    {cat:null,id:"f2",icon:"🌿",name:"Premier jour clean",desc:"Ta première journée sans aucune substance",earned:cd>=1},
+    {cat:null,id:"f3",icon:"📅",name:"7 jours trackés",desc:"Une semaine de données",earned:ld>=7},
+    {cat:null,id:"f4",icon:"📚",name:"30 jours trackés",desc:"Un mois complet",earned:ld>=30},
+    {cat:null,id:"f5",icon:"🏛️",name:"100 jours de suivi",earned:ld>=100,desc:"La constance comme mode de vie"},
+    {cat:"Streaks clean",id:"s1",icon:"✨",name:"Première étincelle",desc:"1 jour sans substance",earned:longest>=1},
+    {cat:null,id:"s2",icon:"🔥",name:"3 jours",desc:"72h — nicotine éliminée",earned:longest>=3},
+    {cat:null,id:"s3",icon:"⚡",name:"1 semaine",desc:"Circulation améliorée",earned:longest>=7},
+    {cat:null,id:"s4",icon:"💎",name:"2 semaines",desc:"14 jours consécutifs",earned:longest>=14},
+    {cat:null,id:"s5",icon:"🌙",name:"3 semaines",desc:"Nouvelles habitudes neurologiques",earned:longest>=21},
+    {cat:null,id:"s6",icon:"👑",name:"1 mois clean",desc:"Risque cardiovasculaire en baisse",earned:longest>=30},
+    {cat:null,id:"s7",icon:"🏆",name:"2 mois",desc:"Ton corps se régénère",earned:longest>=60},
+    {cat:null,id:"s8",icon:"🦋",name:"3 mois — Renaissance",desc:"Poumons restaurés, cognition rétablie",earned:longest>=90},
+    {cat:null,id:"s9",icon:"🌍",name:"6 mois",desc:"180 jours de liberté",earned:longest>=180},
+    {cat:null,id:"s10",icon:"🌟",name:"1 an clean",desc:"365 jours — transformation complète",earned:longest>=365},
+    {cat:"Sevrage tabac",id:"t1",icon:"🚭",name:"3 jours sans tabac",desc:"La nicotine quitte ton sang",earned:cn("tabac")>=3},
+    {cat:null,id:"t2",icon:"💨",name:"1 semaine sans fumer",earned:cn("tabac")>=7,desc:"Cils bronchiques qui repoussent"},
+    {cat:null,id:"t3",icon:"🫁",name:"1 mois sans tabac",earned:cn("tabac")>=30,desc:"Risque cardio réduit"},
+    {cat:null,id:"t4",icon:"❤️",name:"3 mois sans tabac",earned:cn("tabac")>=90,desc:"+30% capacité pulmonaire"},
+    {cat:"Sevrage cannabis",id:"w1",icon:"🍃",name:"3 jours sans joints",desc:"THC sanguin en baisse",earned:cn("cannabis")>=3},
+    {cat:null,id:"w2",icon:"🧠",name:"1 semaine sans weed",earned:cn("cannabis")>=7,desc:"Mémoire en récupération"},
+    {cat:null,id:"w3",icon:"💡",name:"2 sem. sans cannabis",earned:cn("cannabis")>=14,desc:"Cognition améliorée"},
+    {cat:null,id:"w4",icon:"🌟",name:"1 mois sans cannabis",earned:cn("cannabis")>=30,desc:"Endocannabinoïde rétabli"},
+    {cat:"Sevrage alcool",id:"a1",icon:"💧",name:"3 jours sans alcool",earned:cn("alcool")>=3,desc:"Foie en récupération"},
+    {cat:null,id:"a2",icon:"🫀",name:"2 sem. sans alcool",earned:cn("alcool")>=14,desc:"Tension normalisée"},
+    {cat:null,id:"a3",icon:"🌊",name:"1 mois sans alcool",earned:cn("alcool")>=30,desc:"Foie régénéré"},
+    {cat:"Cumulés",id:"c1",icon:"🌱",name:"10 jours clean",earned:cd>=10,desc:"Au total"},
+    {cat:null,id:"c2",icon:"🌿",name:"25 jours clean",earned:cd>=25,desc:"Au total"},
+    {cat:null,id:"c3",icon:"🌳",name:"50 jours clean",earned:cd>=50,desc:"Au total"},
+    {cat:null,id:"c4",icon:"🏔️",name:"100 jours clean",earned:cd>=100,desc:"Un cap majeur"},
+    {cat:null,id:"c5",icon:"🌍",name:"200 jours clean",earned:cd>=200,desc:"Tu as changé ta vie"},
+    {cat:"Bien-être",id:"b1",icon:"😊",name:"5 jours positifs",earned:gm>=5,desc:"5 jours humeur ≥ 4"},
+    {cat:null,id:"b2",icon:"🌈",name:"20 jours positifs",earned:gm>=20,desc:"20 jours humeur positive"},
+    {cat:"Secrets",id:"x1",icon:"🦅",name:"Phénix",desc:"Rechute puis 7 jours clean",earned:(()=>{const keys=Object.keys(data).sort();let rel=false;for(let i=0;i<keys.length;i++){const e=data[keys[i]];if(e&&!cf(e)&&e.logged)rel=true;if(rel){let s=0;for(let j=i;j<keys.length&&j<i+7;j++){if(cf(data[keys[j]]))s++;}if(s===7)return true;}}return false;})()},
   ];
 }
 
-// ── DayModal ──────────────────────────────────────────────────────────────────
+// ── Day Modal — swipe down to close ──────────────────────────────────────────
 function DayModal({modal,data,activeDrugs,onSave,onClear,onClose}){
   const selKey=dk(modal.y,modal.m,modal.d);
   const raw=data[selKey]||null;
@@ -640,140 +540,141 @@ function DayModal({modal,data,activeDrugs,onSave,onClear,onClose}){
     activeList.forEach(k=>{base[k]=0;});
     return raw?{...base,...raw}:base;
   });
-  const hasConsumption=activeList.some(k=>(local[k]||0)>0);
-  function setVal(key,val){setLocal(p=>({...p,[key]:val,clean:false,logged:true}));}
+  const hasCons=activeList.some(k=>(local[k]||0)>0);
+
+  // Swipe down to close
+  const sheetRef=useRef(null);
+  useEffect(()=>{
+    const el=sheetRef.current;if(!el)return;
+    let sy=0;
+    const ts=e=>{sy=e.touches[0].clientY;};
+    const te=e=>{const dy=e.changedTouches[0].clientY-sy;if(dy>70)onClose();};
+    el.addEventListener("touchstart",ts,{passive:true});el.addEventListener("touchend",te,{passive:true});
+    return()=>{el.removeEventListener("touchstart",ts);el.removeEventListener("touchend",te);};
+  },[onClose]);
+
   function toggleClean(){setLocal(p=>{if(p.clean)return{...p,clean:false};const n={...p,clean:true,logged:true};activeList.forEach(k=>{n[k]=0;});return n;});}
-  return(
-    <div className="mo" onClick={onClose}>
-      <div className="mb" onClick={e=>e.stopPropagation()}>
-        <div className="mh"/>
-        <div style={{marginBottom:12}}>
-          <div style={{fontSize:9,color:"var(--t3)",letterSpacing:".1em",textTransform:"uppercase"}}>Journal du</div>
-          <div style={{fontSize:15,fontFamily:"'DM Serif Display',serif",color:"var(--t)"}}>{modal.d} {MONTHS[modal.m]} {modal.y}</div>
-        </div>
-        <div className="slbl" style={{marginTop:0}}>Journée</div>
-        <div className={`ctr-row${local.clean?" active":""}`} style={{background:local.clean?"rgba(34,197,94,0.12)":"var(--s)",color:"#22c55e",cursor:"pointer"}} onClick={toggleClean}>
-          <div className="ctr-left"><div className="ctr-emoji">✦</div><div><div className="ctr-lbl" style={{color:"#22c55e"}}>Journée clean</div><div className="ctr-sub">Aucune substance aujourd'hui</div></div></div>
-          {local.clean&&<span style={{color:"#22c55e",fontSize:15,marginRight:4}}>✓</span>}
-        </div>
-        {activeList.map(k=>{
-          const d=ALL_DRUGS[k];if(!d)return null;
-          const val=local[k]||0;
-          return<React.Fragment key={k}>
-            <div className="slbl">{d.name} {d.emoji}</div>
-            <div className={`ctr-row${val>0?" active":""}`} style={{background:val>0?d.color+"1a":"var(--s)",color:d.color}}>
-              <div className="ctr-left"><div className="ctr-emoji">{d.emoji}</div><div>
-                <div className="ctr-lbl" style={{color:val>0?d.color:"var(--t)"}}>{d.unit}</div>
-                <div className="ctr-sub">{val>0?(d.gramPerUnit?`≈${(val*d.gramPerUnit).toFixed(1)}g`:`${val} ${val>1?d.unit:d.unitShort}`):"Combien ?"}</div>
-              </div></div>
-              <div className="ctr-right">
-                <button className="ctr-btn" style={{borderColor:val>0?d.color:"var(--b2)"}} onPointerDown={e=>{e.stopPropagation();setVal(k,Math.max(0,val-1));}}>−</button>
-                <div className="ctr-val" style={{color:val>0?d.color:"var(--t3)"}}>{val}</div>
-                <button className="ctr-btn" style={{borderColor:val>0?d.color:"var(--b2)"}} onPointerDown={e=>{e.stopPropagation();setVal(k,Math.min(99,val+1));}}>+</button>
-              </div>
+  function setVal(key,val){setLocal(p=>({...p,[key]:val,clean:false,logged:true}));}
+
+  return<div className="mo" onClick={onClose}>
+    <div className="mb" ref={sheetRef} onClick={e=>e.stopPropagation()}>
+      <div className="mh" onClick={onClose}/>
+      <div style={{marginBottom:12}}>
+        <div style={{fontSize:9,color:"var(--t3)",letterSpacing:".1em",textTransform:"uppercase"}}>Journal du</div>
+        <div style={{fontSize:15,fontWeight:600,color:"var(--t)"}}>{modal.d} {MONTHS[modal.m]} {modal.y}</div>
+      </div>
+      <div className="slbl" style={{marginTop:0}}>Journée</div>
+      <div className={`ctr-row${local.clean?" active":""}`} style={{background:local.clean?"rgba(34,197,94,0.12)":"var(--s)",color:"#22c55e",cursor:"pointer"}} onClick={toggleClean}>
+        <div className="ctr-left"><div className="ctr-emoji">✦</div><div><div className="ctr-lbl" style={{color:"#22c55e"}}>Journée clean</div><div className="ctr-sub">Aucune substance aujourd'hui</div></div></div>
+        {local.clean&&<span style={{color:"#22c55e",fontSize:15,marginRight:4}}>✓</span>}
+      </div>
+      {activeList.map(k=>{
+        const d=ALL_DRUGS[k];if(!d)return null;
+        const val=local[k]||0;
+        return<React.Fragment key={k}>
+          <div className="slbl">{d.name} {d.emoji}</div>
+          <div className={`ctr-row${val>0?" active":""}`} style={{background:val>0?d.color+"1a":"var(--s)",color:d.color}}>
+            <div className="ctr-left"><div className="ctr-emoji">{d.emoji}</div><div>
+              <div className="ctr-lbl" style={{color:val>0?d.color:"var(--t)"}}>{d.unit}</div>
+              <div className="ctr-sub">{val>0?(d.gramPerUnit?`≈${(val*d.gramPerUnit).toFixed(1)}g`:`${val} ${val>1?d.unit:d.unitShort}`):"Combien ?"}</div>
+            </div></div>
+            <div className="ctr-right">
+              <button className="ctr-btn" style={{borderColor:val>0?d.color:"var(--b2)"}} onPointerDown={e=>{e.stopPropagation();setVal(k,Math.max(0,val-1));}}>−</button>
+              <div className="ctr-val" style={{color:val>0?d.color:"var(--t3)"}}>{val}</div>
+              <button className="ctr-btn" style={{borderColor:val>0?d.color:"var(--b2)"}} onPointerDown={e=>{e.stopPropagation();setVal(k,Math.min(99,val+1));}}>+</button>
             </div>
-          </React.Fragment>;
-        })}
-        <div className="slbl">Humeur 😊</div>
-        <div className="mood-row">{MOODS.map((m,i)=><button key={i} className={`mood-btn${local.mood===i?" on":""}`} style={{borderColor:local.mood===i?m.c:"transparent",color:local.mood===i?m.c:"var(--t3)"}} onClick={()=>setLocal(p=>({...p,mood:p.mood===i?null:i}))}><span>{m.e}</span><span>{m.l}</span></button>)}</div>
-        {hasConsumption&&<><div className="slbl">Contexte 🏷️</div><div className="tag-row">{CTXS.map(c=><button key={c} className={`tag${(local.ctx||[]).includes(c)?" on":""}`} onClick={()=>setLocal(p=>({...p,ctx:(p.ctx||[]).includes(c)?(p.ctx||[]).filter(x=>x!==c):[...(p.ctx||[]),c]}))}>{c}</button>)}</div></>}
-        <div className="slbl">Note</div>
-        <textarea rows={2} placeholder="Comment tu te sens ?" value={local.note||""} onChange={e=>setLocal(p=>({...p,note:e.target.value}))}/>
-        <div style={{display:"flex",gap:7,marginTop:12}}>
-          {raw&&<button onClick={()=>{onClear(selKey);onClose();}} style={{flex:1,padding:"12px",borderRadius:10,background:"var(--s)",border:"1px solid var(--b)",color:"var(--t3)",fontFamily:"inherit",fontWeight:600,fontSize:12,cursor:"pointer"}}>Effacer</button>}
-          <button className="bprim" style={{flex:2,margin:0}} onClick={()=>{onSave(selKey,{...local,logged:true});onClose();}}>Enregistrer</button>
-        </div>
+          </div>
+        </React.Fragment>;
+      })}
+      <div className="slbl">Humeur</div>
+      <div className="mood-row">{MOODS.map((m,i)=><button key={i} className={`mood-btn${local.mood===i?" on":""}`} style={{borderColor:local.mood===i?m.c:"transparent",color:local.mood===i?m.c:"var(--t3)"}} onClick={()=>setLocal(p=>({...p,mood:p.mood===i?null:i}))}><span>{m.e}</span><span>{m.l}</span></button>)}</div>
+      {hasCons&&<><div className="slbl">Contexte</div><div className="tag-row">{CTXS.map(c=><button key={c} className={`tag${(local.ctx||[]).includes(c)?" on":""}`} onClick={()=>setLocal(p=>({...p,ctx:(p.ctx||[]).includes(c)?(p.ctx||[]).filter(x=>x!==c):[...(p.ctx||[]),c]}))}>{c}</button>)}</div></>}
+      <div className="slbl">Note</div>
+      <textarea rows={2} placeholder="Comment tu te sens ?" value={local.note||""} onChange={e=>setLocal(p=>({...p,note:e.target.value}))}/>
+      <div style={{display:"flex",gap:7,marginTop:12}}>
+        {raw&&<button onClick={()=>{onClear(selKey);onClose();}} style={{flex:1,padding:"12px",borderRadius:10,background:"var(--s)",border:"1px solid var(--b)",color:"var(--t3)",fontFamily:"inherit",fontWeight:600,fontSize:12,cursor:"pointer"}}>Effacer</button>}
+        <button className="bprim" style={{flex:2,margin:0}} onClick={()=>{onSave(selKey,{...local,logged:true});onClose();}}>Enregistrer</button>
       </div>
     </div>
-  );
+  </div>;
 }
 
-// ── Profile Section ───────────────────────────────────────────────────────────
-function ProfileSection({profile,setProfile,onClose}){
+// ── Profile Modal ─────────────────────────────────────────────────────────────
+function ProfileModal({profile,setProfile,onClose}){
   const fileRef=useRef(null);
-  const [aiMotiv,setAiMotiv]=useState(false);
-  const [generating,setGenerating]=useState(false);
-
-  async function generateMotivation(){
-    setGenerating(true);
-    const drugs=Object.keys(DEFAULT_ACTIVE).filter(k=>DEFAULT_ACTIVE[k]).map(k=>ALL_DRUGS[k]?.name).join(", ");
-    const prompt=`Tu es un coach bienveillant spécialisé en addictologie. Génère un texte personnel de motivation (6-8 phrases, à la première personne du singulier, intime et sincère) pour quelqu'un qui souhaite se sevrer de : ${profile.drugs||drugs}. Le texte doit parler des raisons profondes de se sevrer, des bénéfices concrets sur la santé, les relations, la liberté. Commence par "Je me bats pour..." Réponds uniquement avec le texte, pas de JSON, pas de titre.`;
+  const [gen,setGen]=useState(false);
+  const isIn=profile.loggedIn;
+  function handlePhoto(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=ev=>setProfile(p=>({...p,photo:ev.target.result}));r.readAsDataURL(f);}
+  async function genMotiv(){
+    setGen(true);
+    const active=Object.keys(DEFAULT_ACTIVE).filter(k=>DEFAULT_ACTIVE[k]);
+    const names=active.map(k=>ALL_DRUGS[k]?.name).filter(Boolean).join(", ")||"substances";
     try{
-      const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:400,messages:[{role:"user",content:prompt}]})});
-      const d=await r.json();
-      const txt=d.content?.find(b=>b.type==="text")?.text||"";
-      setProfile(p=>({...p,motivations:txt}));
+      const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":"","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:350,messages:[{role:"user",content:`Génère un texte de motivation personnel (6 phrases, première personne, sincère) pour quelqu'un qui veut se sevrer de : ${names}. Commence par "Je me bats pour...". Texte uniquement.`}]})});
+      const d=await r.json();const txt=d.content?.find(b=>b.type==="text")?.text||"";
+      if(txt)setProfile(p=>({...p,motivations:txt}));
     }catch(e){}
-    setGenerating(false);
+    setGen(false);
   }
-
-  function handlePhoto(e){
-    const file=e.target.files?.[0];
-    if(!file)return;
-    const reader=new FileReader();
-    reader.onload=ev=>setProfile(p=>({...p,photo:ev.target.result}));
-    reader.readAsDataURL(file);
-  }
-
-  const socials=[
-    {icon:"🍎",label:"Continuer avec Apple",color:"#000"},
-    {icon:"G",label:"Continuer avec Google",color:"#4285f4",isG:true},
-    {icon:"📧",label:"Continuer avec l'email",color:"var(--t2)"},
-  ];
-
-  if(profile.loggedIn) return(
-    <div style={{padding:"0 16px 20px"}}>
+  return<div className="mo" onClick={onClose}>
+    <div className="mb" style={{maxHeight:"92vh"}} onClick={e=>e.stopPropagation()}>
+      <div className="mh" onClick={onClose}/>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-        <div style={{fontSize:16,fontFamily:"'DM Serif Display',serif",color:"var(--t)"}}>Mon profil</div>
+        <div style={{fontSize:15,fontWeight:600,color:"var(--t)"}}>{isIn?"Mon profil":"Connexion"}</div>
         <button onClick={onClose} style={{background:"var(--s)",border:"1px solid var(--b)",borderRadius:8,padding:"5px 12px",color:"var(--t2)",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>Fermer</button>
       </div>
-      <div style={{display:"flex",gap:14,alignItems:"center",marginBottom:16}}>
-        {profile.photo
-          ?<img src={profile.photo} alt="profil" className="profile-avatar" onClick={()=>fileRef.current?.click()}/>
-          :<div className="profile-avatar-placeholder" onClick={()=>fileRef.current?.click()}>👤</div>}
-        <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={handlePhoto}/>
-        <div style={{flex:1}}>
-          <input type="text" value={profile.name||""} onChange={e=>setProfile(p=>({...p,name:e.target.value}))}
-            placeholder="Ton prénom" style={{width:"100%",marginBottom:6}}/>
-          <div style={{fontSize:10,color:"var(--t3)"}}>Tape sur la photo pour la changer</div>
+      {!isIn&&<>
+        <div style={{textAlign:"center",marginBottom:20}}>
+          <div style={{width:56,height:56,borderRadius:"50%",background:"var(--s2)",border:"1px solid var(--b)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 10px",color:"var(--t2)"}}><IcoUser/></div>
+          <div style={{fontSize:14,fontWeight:600,color:"var(--t)",marginBottom:4}}>Habit Tracker</div>
+          <div style={{fontSize:12,color:"var(--t2)"}}>Crée ton profil pour personnaliser ton parcours</div>
         </div>
-      </div>
-      <div style={{fontSize:10,color:"var(--t3)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:8}}>Life Tracker — Mes motivations</div>
-      <div style={{fontSize:11,color:"var(--t3)",marginBottom:8,lineHeight:1.5}}>Pourquoi tu te bats pour ta guérison ? Écris ici, ou laisse l'IA générer un texte basé sur ce que tu consommes.</div>
-      <textarea className="motiv-area" rows={6}
-        value={profile.motivations||""}
-        onChange={e=>setProfile(p=>({...p,motivations:e.target.value}))}
-        placeholder="Je me bats pour me libérer de..."/>
-      <button onClick={generateMotivation} disabled={generating} style={{width:"100%",marginTop:8,padding:"10px",borderRadius:10,background:generating?"var(--s)":"rgba(168,85,247,0.15)",border:"1px solid rgba(168,85,247,0.25)",color:generating?"var(--t3)":"#d8b4fe",fontFamily:"inherit",fontWeight:600,fontSize:13,cursor:generating?"not-allowed":"pointer"}}>
-        {generating?"✨ Génération...":"✨ Générer avec l'IA"}
-      </button>
-      {profile.motivations&&<div style={{marginTop:12,padding:"12px 14px",background:"rgba(168,85,247,0.07)",border:"1px solid rgba(168,85,247,0.15)",borderRadius:12}}>
-        <div style={{fontSize:10,color:"#a855f7",fontWeight:700,marginBottom:6,letterSpacing:".06em",textTransform:"uppercase"}}>Mes motivations</div>
-        <p style={{fontSize:12,color:"var(--t)",lineHeight:1.7,fontStyle:"italic"}}>{profile.motivations}</p>
-      </div>}
-      <button onClick={()=>setProfile(p=>({...p,loggedIn:false}))} style={{width:"100%",marginTop:12,padding:"10px",borderRadius:10,background:"var(--s)",border:"1px solid var(--b)",color:"var(--t3)",fontFamily:"inherit",fontSize:12,cursor:"pointer"}}>Se déconnecter</button>
+        {[{icon:<svg width={16} height={16} viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>,label:"Continuer avec Apple"},
+          {icon:<span style={{fontWeight:800,fontSize:15,color:"#4285f4"}}>G</span>,label:"Continuer avec Google"},
+          {icon:<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>,label:"Continuer avec l'email"},
+        ].map((s,i)=><button key={i} className="social-btn" onClick={()=>setProfile(p=>({...p,loggedIn:true}))}>{s.icon}<span>{s.label}</span></button>)}
+      </>}
+      {isIn&&<>
+        <div style={{display:"flex",gap:14,alignItems:"center",marginBottom:16}}>
+          <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={handlePhoto}/>
+          {profile.photo?<img src={profile.photo} alt="" className="profile-avatar" onClick={()=>fileRef.current?.click()}/>:<div className="avatar-icon" onClick={()=>fileRef.current?.click()}><IcoUser/></div>}
+          <div style={{flex:1}}>
+            <input type="text" value={profile.name||""} onChange={e=>setProfile(p=>({...p,name:e.target.value}))} placeholder="Ton prénom" style={{width:"100%",marginBottom:6}}/>
+            <div style={{fontSize:10,color:"var(--t3)"}}>Tape l'avatar pour changer la photo</div>
+          </div>
+        </div>
+        <div style={{fontSize:10,color:"var(--t3)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:6}}>Mes motivations</div>
+        <textarea className="motiv-area" rows={5} value={profile.motivations||""} onChange={e=>setProfile(p=>({...p,motivations:e.target.value}))} placeholder="Je me bats pour me libérer de..."/>
+        <button onClick={genMotiv} disabled={gen} style={{width:"100%",marginTop:8,padding:"10px",borderRadius:10,background:gen?"var(--s)":"rgba(168,85,247,0.15)",border:"1px solid rgba(168,85,247,0.25)",color:gen?"var(--t3)":"#d8b4fe",fontFamily:"inherit",fontWeight:600,fontSize:13,cursor:gen?"default":"pointer"}}>{gen?"Génération...":"Générer avec l'IA"}</button>
+        {profile.motivations&&<div style={{marginTop:12,padding:"12px 14px",background:"rgba(168,85,247,0.07)",border:"1px solid rgba(168,85,247,0.15)",borderRadius:12}}><p style={{fontSize:12,color:"var(--t)",lineHeight:1.7,fontStyle:"italic"}}>{profile.motivations}</p></div>}
+        <button onClick={()=>setProfile(p=>({...p,loggedIn:false}))} style={{width:"100%",marginTop:12,padding:"10px",borderRadius:10,background:"var(--s)",border:"1px solid var(--b)",color:"var(--t3)",fontFamily:"inherit",fontSize:12,cursor:"pointer"}}>Se déconnecter</button>
+      </>}
     </div>
-  );
+  </div>;
+}
 
-  return(
-    <div style={{padding:"0 16px 20px"}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-        <div style={{fontSize:16,fontFamily:"'DM Serif Display',serif",color:"var(--t)"}}>Créer un profil</div>
+// ── Widget Manager ────────────────────────────────────────────────────────────
+function WidgetManager({widgets,setWidgets,onClose}){
+  const [dragIdx,setDragIdx]=useState(null);
+  const [overIdx,setOverIdx]=useState(null);
+  function drop(toIdx){if(dragIdx===null||dragIdx===toIdx){setDragIdx(null);setOverIdx(null);return;}const w=[...widgets];const item=w.splice(dragIdx,1)[0];w.splice(toIdx,0,item);setWidgets(w);setDragIdx(null);setOverIdx(null);}
+  return<div className="mo" onClick={onClose}>
+    <div className="mb" onClick={e=>e.stopPropagation()}>
+      <div className="mh" onClick={onClose}/>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+        <div style={{fontSize:15,fontWeight:600,color:"var(--t)"}}>Personnaliser l'accueil</div>
         <button onClick={onClose} style={{background:"var(--s)",border:"1px solid var(--b)",borderRadius:8,padding:"5px 12px",color:"var(--t2)",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>Fermer</button>
       </div>
-      <div style={{textAlign:"center",marginBottom:20}}>
-        <div style={{fontSize:40,marginBottom:8}}>🌱</div>
-        <div style={{fontSize:14,fontWeight:600,color:"var(--t)",marginBottom:4}}>Recovery Tracker</div>
-        <div style={{fontSize:12,color:"var(--t2)"}}>Crée ton profil pour personnaliser ton parcours de guérison</div>
-      </div>
-      {socials.map((s,i)=>(
-        <button key={i} className="social-btn" onClick={()=>setProfile(p=>({...p,loggedIn:true,provider:s.label}))}>
-          {s.isG?<span style={{fontWeight:800,fontSize:15,color:s.color}}>G</span>:<span style={{fontSize:18}}>{s.icon}</span>}
-          <span>{s.label}</span>
-        </button>
-      ))}
+      <div style={{fontSize:11,color:"var(--t3)",marginBottom:12}}>Glisse pour réordonner · Bascule pour activer</div>
+      {widgets.map((w,i)=><div key={w.id} className="widget-item"
+        style={{opacity:dragIdx===i?.5:1,borderColor:overIdx===i?"var(--green)":"var(--b)",background:overIdx===i?"var(--green3)":"var(--bg2)"}}
+        draggable onDragStart={()=>setDragIdx(i)} onDragOver={e=>{e.preventDefault();setOverIdx(i);}} onDragEnd={()=>drop(overIdx??i)}>
+        <div style={{color:"var(--t3)",flexShrink:0}}><IcoDrag/></div>
+        <div style={{flex:1,fontSize:13,fontWeight:500,color:"var(--t)"}}>{w.label}</div>
+        <button className={`toggle${w.enabled?" on":" off"}`} onClick={e=>{e.stopPropagation();setWidgets(prev=>prev.map((x,j)=>j===i?{...x,enabled:!x.enabled}:x));}}/>
+      </div>)}
     </div>
-  );
+  </div>;
 }
 
 // ── Main App ──────────────────────────────────────────────────────────────────
@@ -782,17 +683,19 @@ function App(){
   const [year,setYear]=useState(today.getFullYear());
   const [month,setMonth]=useState(today.getMonth());
   const [data,setData]=useState(()=>load(STORE,{}));
-  const [goals,setGoals]=useState(()=>load(GSTORE,{target:20,notifOn:false,notifTime:"22:00",cigCost:10,weedCost:15}));
+  const [goals,setGoals]=useState(()=>load(GSTORE,{target:20,notifOn:false,notifTime:"22:00",cigPerDay:20,cigPackCost:10,jointsPerDay:1,weedGPerJoint:0.3,weedGCost:15}));
   const [activeDrugs,setActiveDrugs]=useState(()=>load(DSTORE,DEFAULT_ACTIVE));
-  const [profile,setProfile]=useState(()=>load(PSTORE,{loggedIn:false,name:"",photo:null,motivations:"",drugs:""}));
+  const [profile,setProfile]=useState(()=>load(PSTORE,{loggedIn:false,name:"",photo:null,motivations:""}));
+  const [widgets,setWidgets]=useState(()=>load(WSTORE,DEFAULT_WIDGETS));
   const [tab,setTab]=useState("cal");
-  const [modal,setModal]=useState(null);
   const [calView,setCalView]=useState("month");
   const [weekOffset,setWeekOffset]=useState(0);
+  const [modal,setModal]=useState(null);
   const [bop,setBop]=useState(null);
   const [calKey,setCalKey]=useState(0);
   const [expand,setExpand]=useState(null);
   const [showProfile,setShowProfile]=useState(false);
+  const [showWidgets,setShowWidgets]=useState(false);
   const [pulse,setPulse]=useState(false);
   const prevStreak=useRef(0);
 
@@ -800,10 +703,12 @@ function App(){
   useEffect(()=>{try{localStorage.setItem(GSTORE,JSON.stringify(goals));}catch{}},[goals]);
   useEffect(()=>{try{localStorage.setItem(DSTORE,JSON.stringify(activeDrugs));}catch{}},[activeDrugs]);
   useEffect(()=>{try{localStorage.setItem(PSTORE,JSON.stringify(profile));}catch{}},[profile]);
+  useEffect(()=>{try{localStorage.setItem(WSTORE,JSON.stringify(widgets));}catch{}},[widgets]);
 
   const activeList=useMemo(()=>Object.keys(activeDrugs).filter(k=>activeDrugs[k]),[activeDrugs]);
   const daysCount=daysIn(year,month),offset=firstOff(year,month);
 
+  // Entries — recomputed whenever data OR activeDrugs changes
   const entries=useMemo(()=>Array.from({length:daysCount},(_,i)=>{
     const e=data[dk(year,month,i+1)]||null;
     return{d:i+1,e,clean:isClean(e,activeDrugs)};
@@ -814,330 +719,389 @@ function App(){
   const pct=logged?Math.round((nClean/logged)*100):0;
   const totals=useMemo(()=>{const t={};activeList.forEach(k=>{t[k]=entries.reduce((s,x)=>s+(x.e?.[k]||0),0);});return t;},[entries,activeList]);
 
-  const prevM=month===0?11:month-1,prevY=month===0?year-1:year;
-  const prevEntries=useMemo(()=>{const dim=daysIn(prevY,prevM);return Array.from({length:dim},(_,i)=>{const e=data[dk(prevY,prevM,i+1)]||null;return{e,clean:isClean(e,activeDrugs)};});},[data,prevY,prevM,activeDrugs]);
-  const prevClean=prevEntries.filter(x=>x.clean).length;
-
   const weeklyData=useMemo(()=>{const wks=[];for(let w=0;w<5;w++){const start=w*7+1,end=Math.min(start+6,daysCount);if(start>daysCount)break;const we=entries.filter(x=>x.d>=start&&x.d<=end);const wk={clean:we.filter(x=>x.clean).length};activeList.forEach(k=>{wk[k]=we.reduce((s,x)=>s+(x.e?.[k]||0),0);});wks.push(wk);}return wks;},[entries,daysCount,activeList]);
 
-  let streak=0,curD=new Date(today);
-  while(true){const k=dk(curD.getFullYear(),curD.getMonth(),curD.getDate());if(isClean(data[k],activeDrugs)){streak++;curD.setDate(curD.getDate()-1);}else break;}
-  useEffect(()=>{if(streak>prevStreak.current){setPulse(true);setTimeout(()=>setPulse(false),600);}prevStreak.current=streak;},[streak]);
-  let longest=0,run=0,prevD2=null;
-  for(const k of Object.keys(data).sort()){if(isClean(data[k],activeDrugs)){const d=new Date(k);if(prevD2&&(d-prevD2)/86400000===1){run++;}else{run=1;}longest=Math.max(longest,run);prevD2=d;}else{run=0;prevD2=null;}}
+  // Streak — recomputed whenever data OR activeDrugs changes
+  const [streak,longest]=useMemo(()=>{
+    let s=0,cur=new Date(today);
+    while(true){const k=dk(cur.getFullYear(),cur.getMonth(),cur.getDate());if(isClean(data[k],activeDrugs)){s++;cur.setDate(cur.getDate()-1);}else break;}
+    let lg=0,run=0,pd=null;
+    for(const k of Object.keys(data).sort()){if(isClean(data[k],activeDrugs)){const d=new Date(k);if(pd&&(d-pd)/86400000===1){run++;}else{run=1;}lg=Math.max(lg,run);pd=d;}else{run=0;pd=null;}}
+    return[s,lg];
+  },[data,activeDrugs]);
 
-  const score=sevrageScore(streak,longest,pct,nClean,daysCount);
+  useEffect(()=>{if(streak>prevStreak.current){setPulse(true);setTimeout(()=>setPulse(false),600);}prevStreak.current=streak;},[streak]);
+
+  const score=sevrageScore(streak,longest,pct,nClean,daysCount,logged);
   const scoreColor=score>=70?"#22c55e":score>=40?"#f97316":"#ef4444";
   const badges=useMemo(()=>computeBadges(data,activeDrugs),[data,activeDrugs]);
   const earnedCount=badges.filter(b=>b.earned).length;
 
-  const moodVals=Object.values(data).filter(e=>e?.mood!=null).map(e=>e.mood);
-  const moodAvg=moodVals.length?moodVals.reduce((s,v)=>s+v,0)/moodVals.length:0;
-  const moneyTotal=useMemo(()=>{
-    const cigSaved=entries.filter(x=>!["tabac"].some(t=>x.e?.[t]>0)).length;
-    const weedSaved=entries.filter(x=>!["cannabis"].some(t=>x.e?.[t]>0)).length;
-    return Math.round(cigSaved*(goals.cigCost||10)+weedSaved*(goals.weedCost||15)*0.3);
+  // ── Correct money saved ──────────────────────────────────────────────────
+  // For cigs: days without any cig × (cigPerDay / cigPackSize) × cigPackCost
+  // For weed: days without any joint × jointsPerDay × weedGPerJoint × weedGCost
+  const moneySaved=useMemo(()=>{
+    const cigDaysClean=entries.filter(x=>x.e?.logged&&(x.e?.tabac||0)===0).length;
+    const weedDaysClean=entries.filter(x=>x.e?.logged&&(x.e?.cannabis||0)===0).length;
+    const cigCostPerDay=(goals.cigPerDay||20)/20*(goals.cigPackCost||10);
+    const weedCostPerDay=(goals.jointsPerDay||1)*(goals.weedGPerJoint||0.3)*(goals.weedGCost||15);
+    const cigSaved=cigDaysClean*cigCostPerDay;
+    const weedSaved=weedDaysClean*weedCostPerDay;
+    return{total:(cigSaved+weedSaved).toFixed(2),cig:cigSaved.toFixed(2),weed:weedSaved.toFixed(2)};
   },[entries,goals]);
 
   const spark=useMemo(()=>Array.from({length:30},(_,i)=>{
     const d=new Date(today);d.setDate(d.getDate()-(29-i));
     const k=dk(d.getFullYear(),d.getMonth(),d.getDate());
-    const e=data[k];const cl=isClean(e,activeDrugs);
+    const e=data[k],cl=isClean(e,activeDrugs);
     const tot=e?activeList.reduce((s,dr)=>s+(e[dr]||0),0):0;
-    const months=["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
-    return{v:cl?3:tot===0?2:tot<=2?1:0,color:cl?"#22c55e":tot===0?"var(--t3)":"#ef4444",label:`${d.getDate()} ${months[d.getMonth()]} — ${cl?"Clean":tot===0?"Non renseigné":tot+" substance(s)"}`};
+    const ms=["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
+    return{v:cl?3:tot===0?2:tot<=2?1:0,color:cl?"#22c55e":tot===0?"var(--t3)":"#ef4444",label:`${d.getDate()} ${ms[d.getMonth()]} — ${cl?"Clean":tot===0?"Non renseigné":tot+" prise(s)"}`};
   }),[data,activeDrugs,activeList]);
 
   const aiStats=useMemo(()=>({totals,nClean,daysCount,streak,longest,pct,score}),[totals,nClean,daysCount,streak,longest,pct,score]);
 
   // Calendar
-  const cells=[];
-  for(let i=0;i<offset;i++)cells.push(null);
-  for(let d=1;d<=daysCount;d++)cells.push(d);
-  while(cells.length%7!==0)cells.push(null);
+  const cells=[];for(let i=0;i<offset;i++)cells.push(null);for(let d=1;d<=daysCount;d++)cells.push(d);while(cells.length%7!==0)cells.push(null);
   function getWD(off){const base=new Date(today);const dow=base.getDay()===0?6:base.getDay()-1;base.setDate(base.getDate()-dow+off*7);return Array.from({length:7},(_,i)=>{const d=new Date(base);d.setDate(base.getDate()+i);return{date:d,key:dk(d.getFullYear(),d.getMonth(),d.getDate())};});}
   const weekDays=getWD(weekOffset);
-  function changeMonth(dir){if(dir<0){if(month===0){setMonth(11);setYear(y=>y-1);}else setMonth(m=>m-1);}else{if(month===11){setMonth(0);setYear(y=>y+1);}else setMonth(m=>m+1);}setCalKey(k=>k+1);}
+  const prevMonthCb=useCallback(()=>{if(month===0){setMonth(11);setYear(y=>y-1);}else setMonth(m=>m-1);setCalKey(k=>k+1);},[month]);
+  const nextMonthCb=useCallback(()=>{if(month===11){setMonth(0);setYear(y=>y+1);}else setMonth(m=>m+1);setCalKey(k=>k+1);},[month]);
+  const monthSwipeRef=useSwipe(nextMonthCb,prevMonthCb);
+  const weekSwipeRef=useSwipe(()=>setWeekOffset(w=>w+1),()=>setWeekOffset(w=>w-1));
+  const yearSwipeRef=useSwipe(()=>setYear(y=>y+1),()=>setYear(y=>y-1));
+
   function saveEntry(key,d){setData(prev=>({...prev,[key]:d}));setBop(parseInt(key.split("-")[2]));setTimeout(()=>setBop(null),450);}
   function clearEntry(key){setData(prev=>{const n={...prev};delete n[key];return n;});}
-  function exportJSON(){const blob=new Blob([JSON.stringify({data,goals,activeDrugs,profile},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="recovery_tracker.json";a.click();}
 
   const riskOrder={"Extrême":0,"Très élevé":1,"Élevé":2,"Modéré":3,"Faible":4};
   const sortedDrugs=Object.entries(ALL_DRUGS).sort((a,b)=>(riskOrder[a[1].risk]||9)-(riskOrder[b[1].risk]||9));
+  const enabledWidgets=widgets.filter(w=>w.enabled);
 
-  return(
-    <div className="shell">
-      {/* Header */}
-      <div className="hdr">
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-          <div>
-            <div style={{fontSize:9,letterSpacing:".15em",color:"var(--t3)",textTransform:"uppercase",fontWeight:600}}>Parcours de guérison</div>
-            <h1 style={{fontSize:17,fontFamily:"'DM Serif Display',serif",fontWeight:400,color:"var(--t)",lineHeight:1.1}}>Recovery Tracker</h1>
-          </div>
-          <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            {/* Profile button */}
-            <button onClick={()=>setShowProfile(true)} style={{width:34,height:34,borderRadius:"50%",background:"var(--s)",border:"1px solid var(--b)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0}}>
-              {profile.photo
-                ?<img src={profile.photo} alt="profil" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
-                :<span style={{fontSize:16}}>👤</span>}
-            </button>
-            <button className="expbtn" onClick={exportJSON}>↓ JSON</button>
+  return<div className="shell">
+    {/* Header */}
+    <div className="hdr">
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+        <div>
+          <div style={{fontSize:9,letterSpacing:".15em",color:"var(--t3)",textTransform:"uppercase",fontWeight:600}}>Parcours de guérison</div>
+          <h1 style={{fontSize:18,fontWeight:700,color:"var(--t)",lineHeight:1.1,letterSpacing:"-.02em"}}>Habit Tracker</h1>
+        </div>
+        <button onClick={()=>setShowProfile(true)} style={{width:34,height:34,borderRadius:"50%",background:"var(--s)",border:"1px solid var(--b)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0,color:"var(--t2)"}}>
+          {profile.photo?<img src={profile.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<IcoUser/>}
+        </button>
+      </div>
+    </div>
+
+    <div className="content">
+
+      {/* ══ PARCOURS ══ */}
+      {tab==="cal"&&<div className="tc">
+        {/* Score card */}
+        <div className="card" style={{background:"linear-gradient(135deg,var(--bg2),var(--bg3))"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div style={{flex:1}}>
+              <div style={{fontSize:9,color:"var(--t3)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>Score de guérison</div>
+              <div style={{fontSize:48,fontWeight:700,color:scoreColor,lineHeight:1,letterSpacing:"-.02em"}}>{score}<span style={{fontSize:18}}>/100</span></div>
+              <div style={{fontSize:11,color:"var(--t2)",marginTop:3}}>{score>=70?"Bonne progression":score>=40?"En chemin":score>=20?"Continue":"Commence aujourd'hui"}</div>
+              <div style={{marginTop:10}}><Bar pct={score} color={`linear-gradient(90deg,${scoreColor},${scoreColor}88)`} thick/></div>
+            </div>
+            <div style={{paddingLeft:16}}><Flame streak={streak}/></div>
           </div>
         </div>
-      </div>
 
-      <div className="content">
-
-        {/* ══ MON PARCOURS ══ */}
-        {tab==="cal"&&<div className="tc">
-          {/* Streak hero */}
-          <div className="card" style={{background:"linear-gradient(135deg,var(--bg2),var(--bg3))",marginBottom:10}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-              <div style={{flex:1}}>
-                <div style={{fontSize:9,color:"var(--t3)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:6}}>Score de guérison</div>
-                <div style={{fontSize:44,fontWeight:700,fontFamily:"'DM Serif Display',serif",color:scoreColor,lineHeight:1}}>{score}<span style={{fontSize:16}}>/100</span></div>
-                <div style={{fontSize:11,color:"var(--t2)",marginTop:4}}>{score>=70?"Bonne progression 🌱":score>=40?"En chemin 🚶":score>=20?"Continue ✊":"Commence aujourd'hui"}</div>
-                <div style={{marginTop:10}}><Bar pct={score} color={`linear-gradient(90deg,${scoreColor},${scoreColor}88)`} thick/></div>
-              </div>
-              <div style={{paddingLeft:16}}>
-                <FlameStreak streak={streak}/>
-              </div>
+        {/* Calendar nav */}
+        <div className="nav">
+          <button className="nbtn" onClick={calView==="year"?()=>setYear(y=>y-1):calView==="week"?()=>setWeekOffset(w=>w-1):prevMonthCb}>‹</button>
+          <div style={{display:"flex",alignItems:"center",gap:7}}>
+            <span style={{fontSize:13,fontWeight:600}}>{calView==="year"?year:calView==="week"?`${weekDays[0].date.getDate()}–${weekDays[6].date.getDate()} ${MONTHS_S[weekDays[3].date.getMonth()]} ${weekDays[3].date.getFullYear()}`:`${MONTHS[month]} ${year}`}</span>
+            <div className="vpill">
+              <button className={`vbtn${calView==="month"?" on":""}`} onClick={()=>setCalView("month")}><IcoMonth/>Mois</button>
+              <button className={`vbtn${calView==="week"?" on":""}`} onClick={()=>setCalView("week")}><IcoWeek/>Sem.</button>
+              <button className={`vbtn${calView==="year"?" on":""}`} onClick={()=>setCalView("year")}><IcoYear/>Année</button>
             </div>
           </div>
+          <button className="nbtn" onClick={calView==="year"?()=>setYear(y=>y+1):calView==="week"?()=>setWeekOffset(w=>w+1):nextMonthCb}>›</button>
+        </div>
 
-          <div className="nav">
-            <button className="nbtn" onClick={()=>calView==="month"?changeMonth(-1):setWeekOffset(w=>w-1)}>‹</button>
-            <div style={{display:"flex",alignItems:"center",gap:7}}>
-              <span style={{fontSize:13,fontWeight:600}}>{calView==="week"?`${weekDays[0].date.getDate()}–${weekDays[6].date.getDate()} ${MONTHS_S[weekDays[3].date.getMonth()]}`:`${MONTHS[month]} ${year}`}</span>
-              <div className="vpill">
-                <button className={`vbtn${calView==="month"?" on":""}`} onClick={()=>setCalView("month")}><IcoMonth/>Mois</button>
-                <button className={`vbtn${calView==="week"?" on":""}`} onClick={()=>setCalView("week")}><IcoWeek/>Sem.</button>
-              </div>
-            </div>
-            <button className="nbtn" onClick={()=>calView==="month"?changeMonth(1):setWeekOffset(w=>w+1)}>›</button>
+        {calView==="month"&&<div ref={monthSwipeRef} style={{touchAction:"pan-y"}}>
+          <div className="cal-hdr">{DAYS.map(d=><div key={d} className="cdl">{d}</div>)}</div>
+          <div className="cal-grid" key={calKey}>
+            {cells.map((d,i)=>{
+              if(!d)return<div key={`e${i}`}/>;
+              const e=data[dk(year,month,d)]||null,col=dayColor(e,activeDrugs);
+              const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();
+              return<div key={d} className={`day${isToday?" td":""}${bop===d?" bop":""}`}
+                style={{background:col?col+"22":"var(--s)",borderColor:col||(isToday?"rgba(34,197,94,0.6)":"transparent"),color:col||"var(--t3)",animationDuration:`${Math.min(i*14,260)+160}ms`}}
+                onClick={()=>setModal({y:year,m:month,d})}>
+                <span style={{fontSize:11,fontWeight:isToday?700:500}}>{d}</span>
+                {e&&<span style={{fontSize:8,marginTop:1}}>{dayEmoji(e,activeDrugs)}</span>}
+                {e?.mood!=null&&<span style={{position:"absolute",bottom:2,right:2,fontSize:7}}>{MOODS[e.mood]?.e}</span>}
+                {e?.note&&<div className="dot"/>}
+              </div>;
+            })}
           </div>
+        </div>}
 
-          {calView==="month"&&<>
-            <div className="cal-hdr">{DAYS.map(d=><div key={d} className="cdl">{d}</div>)}</div>
-            <div className="cal-grid" key={calKey}>
-              {cells.map((d,i)=>{
-                if(!d)return<div key={`e${i}`}/>;
-                const e=data[dk(year,month,d)]||null,col=dayColor(e,activeDrugs);
-                const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();
-                return<div key={d} className={`day${isToday?" td":""}${bop===d?" bop":""}`}
-                  style={{background:col?col+"22":"var(--s)",borderColor:col||(isToday?"rgba(34,197,94,0.5)":"transparent"),color:col||"var(--t3)",animationDuration:`${Math.min(i*14,260)+160}ms`}}
-                  onClick={()=>setModal({y:year,m:month,d})}>
-                  <span style={{fontSize:11,fontWeight:isToday?700:500}}>{d}</span>
-                  {e&&<span style={{fontSize:8,marginTop:1}}>{dayEmoji(e,activeDrugs)}</span>}
-                  {e?.mood!=null&&<span style={{position:"absolute",bottom:2,right:2,fontSize:7}}>{MOODS[e.mood]?.e}</span>}
-                  {e?.note&&<div className="dot"/>}
-                </div>;
-              })}
-            </div>
-          </>}
-
-          {calView==="week"&&<div className="week-grid">
+        {calView==="week"&&<div ref={weekSwipeRef} style={{touchAction:"pan-y"}}>
+          <div className="week-grid">
             {weekDays.map(({date,key},i)=>{
               const e=data[key]||null,col=dayColor(e,activeDrugs);
               const isToday=date.toDateString()===today.toDateString();
               return<div key={key} className={`wday${isToday?" td":""}`}
-                style={{background:col?col+"18":"var(--s)",borderColor:col||(isToday?"rgba(34,197,94,0.5)":"transparent")}}
+                style={{background:col?col+"18":"var(--s)",borderColor:col||(isToday?"rgba(34,197,94,0.6)":"transparent")}}
                 onClick={()=>setModal({y:date.getFullYear(),m:date.getMonth(),d:date.getDate()})}>
                 <div style={{fontSize:9,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",marginBottom:2}}>{DAYS_S[i]}</div>
-                <div style={{fontSize:14,fontWeight:700,color:col||(isToday?"#4ade80":"var(--t)"),marginBottom:2}}>{date.getDate()}</div>
-                <div style={{fontSize:12}}>{e?dayEmoji(e,activeDrugs):"·"}</div>
+                <div style={{fontSize:14,fontWeight:700,color:col||(isToday?"var(--green2)":"var(--t)"),marginBottom:2}}>{date.getDate()}</div>
+                <div style={{fontSize:9,color:"var(--t3)",marginBottom:2}}>{MONTHS_S[date.getMonth()]}</div>
+                <div style={{fontSize:13}}>{e?dayEmoji(e,activeDrugs):"·"}</div>
                 {e&&activeList.filter(k=>(e[k]||0)>0).slice(0,2).map(k=><div key={k} style={{fontSize:8,color:ALL_DRUGS[k]?.color,marginTop:1}}>{e[k]}{ALL_DRUGS[k]?.emoji}</div>)}
                 {e?.mood!=null&&<div style={{fontSize:10,marginTop:1}}>{MOODS[e.mood]?.e}</div>}
               </div>;
             })}
+          </div>
+        </div>}
+
+        {calView==="year"&&<div ref={yearSwipeRef} style={{touchAction:"pan-y"}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+            {Array.from({length:12},(_,mi)=>{
+              const dim=daysIn(year,mi),off=firstOff(year,mi);
+              const dots=[];for(let i=0;i<off;i++)dots.push(null);for(let d=1;d<=dim;d++)dots.push(d);
+              return<div key={mi} className="ym-card" onClick={()=>{setMonth(mi);setCalView("month");}}>
+                <div className="ym-name">{MONTHS_S[mi]}</div>
+                <div className="ym-dots">{dots.slice(0,35).map((d,i)=>{const e=d?data[dk(year,mi,d)]||null:null;const col=e?dayColor(e,activeDrugs):null;const iT=d&&d===today.getDate()&&mi===today.getMonth()&&year===today.getFullYear();return<div key={i} className="yd" style={{background:col?col+"cc":iT?"rgba(34,197,94,0.4)":"var(--s2)"}}/>;})}</div>
+              </div>;
+            })}
+          </div>
+        </div>}
+
+        <div className="leg">
+          <div className="li"><div className="ld" style={{background:"#22c55e"}}/>Clean</div>
+          {activeList.map(k=><div key={k} className="li"><div className="ld" style={{background:ALL_DRUGS[k]?.color}}/>{ALL_DRUGS[k]?.name}</div>)}
+          <div className="li"><div className="ld" style={{background:"#ef4444"}}/>2+</div>
+          <div className="li"><div className="ld" style={{background:"#9f1239"}}/>3+</div>
+        </div>
+        <div className="ss" style={{marginTop:10}}>
+          <div className="m"><div className="v" style={{color:"#22c55e"}}>{nClean}</div><div className="l">jours clean</div></div>
+          <div className="m"><div className={`v${pulse?" pulse":""}`} style={{color:"var(--green2)",display:"inline-block"}}>{streak}j</div><div className="l">streak</div></div>
+          <div className="m"><div className="v" style={{color:"#a3e635"}}>{pct}%</div><div className="l">taux</div></div>
+        </div>
+
+        {/* Widgets */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:16,marginBottom:10}}>
+          <div style={{fontSize:11,fontWeight:600,color:"var(--t2)"}}>Widgets</div>
+          <button onClick={()=>setShowWidgets(true)} style={{background:"var(--s)",border:"1px solid var(--b)",borderRadius:8,padding:"4px 10px",color:"var(--t3)",fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>Personnaliser</button>
+        </div>
+        {enabledWidgets.map(w=><React.Fragment key={w.id}>
+          {w.id==="streak"&&<div className="card" style={{display:"flex",alignItems:"center",gap:16}}>
+            <Flame streak={streak}/>
+            <div>
+              <div style={{fontSize:9,color:"var(--t3)",fontWeight:700,textTransform:"uppercase",letterSpacing:".1em",marginBottom:3}}>Score sevrage</div>
+              <div style={{fontSize:30,fontWeight:700,color:scoreColor,letterSpacing:"-.01em"}}>{score}<span style={{fontSize:14}}>/100</span></div>
+              <div style={{fontSize:10,color:"var(--t2)"}}>Record : {longest}j</div>
+            </div>
           </div>}
-
-          <div className="leg">
-            <div className="li"><div className="ld" style={{background:"#22c55e"}}/>Clean</div>
-            {activeList.map(k=><div key={k} className="li"><div className="ld" style={{background:ALL_DRUGS[k]?.color}}/>{ALL_DRUGS[k]?.name}</div>)}
-            <div className="li"><div className="ld" style={{background:"#ef4444"}}/>2+</div>
-            <div className="li"><div className="ld" style={{background:"#9f1239"}}/>3+</div>
-          </div>
-          <div className="ss" style={{marginTop:10}}>
-            <div className="m"><div className="v" style={{color:"#22c55e"}}>{nClean}</div><div className="l">jours clean</div></div>
-            <div className="m"><div className={`v${pulse?" pulse":""}`} style={{color:"#4ade80",display:"inline-block"}}>{streak}j</div><div className="l">streak</div></div>
-            <div className="m"><div className="v" style={{color:"#a3e635"}}>{pct}%</div><div className="l">taux</div></div>
-          </div>
-        </div>}
-
-        {/* ══ GUÉRISON — full dynamic ══ */}
-        {tab==="heal"&&<div className="tc">
-          {/* Flame + score */}
-          <div className="card" style={{background:"linear-gradient(135deg,var(--bg2),var(--bg3))"}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-              <div>
-                <div style={{fontSize:9,color:"var(--t3)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:6}}>Guérison en cours</div>
-                <div style={{fontSize:42,fontWeight:700,fontFamily:"'DM Serif Display',serif",color:scoreColor,lineHeight:1}}>{score}<span style={{fontSize:16}}>/100</span></div>
-                <div style={{fontSize:11,color:"var(--t2)",marginTop:3}}>{streak} jour{streak>1?"s":""} de streak · Record {longest}j</div>
-              </div>
-              <FlameStreak streak={streak}/>
+          {w.id==="lastdays"&&<div className="card">
+            <div className="clbl">7 derniers jours</div>
+            <div style={{display:"flex",gap:4}}>
+              {Array.from({length:7},(_,i)=>{const d=new Date(today);d.setDate(d.getDate()-(6-i));const k=dk(d.getFullYear(),d.getMonth(),d.getDate());const e=data[k];const col=dayColor(e,activeDrugs);const iT=d.toDateString()===today.toDateString();return<div key={i} onClick={()=>setModal({y:d.getFullYear(),m:d.getMonth(),d:d.getDate()})} style={{flex:1,aspectRatio:1,borderRadius:8,background:col?col+"22":"var(--s)",border:`1px solid ${col||(iT?"rgba(34,197,94,0.5)":"var(--b)")}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",color:col||"var(--t3)"}}>
+                <div style={{fontSize:9,color:"var(--t3)"}}>{["L","M","M","J","V","S","D"][(d.getDay()+6)%7]}</div>
+                <div style={{fontSize:11,fontWeight:600,marginTop:1}}>{d.getDate()}</div>
+                {e&&<div style={{fontSize:9}}>{dayEmoji(e,activeDrugs)}</div>}
+              </div>;})}
             </div>
-          </div>
-
-          {/* Next milestone */}
-          <NextMilestone streak={streak} activeDrugs={activeDrugs}/>
-
-          {/* Organs */}
-          <div className="card">
-            <div className="clbl">Tes organes en récupération</div>
-            <OrganCards streak={streak} activeDrugs={activeDrugs}/>
-            <div style={{fontSize:10,color:"var(--t3)",marginTop:4,textAlign:"center"}}>Basé sur {streak} jour{streak>1?"s":""} de streak actuel</div>
-          </div>
-
-          {/* Interactive chart */}
-          <div className="card">
-            <InteractiveChart spark={spark} onExpand={()=>setExpand("spark")}/>
-          </div>
-
-          {/* Radar */}
-          <div className="card">
-            <div className="clbl">Ton état global — Radar</div>
-            <RadarChart streak={streak} moodAvg={moodAvg} nClean={nClean} daysCount={daysCount} totalCigs={totals.tabac||0} totalJoints={totals.cannabis||0} moneyTotal={moneyTotal}/>
-            <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",marginTop:4}}>
-              {["Sommeil","Énergie","Humeur","Finances","Clarté"].map(l=><span key={l} style={{fontSize:9,color:"var(--t3)"}}>{l}</span>)}
+          </div>}
+          {w.id==="stats"&&<div className="card">
+            <div className="clbl">Ce mois — {MONTHS_S[month]}</div>
+            <div style={{display:"grid",gridTemplateColumns:`repeat(${Math.min(activeList.length,3)},1fr)`,gap:8}}>
+              {activeList.map(k=>{const d=ALL_DRUGS[k];const v=totals[k]||0;return<div key={k} style={{textAlign:"center",padding:"8px 4px",background:"var(--s)",borderRadius:10}}>
+                <div style={{fontSize:9,marginBottom:2}}>{d.emoji}</div>
+                <div style={{fontSize:18,fontWeight:700,color:v>0?d.color:"var(--t3)"}}>{v}</div>
+                <div style={{fontSize:9,color:"var(--t3)"}}>{d.unitShort}</div>
+              </div>;})}
             </div>
-          </div>
+          </div>}
+          {w.id==="milestone"&&<NextMilestone streak={streak} activeDrugs={activeDrugs}/>}
+          {w.id==="money"&&<div className="card" style={{background:"rgba(168,85,247,0.07)",borderColor:"rgba(168,85,247,0.18)"}}>
+            <div style={{fontSize:11,color:"#a855f7",fontWeight:600,marginBottom:3}}>Économies estimées ce mois</div>
+            <div style={{fontSize:30,fontWeight:700,color:"#d8b4fe",letterSpacing:"-.01em"}}>{moneySaved.total}€</div>
+            <div style={{fontSize:10,color:"var(--t3)",marginTop:2}}>{moneySaved.cig}€ cigs · {moneySaved.weed}€ weed</div>
+          </div>}
+          {w.id==="fact"&&<div className="card" style={{background:"var(--green3)",border:"1px solid rgba(34,197,94,0.2)"}}>
+            <div style={{fontSize:9,color:"var(--green)",fontWeight:700,marginBottom:5,letterSpacing:".08em",textTransform:"uppercase"}}>Fait médical</div>
+            <p style={{fontSize:12,color:"var(--t)",lineHeight:1.6,fontStyle:"italic"}}>{streak>=90?"90j : poumons restaurés, +30% capacité. Risque cardio cliniquement réduit.":streak>=30?"30j : foie partiellement régénéré. Récepteurs dopaminergiques en récupération.":streak>=14?"2 semaines : mémoire à court terme mesurément améliorée.":streak>=7?"7j : circulation sanguine améliorée. Oxygénation cellulaire optimisée.":streak>=3?"72h : substances en cours d'élimination. SNC recalibre ses neurotransmetteurs.":"Chaque heure sans consommer modifie la chimie de ton cerveau."}</p>
+          </div>}
+        </React.Fragment>)}
+      </div>}
 
-          {/* Avoided */}
-          <AvoidedSection data={data} activeDrugs={activeDrugs} goals={goals}/>
-
-          {/* Weekly progression */}
-          <div className="xcard">
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-              <div className="clbl" style={{margin:0}}>Par semaine</div>
-              <button className="xbtn" onClick={()=>setExpand("weekly")}><IcoExpand/></button>
-            </div>
-            <div style={{marginBottom:7}}><div style={{fontSize:9,color:"#22c55e",fontWeight:600,marginBottom:4}}>✦ Jours clean</div><WeekBars weeks={weeklyData} metric="clean" color="#22c55e"/></div>
-            {activeList.slice(0,2).map(k=><div key={k} style={{marginBottom:7}}><div style={{fontSize:9,color:ALL_DRUGS[k]?.color,fontWeight:600,marginBottom:4}}>{ALL_DRUGS[k]?.emoji} {ALL_DRUGS[k]?.name}</div><WeekBars weeks={weeklyData} metric={k} color={ALL_DRUGS[k]?.color}/></div>)}
-          </div>
-
-          {/* Fact médical */}
-          <div className="card" style={{background:"var(--green3)",border:"1px solid rgba(34,197,94,0.2)"}}>
-            <div style={{fontSize:9,color:"var(--green)",fontWeight:700,marginBottom:5,letterSpacing:".08em",textTransform:"uppercase"}}>💊 Fact médical</div>
-            <p style={{fontSize:12,color:"var(--t)",lineHeight:1.6,fontStyle:"italic"}}>{streak>=90?"90+ jours : tes poumons ont restauré leurs cils bronchiques. Capacité respiratoire +30%. Risque cardiovasculaire cliniquement réduit.":streak>=30?"30 jours : ton foie s'est partiellement régénéré. Les récepteurs dopaminergiques retrouvent leur sensibilité normale.":streak>=14?"2 semaines : la mémoire à court terme s'améliore mesurément. L'anxiété de sevrage atteint son pic puis décroît naturellement.":streak>=7?"7 jours : ta circulation sanguine s'est déjà améliorée. L'oxygénation cellulaire est optimisée.":streak>=3?"72h : les substances sont en cours d'élimination. Le système nerveux recalibre ses neurotransmetteurs.":"Chaque heure sans consommer modifie la chimie de ton cerveau. Le processus commence maintenant."}</p>
-          </div>
-        </div>}
-
-        {/* ══ BADGES ══ */}
-        {tab==="badges"&&<div className="tc">
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-            <div style={{fontSize:12,color:"var(--t2)"}}><span style={{color:"#4ade80",fontWeight:700}}>{earnedCount}</span>/{badges.length} obtenus</div>
-            <div style={{fontSize:11,color:"#22c55e",fontWeight:700}}>{Math.round((earnedCount/badges.length)*100)}%</div>
-          </div>
-          <div style={{marginBottom:12}}><Bar pct={(earnedCount/badges.length)*100} color="linear-gradient(90deg,#22c55e,#4ade80)"/></div>
-          {badges.map(b=>(
-            <React.Fragment key={b.id}>
-              {b.cat&&<div className="badge-cat">{b.cat}</div>}
-              <div className={`badge${b.earned?" earned":" locked"}`}>
-                <div className="badge-icon" style={{filter:b.earned?"none":"grayscale(1) opacity(0.25)"}}>{b.icon}</div>
-                <div style={{flex:1}}>
-                  <div className="badge-name" style={{color:b.earned?"var(--t)":"var(--t3)"}}>{b.name}</div>
-                  <div className="badge-desc">{b.desc}</div>
-                </div>
-                {b.earned&&<div style={{color:"#22c55e",fontSize:13,marginLeft:"auto",flexShrink:0}}>✓</div>}
-              </div>
-            </React.Fragment>
-          ))}
-        </div>}
-
-        {/* ══ CONFIG ══ */}
-        {tab==="goals"&&<div className="tc">
-          <div className="card">
-            <div className="clbl">Substances actives</div>
-            <div style={{fontSize:11,color:"var(--t3)",marginBottom:10}}>Active uniquement ce que tu consommes ou as consommé.</div>
-            {sortedDrugs.map(([k,d])=>(
-              <div key={k} className={`drug-chip${activeDrugs[k]?" on":""}`} onClick={()=>setActiveDrugs(prev=>({...prev,[k]:!prev[k]}))}>
-                <div className="drug-chip-ico">{d.emoji}</div>
-                <div style={{flex:1}}><div style={{fontSize:13,fontWeight:500,color:activeDrugs[k]?d.color:"var(--t3)"}}>{d.name}</div><div style={{fontSize:10,color:"var(--t3)"}}>{d.unit}</div></div>
-                <div className="drug-chip-risk" style={{background:`${d.riskColor}22`,color:d.riskColor,flexShrink:0}}>{d.risk}</div>
-                <div style={{marginLeft:8,flexShrink:0}}><div className={`toggle${activeDrugs[k]?" on":" off"}`} style={{background:activeDrugs[k]?d.color:undefined}}/></div>
-              </div>
-            ))}
-          </div>
-          <div className="card">
-            <div className="clbl">Paramètres</div>
-            {[{l:"Objectif jours clean / mois",k:"target",max:31},{l:"Coût paquet cigs (€)",k:"cigCost"},{l:"Coût cannabis / g (€)",k:"weedCost"}].map(g=>(
-              <div key={g.k} className="gr"><span>{g.l}</span><input type="number" value={goals[g.k]||0} onChange={e=>setGoals(p=>({...p,[g.k]:+e.target.value}))} min="0" step={g.k.includes("Cost")?0.5:1} max={g.max||99}/></div>
-            ))}
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><span style={{fontSize:12,color:"var(--t)"}}>Progression</span><span style={{fontSize:12,fontWeight:700,color:"#22c55e"}}>{nClean} / {goals.target}</span></div>
-            <Bar pct={Math.min((nClean/Math.max(goals.target,1))*100,100)} color="linear-gradient(90deg,#22c55e,#4ade80)" thick/>
-            {nClean>=goals.target&&<div className="sban">🎉 Objectif atteint !</div>}
-          </div>
-          <div className="card">
-            <div className="clbl">Rappel quotidien</div>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:goals.notifOn?10:0}}>
-              <div><div style={{fontSize:12,color:"var(--t)",fontWeight:500}}>Notification du soir</div><div style={{fontSize:10,color:"var(--t3)",marginTop:1}}>Rappel de renseigner ta journée</div></div>
-              <button className={`toggle${goals.notifOn?" on":" off"}`} onClick={async()=>{if(!goals.notifOn){if("Notification" in window){const p=await Notification.requestPermission();if(p==="granted")setGoals(g=>({...g,notifOn:true}));}else setGoals(g=>({...g,notifOn:true}));}else setGoals(g=>({...g,notifOn:false}));}}/>
-            </div>
-            {goals.notifOn&&<div className="gr" style={{marginBottom:0}}><span>Heure</span><input type="time" value={goals.notifTime||"22:00"} onChange={e=>setGoals(p=>({...p,notifTime:e.target.value}))}/></div>}
-          </div>
-          <div className="sg">
-            <div className="sm"><div className="v" style={{color:"#22c55e"}}>{streak}j</div><div className="l">streak</div></div>
-            <div className="sm"><div className="v" style={{color:scoreColor}}>{score}</div><div className="l">score</div></div>
-            <div className="sm"><div className="v" style={{color:"#4ade80"}}>{earnedCount}</div><div className="l">badges</div></div>
-            <div className="sm"><div className="v" style={{color:"#a855f7"}}>{longest}j</div><div className="l">record</div></div>
-          </div>
-        </div>}
-      </div>
-
-      {/* ══ Tabs ══ */}
-      <div className="tabs">
-        {[["cal",<IcoCalendar/>,"Parcours"],["heal",<IcoHeart/>,"Guérison"],["badges",<IcoBadge/>,"Badges"],["goals",<IcoSettings/>,"Config"]].map(([k,icon,label])=>(
-          <button key={k} className={`tb${tab===k?" on":""}`} onClick={()=>setTab(k)}>{icon}{label}</button>
-        ))}
-      </div>
-
-      {/* ══ Expand overlays ══ */}
-      {expand==="weekly"&&<ExpandView title="Progression hebdomadaire" onClose={()=>setExpand(null)}>
-        {[{metric:"clean",color:"#22c55e",label:"Jours clean",e:"✦"},...activeList.map(k=>({metric:k,color:ALL_DRUGS[k]?.color,label:ALL_DRUGS[k]?.name,e:ALL_DRUGS[k]?.emoji}))].map(m=>(
-          <div key={m.metric} style={{background:"var(--s)",borderRadius:13,padding:13}}>
-            <div style={{fontSize:11,color:m.color,fontWeight:600,marginBottom:9}}>{m.e} {m.label}</div>
-            <WeekBars weeks={weeklyData} metric={m.metric} color={m.color}/>
-          </div>
-        ))}
-        <AIAnalysis stats={aiStats} activeDrugs={activeDrugs}/>
-      </ExpandView>}
-
-      {expand==="spark"&&<ExpandView title="Tendance 30 jours — tap pour détails" onClose={()=>setExpand(null)}>
-        <div style={{background:"var(--s)",borderRadius:14,padding:14}}>
-          <InteractiveChart spark={spark} onExpand={()=>{}}/>
+      {/* ══ GUÉRISON ══ */}
+      {tab==="heal"&&<div className="tc">
+        {/* Score — no duplicate streak/flame */}
+        <div className="card" style={{background:"linear-gradient(135deg,var(--bg2),var(--bg3))"}}>
+          <div style={{fontSize:9,color:"var(--t3)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>Score de guérison</div>
+          <div style={{fontSize:48,fontWeight:700,color:scoreColor,lineHeight:1,letterSpacing:"-.02em"}}>{score}<span style={{fontSize:18}}>/100</span></div>
+          <div style={{fontSize:11,color:"var(--t2)",marginTop:3}}>Streak {streak}j · Record {longest}j · {pct}% clean</div>
+          <div style={{marginTop:10}}><Bar pct={score} color={`linear-gradient(90deg,${scoreColor},${scoreColor}66)`} thick/></div>
         </div>
-        <div style={{background:"var(--s)",borderRadius:13,padding:13}}>
-          {[{l:"Jours clean",v:nClean,c:"#22c55e"},...activeList.map(k=>({l:ALL_DRUGS[k]?.name,v:totals[k]||0,c:ALL_DRUGS[k]?.color}))].map(b=>(
-            <div key={b.l} style={{marginBottom:9}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:11,color:"var(--t2)"}}>{b.l}</span><span style={{fontSize:11,fontWeight:700,color:b.c}}>{b.v}</span></div>
-              <Bar pct={Math.min((b.v/Math.max(daysCount,1))*100,100)} color={b.c}/>
-            </div>
-          ))}
-        </div>
-        <AIAnalysis stats={aiStats} activeDrugs={activeDrugs}/>
-      </ExpandView>}
 
-      {/* Profile overlay */}
-      {showProfile&&(
-        <div className="mo" onClick={()=>setShowProfile(false)}>
-          <div className="mb" style={{maxHeight:"92vh"}} onClick={e=>e.stopPropagation()}>
-            <div className="mh"/>
-            <ProfileSection profile={profile} setProfile={setProfile} onClose={()=>setShowProfile(false)}/>
+        <NextMilestone streak={streak} activeDrugs={activeDrugs}/>
+
+        {/* Organ flip cards */}
+        <div className="card">
+          <div className="clbl">Tes organes — tap pour détails</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+            {[{k:"poumons",e:"🫁",n:"Poumons"},{k:"coeur",e:"🫀",n:"Cœur"},{k:"cerveau",e:"🧠",n:"Cerveau"},{k:"foie",e:"🟤",n:"Foie"}].map(o=><OrganCard key={o.k} organKey={o.k} emoji={o.e} name={o.n} streak={streak} activeDrugs={activeDrugs}/>)}
+          </div>
+          <div style={{fontSize:10,color:"var(--t3)",textAlign:"center"}}>Basé sur le streak actuel · Tap = impact médical détaillé</div>
+        </div>
+
+        <DrugTimeline streak={streak} activeDrugs={activeDrugs}/>
+
+        {/* Chart */}
+        <div className="xcard">
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <div className="clbl" style={{margin:0}}>Tendance 30 jours</div>
+            <button className="xbtn" style={{position:"relative",top:0,right:0}} onClick={()=>setExpand("spark")}><IcoExpand/></button>
+          </div>
+          <Chart spark={spark}/>
+        </div>
+
+        {/* Weekly bars */}
+        <div className="xcard">
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+            <div className="clbl" style={{margin:0}}>Par semaine</div>
+            <button className="xbtn" onClick={()=>setExpand("weekly")}><IcoExpand/></button>
+          </div>
+          <div style={{marginBottom:7}}><div style={{fontSize:9,color:"var(--green)",fontWeight:600,marginBottom:4}}>Jours clean</div><WeekBars weeks={weeklyData} metric="clean" color="#22c55e"/></div>
+          {activeList.slice(0,2).map(k=><div key={k} style={{marginBottom:7}}><div style={{fontSize:9,color:ALL_DRUGS[k]?.color,fontWeight:600,marginBottom:4}}>{ALL_DRUGS[k]?.emoji} {ALL_DRUGS[k]?.name}</div><WeekBars weeks={weeklyData} metric={k} color={ALL_DRUGS[k]?.color}/></div>)}
+        </div>
+
+        <div className="card" style={{background:"var(--green3)",border:"1px solid rgba(34,197,94,0.2)"}}>
+          <div style={{fontSize:9,color:"var(--green)",fontWeight:700,marginBottom:5,letterSpacing:".08em",textTransform:"uppercase"}}>Fait médical</div>
+          <p style={{fontSize:12,color:"var(--t)",lineHeight:1.6,fontStyle:"italic"}}>{streak>=90?"90j : poumons restaurés, +30% capacité. Risque cardio cliniquement réduit.":streak>=30?"30j : foie partiellement régénéré. Récepteurs dopaminergiques en récupération.":streak>=14?"2 semaines : mémoire à court terme mesurément améliorée.":streak>=7?"7j : circulation sanguine améliorée.":streak>=3?"72h : substances en élimination. SNC recalibre ses neurotransmetteurs.":"Chaque heure sans consommer modifie la chimie de ton cerveau."}</p>
+        </div>
+      </div>}
+
+      {/* ══ BADGES ══ */}
+      {tab==="badges"&&<div className="tc">
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+          <div style={{fontSize:12,color:"var(--t2)"}}><span style={{color:"var(--green2)",fontWeight:700}}>{earnedCount}</span>/{badges.length}</div>
+          <div style={{fontSize:11,color:"var(--green)",fontWeight:700}}>{Math.round((earnedCount/badges.length)*100)}%</div>
+        </div>
+        <div style={{marginBottom:12}}><Bar pct={(earnedCount/badges.length)*100} color="linear-gradient(90deg,#22c55e,#4ade80)"/></div>
+        {badges.map(b=><React.Fragment key={b.id}>
+          {b.cat&&<div className="badge-cat">{b.cat}</div>}
+          <div className={`badge${b.earned?" earned":" locked"}`}>
+            <div className="badge-icon" style={{filter:b.earned?"none":"grayscale(1) opacity(0.25)"}}>{b.icon}</div>
+            <div style={{flex:1}}>
+              <div className="badge-name" style={{color:b.earned?"var(--t)":"var(--t3)"}}>{b.name}</div>
+              <div className="badge-desc">{b.desc}</div>
+            </div>
+            {b.earned&&<div style={{color:"var(--green)",fontSize:13,marginLeft:"auto",flexShrink:0}}>✓</div>}
+          </div>
+        </React.Fragment>)}
+      </div>}
+
+      {/* ══ CONFIG ══ */}
+      {tab==="goals"&&<div className="tc">
+        <div className="card">
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+            <div style={{width:32,height:32,borderRadius:8,background:"var(--s2)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--t2)",flexShrink:0}}><svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg></div>
+            <div style={{fontSize:13,fontWeight:600,color:"var(--t)"}}>Substances actives</div>
+          </div>
+          {sortedDrugs.map(([k,d])=><div key={k} className={`drug-chip${activeDrugs[k]?" on":""}`} onClick={()=>setActiveDrugs(prev=>({...prev,[k]:!prev[k]}))}>
+            <div style={{fontSize:17,width:26,textAlign:"center"}}>{d.emoji}</div>
+            <div style={{flex:1}}><div style={{fontSize:13,fontWeight:500,color:activeDrugs[k]?d.color:"var(--t3)"}}>{d.name}</div><div style={{fontSize:10,color:"var(--t3)"}}>{d.unit}</div></div>
+            <div style={{fontSize:10,padding:"2px 8px",borderRadius:10,fontWeight:600,background:`${d.riskColor}22`,color:d.riskColor,flexShrink:0}}>{d.risk}</div>
+            <div style={{marginLeft:8,flexShrink:0}}><div className={`toggle${activeDrugs[k]?" on":" off"}`} style={{background:activeDrugs[k]?d.color:undefined}}/></div>
+          </div>)}
+        </div>
+
+        {/* Consumption settings — for accurate money calc */}
+        <div className="card">
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+            <div style={{width:32,height:32,borderRadius:8,background:"var(--s2)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--t2)",flexShrink:0}}><svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div style={{fontSize:13,fontWeight:600,color:"var(--t)"}}>Ma consommation habituelle</div>
+          </div>
+          <div style={{fontSize:11,color:"var(--t3)",marginBottom:12}}>Pour calculer tes vraies économies</div>
+          {[
+            {l:"Cigarettes par jour",k:"cigPerDay",step:1},
+            {l:"Prix d'un paquet (€)",k:"cigPackCost",step:0.5},
+            {l:"Joints par jour",k:"jointsPerDay",step:0.5},
+            {l:"Grammes par joint",k:"weedGPerJoint",step:0.1},
+            {l:"Prix cannabis / g (€)",k:"weedGCost",step:0.5},
+          ].map(g=><div key={g.k} className="gr"><span>{g.l}</span><input type="number" value={goals[g.k]||0} onChange={e=>setGoals(p=>({...p,[g.k]:+e.target.value}))} min="0" step={g.step}/></div>)}
+          <div style={{padding:"10px 12px",background:"var(--green3)",borderRadius:10,border:"1px solid rgba(34,197,94,0.2)"}}>
+            <div style={{fontSize:11,color:"var(--green)",fontWeight:600,marginBottom:3}}>Économies ce mois</div>
+            <div style={{fontSize:24,fontWeight:700,color:"var(--green2)"}}>{moneySaved.total}€</div>
+            <div style={{fontSize:10,color:"var(--t3)",marginTop:2}}>{moneySaved.cig}€ cigs · {moneySaved.weed}€ cannabis</div>
           </div>
         </div>
-      )}
 
-      {/* Day modal */}
-      {modal&&<DayModal modal={modal} data={data} activeDrugs={activeDrugs} onSave={saveEntry} onClear={clearEntry} onClose={()=>setModal(null)}/>}
+        <div className="card">
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+            <div style={{width:32,height:32,borderRadius:8,background:"var(--s2)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--t2)",flexShrink:0}}><svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+            <div style={{fontSize:13,fontWeight:600,color:"var(--t)"}}>Objectif mensuel</div>
+          </div>
+          <div className="gr"><span>Jours clean visés / mois</span><input type="number" value={goals.target} onChange={e=>setGoals(p=>({...p,target:+e.target.value}))} min="1" max="31"/></div>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><span style={{fontSize:12,color:"var(--t)"}}>Progression</span><span style={{fontSize:12,fontWeight:700,color:"var(--green)"}}>{nClean} / {goals.target}</span></div>
+          <Bar pct={Math.min((nClean/Math.max(goals.target,1))*100,100)} color="linear-gradient(90deg,#22c55e,#4ade80)" thick/>
+          {nClean>=goals.target&&<div className="sban">Objectif atteint !</div>}
+        </div>
+
+        <div className="card">
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+            <div style={{width:32,height:32,borderRadius:8,background:"var(--s2)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--t2)",flexShrink:0}}><svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+            <div style={{fontSize:13,fontWeight:600,color:"var(--t)"}}>Rappel quotidien</div>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:goals.notifOn?10:0}}>
+            <div><div style={{fontSize:12,color:"var(--t)",fontWeight:500}}>Notification du soir</div><div style={{fontSize:10,color:"var(--t3)",marginTop:1}}>Rappel de renseigner ta journée</div></div>
+            <button className={`toggle${goals.notifOn?" on":" off"}`} onClick={async()=>{if(!goals.notifOn){if("Notification" in window){const p=await Notification.requestPermission();if(p==="granted")setGoals(g=>({...g,notifOn:true}));}else setGoals(g=>({...g,notifOn:true}));}else setGoals(g=>({...g,notifOn:false}));}}/>
+          </div>
+          {goals.notifOn&&<div className="gr" style={{marginBottom:0}}><span>Heure</span><input type="time" value={goals.notifTime||"22:00"} onChange={e=>setGoals(p=>({...p,notifTime:e.target.value}))}/></div>}
+        </div>
+
+        <div className="sg">
+          <div className="sm"><div className="v" style={{color:"var(--green)"}}>{streak}j</div><div className="l">streak</div></div>
+          <div className="sm"><div className="v" style={{color:scoreColor}}>{score}</div><div className="l">score</div></div>
+          <div className="sm"><div className="v" style={{color:"var(--green2)"}}>{earnedCount}</div><div className="l">badges</div></div>
+          <div className="sm"><div className="v" style={{color:"#a855f7"}}>{longest}j</div><div className="l">record</div></div>
+        </div>
+      </div>}
     </div>
-  );
+
+    {/* ══ Tabs ══ */}
+    <div className="tabs">
+      {[["cal",<IcoCalendar/>,"Parcours"],["heal",<IcoHeart/>,"Guérison"],["badges",<IcoBadge/>,"Badges"],["goals",<IcoSettings/>,"Config"]].map(([k,icon,label])=><button key={k} className={`tb${tab===k?" on":""}`} onClick={()=>setTab(k)}>{icon}{label}</button>)}
+    </div>
+
+    {/* ══ Expand overlays ══ */}
+    {expand==="weekly"&&<ExpandView title="Progression hebdomadaire" onClose={()=>setExpand(null)}>
+      {[{metric:"clean",color:"#22c55e",label:"Jours clean",e:"✦"},...activeList.map(k=>({metric:k,color:ALL_DRUGS[k]?.color,label:ALL_DRUGS[k]?.name,e:ALL_DRUGS[k]?.emoji}))].map(m=><div key={m.metric} style={{background:"var(--s)",borderRadius:13,padding:13}}>
+        <div style={{fontSize:11,color:m.color,fontWeight:600,marginBottom:9}}>{m.e} {m.label}</div>
+        <WeekBars weeks={weeklyData} metric={m.metric} color={m.color}/>
+      </div>)}
+      <AIAnalysis stats={aiStats} activeDrugs={activeDrugs}/>
+    </ExpandView>}
+
+    {expand==="spark"&&<ExpandView title="Tendance 30 jours" onClose={()=>setExpand(null)}>
+      <div style={{background:"var(--s)",borderRadius:14,padding:14}}><Chart spark={spark}/></div>
+      <div style={{background:"var(--s)",borderRadius:13,padding:13}}>
+        {[{l:"Jours clean",v:nClean,c:"#22c55e"},...activeList.map(k=>({l:ALL_DRUGS[k]?.name,v:totals[k]||0,c:ALL_DRUGS[k]?.color}))].map(b=><div key={b.l} style={{marginBottom:9}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:11,color:"var(--t2)"}}>{b.l}</span><span style={{fontSize:11,fontWeight:700,color:b.c}}>{b.v}</span></div>
+          <Bar pct={Math.min((b.v/Math.max(daysCount,1))*100,100)} color={b.c}/>
+        </div>)}
+      </div>
+      <AIAnalysis stats={aiStats} activeDrugs={activeDrugs}/>
+    </ExpandView>}
+
+    {showProfile&&<ProfileModal profile={profile} setProfile={setProfile} onClose={()=>setShowProfile(false)}/>}
+    {showWidgets&&<WidgetManager widgets={widgets} setWidgets={setWidgets} onClose={()=>setShowWidgets(false)}/>}
+    {modal&&<DayModal modal={modal} data={data} activeDrugs={activeDrugs} onSave={saveEntry} onClear={clearEntry} onClose={()=>setModal(null)}/>}
+  </div>;
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
-<script>
-if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});});}
-</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});});}</script>
 </body>
 </html>
