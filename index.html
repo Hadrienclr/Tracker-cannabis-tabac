@@ -12,16 +12,25 @@
   <title>Recovery Tracker</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
   <style>
-    :root{--bg:#0a0a0f;--s:rgba(255,255,255,0.035);--b:rgba(255,255,255,0.07);--t:#e8e8f0;--m:#6b7280;}
+    :root{--bg:#0a0a0f;--s:rgba(255,255,255,0.035);--b:rgba(255,255,255,0.07);--t:#e8e8f0;--m:#6b7280;--sab:env(safe-area-inset-bottom,0px);}
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
     html,body{height:100%;background:var(--bg);color:var(--t);font-family:'DM Sans',system-ui,sans-serif;overflow:hidden;}
     #root{height:100%;display:flex;flex-direction:column;}
     .shell{display:flex;flex-direction:column;height:100%;padding-top:env(safe-area-inset-top,0px);}
     .hdr{padding:10px 16px 0;flex-shrink:0;}
-    .content{flex:1;overflow-y:auto;padding:8px 16px calc(68px + max(env(safe-area-inset-bottom,0px),10px));-webkit-overflow-scrolling:touch;}
-    .tabs{position:fixed;bottom:0;left:0;right:0;padding:5px 6px 0;padding-bottom:max(env(safe-area-inset-bottom,0px),4px);background:rgba(10,10,15,0.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--b);display:flex;gap:2px;z-index:50;}
-    @media all and (display-mode:standalone){.tabs{padding-bottom:max(env(safe-area-inset-bottom,0px),12px);}
-    .content{padding-bottom:calc(72px + max(env(safe-area-inset-bottom,0px),12px));}}
+    /* Bottom bar height: 60px tabs + 34px home indicator in standalone, 60px + safari bar offset in browser */
+    .content{flex:1;overflow-y:auto;padding:8px 16px 160px;-webkit-overflow-scrolling:touch;}
+    /* Tabs: fixed at absolute bottom, 34px padding for home indicator */
+    .tabs{position:fixed;bottom:0;left:0;right:0;
+      padding:6px 6px 10px;
+      background:rgba(10,10,15,0.97);
+      backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+      border-top:1px solid var(--b);
+      display:flex;gap:2px;z-index:50;}
+    /* In standalone PWA: add home indicator space */
+    @supports(padding-bottom:env(safe-area-inset-bottom)){
+      .tabs{padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));}
+    }
     .tb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 1px;border-radius:9px;border:none;background:transparent;cursor:pointer;font-family:inherit;font-size:9px;font-weight:600;color:var(--m);transition:all .22s cubic-bezier(.34,1.56,.64,1);}
     .tb.on{background:rgba(34,197,94,0.12);color:#4ade80;}
     .tb svg{transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
@@ -62,7 +71,7 @@
     .bl span:first-child{color:#9ca3af;}
     .pulse{animation:sp .5s cubic-bezier(.34,1.56,.64,1);}
     @keyframes sp{0%{transform:scale(1)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
-    .exp-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:300;display:flex;flex-direction:column;animation:fadeIn .2s ease;padding:env(safe-area-inset-top,16px) 14px calc(env(safe-area-inset-bottom,0px)+14px);}
+    .exp-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:300;display:flex;flex-direction:column;animation:fadeIn .2s ease;padding:env(safe-area-inset-top,16px) 14px 16px;}
     .exp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-top:2px;}
     .exp-title{font-size:16px;font-family:'DM Serif Display',serif;color:#f0f0f8;}
     .exp-close{background:rgba(255,255,255,0.08);border:1px solid var(--b);border-radius:9px;color:var(--t);width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
@@ -70,61 +79,60 @@
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     .xcard{background:var(--s);border:1px solid var(--b);border-radius:13px;padding:13px;margin-bottom:9px;position:relative;}
     .xbtn{position:absolute;top:11px;right:11px;background:rgba(255,255,255,0.06);border:1px solid var(--b);border-radius:7px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
-    .mo{position:fixed;inset:0;background:rgba(0,0,0,0.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:200;display:flex;align-items:flex-end;animation:fadeIn .18s ease;}
-    .mb{background:#12121c;border:1px solid rgba(255,255,255,0.1);border-radius:22px 22px 0 0;padding:18px 15px calc(16px + max(env(safe-area-inset-bottom,0px),8px));width:100%;animation:sUp .28s cubic-bezier(.22,1,.36,1);max-height:94vh;overflow-y:auto;}
+    /* Modal — bottom sheet */
+    .mo{position:fixed;inset:0;background:rgba(0,0,0,0.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:200;display:flex;align-items:flex-end;}
+    .mo-animate{animation:fadeIn .18s ease;}
+    .mb{background:#12121c;border:1px solid rgba(255,255,255,0.1);border-radius:22px 22px 0 0;
+      padding:18px 15px 24px;
+      width:100%;animation:sUp .28s cubic-bezier(.22,1,.36,1);
+      max-height:88vh;overflow-y:auto;
+      /* Safe area for home indicator */
+      padding-bottom:max(24px, calc(16px + env(safe-area-inset-bottom,0px)));}
     @keyframes sUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
     .mh{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.13);margin:0 auto 14px;}
-    .ctr-row{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-radius:11px;border:1.5px solid transparent;margin-bottom:6px;transition:border-color .15s,background .15s;}
+    /* Counter row — no state-dependent re-renders */
+    .ctr-row{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-radius:11px;border:1.5px solid transparent;margin-bottom:6px;}
     .ctr-row.active{border-color:currentColor;}
-    .ctr-left{display:flex;align-items:center;gap:8px;}
+    .ctr-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
     .ctr-emoji{font-size:16px;width:22px;text-align:center;flex-shrink:0;}
     .ctr-lbl{font-size:13px;font-weight:500;}
     .ctr-sub{font-size:10px;color:var(--m);margin-top:1px;}
-    .ctr-right{display:flex;align-items:center;flex-shrink:0;}
-    .ctr-btn{width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:var(--t);font-size:18px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .14s,transform .14s;font-family:inherit;line-height:1;}
-    .ctr-btn:active{transform:scale(0.88);}
-    .ctr-val{min-width:32px;text-align:center;font-size:16px;font-weight:700;font-family:'DM Serif Display',serif;}
-    .slbl{font-size:9px;color:var(--m);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;margin-top:2px;}
+    .ctr-right{display:flex;align-items:center;flex-shrink:0;gap:0;}
+    .ctr-btn{width:36px;height:36px;border-radius:9px;border:1.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.07);color:var(--t);font-size:20px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;line-height:1;-webkit-user-select:none;user-select:none;}
+    .ctr-btn:active{background:rgba(255,255,255,0.15);}
+    .ctr-val{min-width:36px;text-align:center;font-size:17px;font-weight:700;font-family:'DM Serif Display',serif;}
+    .slbl{font-size:9px;color:var(--m);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;margin-top:8px;}
     .tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
-    .tag{padding:5px 10px;border-radius:18px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;color:#9ca3af;}
+    .tag{padding:5px 10px;border-radius:18px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);font-size:11px;font-weight:500;cursor:pointer;color:#9ca3af;}
     .tag.on{background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.35);color:#4ade80;}
     .mood-row{display:flex;gap:5px;margin-bottom:10px;}
-    .mood-btn{flex:1;padding:8px 2px;border-radius:10px;border:1.5px solid transparent;background:rgba(255,255,255,0.04);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .18s;}
+    .mood-btn{flex:1;padding:8px 2px;border-radius:10px;border:1.5px solid transparent;background:rgba(255,255,255,0.04);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;}
     .mood-btn.on{border-color:currentColor;}
     .mood-btn span:first-child{font-size:18px;}
     .mood-btn span:last-child{font-size:9px;font-weight:600;}
-    textarea{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--t);font-family:inherit;font-size:13px;padding:9px;width:100%;outline:none;resize:none;margin-top:4px;transition:border-color .2s;}
+    textarea{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--t);font-family:inherit;font-size:13px;padding:9px;width:100%;outline:none;resize:none;margin-top:4px;}
     textarea:focus{border-color:rgba(34,197,94,0.4);}
     input[type="number"],input[type="time"]{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--t);font-family:inherit;font-size:13px;padding:6px 8px;width:84px;outline:none;}
     input[type="time"]{width:auto;}
-    .bprim{width:100%;padding:12px;border-radius:11px;background:rgba(34,197,94,0.15);border:1.5px solid rgba(34,197,94,0.3);color:#4ade80;font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;margin-top:11px;transition:background .2s,transform .14s;}
-    .bprim:active{background:rgba(34,197,94,0.25);transform:scale(0.97);}
+    .bprim{width:100%;padding:13px;border-radius:11px;background:rgba(34,197,94,0.15);border:1.5px solid rgba(34,197,94,0.3);color:#4ade80;font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;margin-top:12px;}
+    .bprim:active{background:rgba(34,197,94,0.25);}
     .expbtn{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:#4ade80;border-radius:8px;padding:5px 11px;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;}
     .gr{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;}
     .gr span{font-size:12px;color:#9ca3af;}
-    .chk{display:inline-block;animation:chkP .28s cubic-bezier(.34,1.56,.64,1);}
-    @keyframes chkP{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-    /* Recovery hero */
     .hero{background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(168,85,247,0.06));border:1px solid rgba(34,197,94,0.2);border-radius:18px;padding:18px;margin-bottom:10px;}
-    .hero-score{font-size:52px;font-weight:700;font-family:'DM Serif Display',serif;line-height:1;}
-    /* Recovery timeline */
     .rec-step{display:flex;gap:10px;margin-bottom:8px;align-items:flex-start;}
-    .rec-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px;}
-    /* Badge */
     .badge{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;margin-bottom:6px;border:1px solid transparent;}
     .badge.earned{background:rgba(34,197,94,0.06);border-color:rgba(34,197,94,0.18);}
-    .badge.locked{opacity:.38;}
+    .badge.locked{opacity:.35;}
     .badge-icon{font-size:20px;width:32px;text-align:center;flex-shrink:0;}
     .badge-name{font-size:12px;font-weight:600;}
     .badge-desc{font-size:10px;color:#6b7280;margin-top:1px;}
-    .badge-cat{font-size:9px;color:var(--m);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:12px 0 5px;padding-left:2px;}
-    /* Week bars */
+    .badge-cat{font-size:9px;color:var(--m);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:14px 0 6px;padding-left:2px;}
     .wbar-wrap{display:flex;align-items:flex-end;justify-content:space-between;gap:3px;height:60px;}
     .wbar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
     .wbar{width:100%;border-radius:3px 3px 0 0;min-height:3px;}
     .wbar-lbl{font-size:9px;color:var(--m);font-weight:600;}
     .wbar-val{font-size:8px;font-weight:700;}
-    /* AI box */
     .ai-box{background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.15);border-radius:13px;padding:13px;margin-top:8px;}
     .ai-hdr{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
     .ai-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;animation:aiP 2s infinite;}
@@ -137,17 +145,15 @@
     @keyframes dots{0%,80%,100%{transform:scale(0);opacity:.4}40%{transform:scale(1);opacity:1}}
     .ai-sec{margin-top:8px;padding-top:8px;border-top:1px solid rgba(34,197,94,0.1);}
     .ai-sec-t{font-size:9px;color:#22c55e;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;}
-    /* Drug toggle */
-    .drug-chip{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:11px;border:1.5px solid transparent;margin-bottom:7px;cursor:pointer;transition:all .15s;background:rgba(255,255,255,0.03);}
+    .drug-chip{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:11px;border:1.5px solid transparent;margin-bottom:7px;cursor:pointer;background:rgba(255,255,255,0.03);}
     .drug-chip.on{background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.25);}
     .drug-chip-ico{font-size:18px;width:26px;text-align:center;}
     .drug-chip-name{font-size:13px;font-weight:500;flex:1;}
     .drug-chip-risk{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;}
-    /* Sev */
     .sev-score{background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.2);border-radius:15px;padding:16px;margin-bottom:9px;text-align:center;}
     .delta-up{color:#22c55e;font-size:11px;font-weight:700;}
     .delta-dn{color:#ef4444;font-size:11px;font-weight:700;}
-    .toggle{width:42px;height:24px;border-radius:12px;border:none;cursor:pointer;position:relative;transition:background .2s;}
+    .toggle{width:42px;height:24px;border-radius:12px;border:none;cursor:pointer;position:relative;}
     .toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;}
     .toggle.on{background:#22c55e;}.toggle.on::after{transform:translateX(18px);}
     .toggle.off{background:rgba(255,255,255,0.15);}
@@ -157,11 +163,12 @@
     .motiv{background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.14);border-radius:13px;padding:13px;margin-bottom:9px;}
     .motiv .mt{font-size:9px;color:#22c55e;font-weight:700;margin-bottom:5px;letter-spacing:.08em;text-transform:uppercase;}
     .motiv p{font-size:12px;color:#86efac;line-height:1.6;font-style:italic;}
-    .sban{margin-top:8px;padding:8px 12px;background:rgba(34,197,94,0.1);border-radius:8px;font-size:11px;color:#4ade80;text-align:center;animation:tIn .4s ease;}
+    .sban{margin-top:8px;padding:8px 12px;background:rgba(34,197,94,0.1);border-radius:8px;font-size:11px;color:#4ade80;text-align:center;}
     .ss{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px;}
     .ss .m{background:var(--s);border:1px solid var(--b);border-radius:9px;padding:8px 4px;text-align:center;}
     .ss .m .v{font-size:15px;font-weight:700;}
     .ss .m .l{font-size:9px;color:var(--m);margin-top:1px;}
+    .chk{display:inline-block;}
   </style>
 </head>
 <body>
@@ -172,43 +179,42 @@
 <script type="text/babel">
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
-// ─── Drug Database ────────────────────────────────────────────────────────────
+// ── Drug Database ─────────────────────────────────────────────────────────────
 const ALL_DRUGS = {
-  tabac:   { name:"Tabac",            emoji:"🚬", color:"#f97316", risk:"Élevé",    riskColor:"#f97316", unit:"cigarettes", unitShort:"cig", defaultOn:true,
-    effects:{physique:"Le tabac réduit la capacité pulmonaire de 20 à 40%, augmente le risque d'infarctus ×2 et de cancer du poumon ×15. La nicotine provoque une vasoconstriction immédiate.",mental:"La nicotine crée une dépendance neurochimique forte via la libération de dopamine. Le manque génère irritabilité, anxiété et troubles de concentration dans les 4-6h.",recovery:[{t:"20 min",d:"Tension artérielle et fréquence cardiaque normalisées"},{t:"8h",d:"CO sanguin divisé par 2, O₂ normalisé"},{t:"48h",d:"Nicotine éliminée, odorat et goût améliorés"},{t:"72h",d:"Bronches dilatées, respiration facilitée"},{t:"1 sem.",d:"Circulation améliorée, énergie augmentée"},{t:"1 mois",d:"Risque cardiovasculaire en baisse"},{t:"3 mois",d:"Cils bronchiques restaurés, +30% capacité"},{t:"1 an",d:"Risque d'infarctus divisé par 2"},{t:"5 ans",d:"Risque de cancer du poumon divisé par 2"}]}},
-  cannabis:{ name:"Cannabis",         emoji:"🍃", color:"#a855f7", risk:"Modéré",   riskColor:"#a855f7", unit:"joints",     unitShort:"joint", defaultOn:true,  gramPerUnit:0.3,
-    effects:{physique:"Chaque joint expose les poumons à 4× plus de goudron que le tabac. Usage régulier : tachycardie chronique, baisse de testostérone, troubles du sommeil profond.",mental:"Le THC altère la mémoire de travail et la concentration. Usage régulier avant 25 ans : risque ×3 de troubles psychotiques, baisse du QI de 8 points en moyenne.",recovery:[{t:"72h",d:"THC sanguin en baisse, humeur stabilisée"},{t:"1 sem.",d:"Sommeil profond restauré, appétit normalisé"},{t:"2 sem.",d:"Mémoire à court terme en récupération"},{t:"1 mois",d:"Système endocannabinoïde rétabli"},{t:"3 mois",d:"Cognition et motivation pleinement restaurées"}]}},
-  alcool:  { name:"Alcool",           emoji:"🍺", color:"#3b82f6", risk:"Modéré",   riskColor:"#3b82f6", unit:"verres",     unitShort:"verre", defaultOn:true,
-    effects:{physique:"L'alcool est directement hépatotoxique. 14 verres/semaine suffisent à déclencher une stéatose hépatique. Risque de cancer augmente dès 1 verre/jour.",mental:"Dépresseur du SNC, l'alcool désinhibe puis sédationne. Dépendance psychologique en 2-4 semaines de consommation quotidienne.",recovery:[{t:"24h",d:"Foie commence à éliminer les métabolites"},{t:"72h",d:"Pic du syndrome de sevrage (si dépendant)"},{t:"1 sem.",d:"Sommeil profond restauré, hydratation normalisée"},{t:"2 sem.",d:"Tension artérielle normalisée"},{t:"1 mois",d:"Foie partiellement régénéré, visage moins bouffi"},{t:"3 mois",d:"Risque de cirrhose réduit, mémoire améliorée"}]}},
-  cocaine: { name:"Cocaïne",          emoji:"🤍", color:"#e5e7eb", risk:"Très élevé",riskColor:"#ef4444", unit:"lignes",     unitShort:"ligne", defaultOn:false,
-    effects:{physique:"La cocaïne provoque une vasoconstriction coronarienne immédiate : risque d'infarctus ×24 dans l'heure suivant la prise. Perfore la cloison nasale à terme.",mental:"Dépendance psychologique très rapide (3-5 prises). Crash dopaminergique sévère, dépression post-prise, paranoïa chronique.",recovery:[{t:"1h",d:"Effets stimulants s'estompent, crash commence"},{t:"24h",d:"Craving intense, fatigue profonde"},{t:"1 sem.",d:"Stabilisation de l'humeur débute"},{t:"2 sem.",d:"Dopamine commence à se normaliser"},{t:"3 mois",d:"Circuits de récompense en récupération active"},{t:"1 an",d:"Réduction significative du risque cardiovasculaire"}]}},
-  mdma:    { name:"MDMA / Ecstasy",   emoji:"💊", color:"#ec4899", risk:"Élevé",    riskColor:"#f97316", unit:"prises",     unitShort:"prise", defaultOn:false,
-    effects:{physique:"La MDMA provoque une hyperthermie potentiellement fatale et une hyponatrémie. Neurotoxique pour les terminaisons sérotoninergiques à doses répétées.",mental:"Déplétion sérotoninergique sévère post-prise ('semaine noire'). Usage répété : dépression chronique, troubles mnésiques irréversibles.",recovery:[{t:"3 jours",d:"Pic de dépression sérotoninergique"},{t:"1 sem.",d:"Humeur progressivement stabilisée"},{t:"1 mois",d:"Sérotonine en cours de régénération"},{t:"3 mois",d:"Cognition partiellement restaurée"},{t:"1 an",d:"Récupération neurologique maximale"}]}},
-  amphet:  { name:"Amphétamines",     emoji:"⚡", color:"#fbbf24", risk:"Très élevé",riskColor:"#ef4444", unit:"prises",     unitShort:"prise", defaultOn:false,
-    effects:{physique:"Les amphétamines provoquent une hypertension sévère, arythmies cardiaques, amaigrissement extrême et vieillissement cutané accéléré.",mental:"Psychose amphétaminique dès usage intensif. Dépression profonde en sevrage. Épuisement du système dopaminergique.",recovery:[{t:"24h",d:"Crash et hypersomnie"},{t:"1 sem.",d:"Appétit et énergie en cours de restauration"},{t:"1 mois",d:"Dopamine en récupération"},{t:"3 mois",d:"Stabilisation psychologique"},{t:"6 mois",d:"Circuits dopaminergiques partiellement restaurés"}]}},
-  heroine: { name:"Héroïne / Opioïdes",emoji:"💉", color:"#dc2626", risk:"Extrême",  riskColor:"#dc2626", unit:"prises",     unitShort:"prise", defaultOn:false,
-    effects:{physique:"Dépendance physique en 3-5 jours. Overdose par dépression respiratoire. Risque ×1000 d'hépatite C/VIH si injection.",mental:"Dépendance psychologique la plus forte connue. Anhedonie totale en sevrage. Sevrage physique intense 24-72h après dernière prise.",recovery:[{t:"6-24h",d:"Début du sevrage physique"},{t:"3 jours",d:"Pic du sevrage : douleurs, vomissements"},{t:"1 sem.",d:"Sevrage physique terminé"},{t:"1 mois",d:"Insomnie et craving en baisse"},{t:"3 mois",d:"Endorphines en récupération"},{t:"1 an",d:"Risque de rechute encore présent, vigilance"}]}},
-  ketamine:{ name:"Kétamine",         emoji:"🌀", color:"#818cf8", risk:"Élevé",    riskColor:"#f97316", unit:"prises",     unitShort:"prise", defaultOn:false,
-    effects:{physique:"La kétamine est directement uro-toxique : cystite kétaminique irréversible à usage régulier. Ulcération de la vessie, risque de cystectomie.",mental:"Dissociation chronique, troubles dépersonnalisation. Dépendance psychologique modérée à forte.",recovery:[{t:"1 sem.",d:"Dissociation en régression"},{t:"1 mois",d:"Cognition s'améliore"},{t:"3 mois",d:"Voies urinaires en récupération si dégâts mineurs"},{t:"6 mois",d:"Stabilisation psychologique complète"}]}},
-  lsd:     { name:"LSD / Psychédéliques",emoji:"🔮", color:"#8b5cf6", risk:"Modéré", riskColor:"#a855f7", unit:"prises",     unitShort:"prise", defaultOn:false,
-    effects:{physique:"Le LSD n'est pas directement toxique pour les organes. Risque principal : accident sous influence, HPPD (flashbacks persistants).",mental:"Peut précipiter une psychose chez prédisposés. Risque de bad trip avec trauma durable. Pas de dépendance physique.",recovery:[{t:"12h",d:"Effets aigus terminés"},{t:"3 jours",d:"Intégration psychologique"},{t:"1 sem.",d:"Sommeil normalisé"},{t:"1 mois",d:"HPPD résiduel en régression si présent"}]}},
-  champi:  { name:"Champignons",      emoji:"🍄", color:"#84cc16", risk:"Faible",   riskColor:"#22c55e", unit:"prises",     unitShort:"prise", defaultOn:false,
-    effects:{physique:"La psilocybine est peu toxique organiquement. Nausées possibles en phase initiale. Risque principal : accidents sous influence.",mental:"Expériences difficiles possibles. Risque de décompensation psychotique chez prédisposés. Pas de dépendance.",recovery:[{t:"6h",d:"Effets aigus terminés"},{t:"3 jours",d:"Intégration de l'expérience"},{t:"1 sem.",d:"Retour à l'état basal complet"}]}},
-  crack:   { name:"Crack",            emoji:"🪨", color:"#78350f", risk:"Extrême",  riskColor:"#dc2626", unit:"cailloux",   unitShort:"caillou", defaultOn:false,
-    effects:{physique:"Le crack provoque des dommages pulmonaires immédiats ('crack lung'), infarctus, AVC. Dépendance physique en quelques prises.",mental:"Dépendance psychologique la plus rapide de toutes les drogues. Psychose paranoïaque fréquente.",recovery:[{t:"1h",d:"Crash intense, craving immédiat"},{t:"24h",d:"Stabilisation partielle"},{t:"1 sem.",d:"Craving intense mais gérable"},{t:"1 mois",d:"Circuits dopaminergiques en récupération"},{t:"6 mois",d:"Risque de rechute encore élevé"}]}},
-  benzo:   { name:"Benzodiazépines",  emoji:"💊", color:"#06b6d4", risk:"Élevé",    riskColor:"#f97316", unit:"comprimés",  unitShort:"cp", defaultOn:false,
-    effects:{physique:"Dépendance physique en 2-4 semaines même à dose thérapeutique. Sevrage potentiellement fatal (crises convulsives).",mental:"Sédation cognitive, amnésie antérograde, dépression. Rebond d'anxiété sévère en sevrage.",recovery:[{t:"24-72h",d:"Début du sevrage, anxiété rebond"},{t:"1 sem.",d:"Pic du sevrage (ne jamais arrêter brutal)"},{t:"1 mois",d:"Stabilisation progressive"},{t:"3-6 mois",d:"Récupération cognitive complète"}]}},
-  meth:    { name:"Méthamphétamine",  emoji:"💎", color:"#f43f5e", risk:"Extrême",  riskColor:"#dc2626", unit:"prises",     unitShort:"prise", defaultOn:false,
-    effects:{physique:"Destruction massive des terminaisons dopaminergiques. Vieillissement accéléré spectaculaire. Abcès dentaires ('meth mouth'), lésions cutanées.",mental:"Psychose méthamphetaminique très fréquente. Dépression post-usage sévère et durable. Anhedonie prolongée.",recovery:[{t:"24h",d:"Crash, hypersomnie, dépression"},{t:"1 sem.",d:"Stabilisation partielle de l'humeur"},{t:"1 mois",d:"Dopamine très lentement en récupération"},{t:"6 mois",d:"Récupération neurologique partielle"},{t:"2 ans",d:"Récupération dopaminergique maximale"}]}},
-  poppers: { name:"Poppers",          emoji:"🧪", color:"#f59e0b", risk:"Faible",   riskColor:"#22c55e", unit:"prises",     unitShort:"inhal.", defaultOn:false,
-    effects:{physique:"Risque de rétinopathie (taches permanentes sur la vision) en usage répété. Hypotension brutale, risque d'évanouissement.",mental:"Pas de dépendance chimique. Usage comportemental possible.",recovery:[{t:"30 min",d:"Effets terminés"},{t:"1 sem.",d:"Vision se stabilise si pas de lésion rétinienne"}]}},
-  ghb:     { name:"GHB / GBL",        emoji:"🥤", color:"#0ea5e9", risk:"Très élevé",riskColor:"#ef4444", unit:"doses",      unitShort:"dose", defaultOn:false,
-    effects:{physique:"Marge thérapeutique très étroite : dose récréative proche de dose létale. Dépendance physique rapide et sevrage dangereux.",mental:"Amnésie antérograde fréquente. Dépendance psychologique forte. Risque de perte de conscience.",recovery:[{t:"6h",d:"Effets aigus terminés"},{t:"24-72h",d:"Sevrage intense si dépendant"},{t:"1 sem.",d:"Stabilisation neurologique"},{t:"1 mois",d:"Récupération mnésique"}]}},
-  proto:   { name:"Protoxyde d'azote",emoji:"🎈", color:"#a3e635", risk:"Modéré",   riskColor:"#a855f7", unit:"cartouches", unitShort:"cart.", defaultOn:false,
-    effects:{physique:"Détruit la vitamine B12 à usage régulier : neuropathie périphérique irréversible (paralysie, engourdissements). Frostbite des lèvres.",mental:"Pas de dépendance chimique forte, mais usage compulsif fréquent. Dissociation, désorientation.",recovery:[{t:"30 min",d:"Effets aigus terminés"},{t:"1 sem.",d:"Bilan B12 à faire si usage fréquent"},{t:"3 mois",d:"Neuropathie légère peut régresser avec B12"}]}},
+  tabac:   {name:"Tabac",emoji:"🚬",color:"#f97316",risk:"Élevé",riskColor:"#f97316",unit:"cigarettes",unitShort:"cig",defaultOn:true,
+    recovery:[{t:"20 min",d:"Tension artérielle et fréquence cardiaque normalisées"},{t:"8h",d:"CO sanguin divisé par 2, O₂ normalisé"},{t:"48h",d:"Nicotine éliminée, odorat et goût améliorés"},{t:"72h",d:"Bronches dilatées, respiration facilitée"},{t:"1 sem.",d:"Circulation améliorée, énergie augmentée"},{t:"1 mois",d:"Risque cardiovasculaire en baisse"},{t:"3 mois",d:"Cils bronchiques restaurés, +30% capacité"},{t:"1 an",d:"Risque d'infarctus divisé par 2"}]},
+  cannabis:{name:"Cannabis",emoji:"🍃",color:"#a855f7",risk:"Modéré",riskColor:"#a855f7",unit:"joints",unitShort:"joint",defaultOn:true,gramPerUnit:0.3,
+    recovery:[{t:"72h",d:"THC sanguin en baisse, humeur stabilisée"},{t:"1 sem.",d:"Sommeil profond restauré, appétit normalisé"},{t:"2 sem.",d:"Mémoire à court terme en récupération"},{t:"1 mois",d:"Système endocannabinoïde rétabli"},{t:"3 mois",d:"Cognition et motivation pleinement restaurées"}]},
+  alcool:  {name:"Alcool",emoji:"🍺",color:"#3b82f6",risk:"Modéré",riskColor:"#3b82f6",unit:"verres",unitShort:"verre",defaultOn:true,
+    recovery:[{t:"24h",d:"Foie commence à éliminer les métabolites"},{t:"72h",d:"Pic du sevrage (si dépendant)"},{t:"1 sem.",d:"Sommeil profond restauré, hydratation normalisée"},{t:"2 sem.",d:"Tension artérielle normalisée"},{t:"1 mois",d:"Foie partiellement régénéré"},{t:"3 mois",d:"Risque de cirrhose réduit, mémoire améliorée"}]},
+  cocaine: {name:"Cocaïne",emoji:"🤍",color:"#e5e7eb",risk:"Très élevé",riskColor:"#ef4444",unit:"lignes",unitShort:"ligne",defaultOn:false,
+    recovery:[{t:"1h",d:"Effets stimulants s'estompent, crash commence"},{t:"24h",d:"Craving intense, fatigue profonde"},{t:"1 sem.",d:"Stabilisation de l'humeur débute"},{t:"3 mois",d:"Circuits de récompense en récupération active"},{t:"1 an",d:"Réduction significative du risque cardiovasculaire"}]},
+  mdma:    {name:"MDMA / Ecstasy",emoji:"💗",color:"#ec4899",risk:"Élevé",riskColor:"#f97316",unit:"prises",unitShort:"prise",defaultOn:false,
+    recovery:[{t:"3 jours",d:"Pic de dépression sérotoninergique"},{t:"1 sem.",d:"Humeur progressivement stabilisée"},{t:"1 mois",d:"Sérotonine en cours de régénération"},{t:"1 an",d:"Récupération neurologique maximale"}]},
+  amphet:  {name:"Amphétamines",emoji:"⚡",color:"#fbbf24",risk:"Très élevé",riskColor:"#ef4444",unit:"prises",unitShort:"prise",defaultOn:false,
+    recovery:[{t:"24h",d:"Crash et hypersomnie"},{t:"1 sem.",d:"Appétit et énergie en restauration"},{t:"3 mois",d:"Stabilisation psychologique"},{t:"6 mois",d:"Circuits dopaminergiques partiellement restaurés"}]},
+  heroine: {name:"Héroïne / Opioïdes",emoji:"💉",color:"#dc2626",risk:"Extrême",riskColor:"#dc2626",unit:"prises",unitShort:"prise",defaultOn:false,
+    recovery:[{t:"6-24h",d:"Début du sevrage physique"},{t:"3 jours",d:"Pic du sevrage : douleurs, vomissements"},{t:"1 sem.",d:"Sevrage physique terminé"},{t:"3 mois",d:"Endorphines en récupération"},{t:"1 an",d:"Risque de rechute encore présent, vigilance"}]},
+  ketamine:{name:"Kétamine",emoji:"🌀",color:"#818cf8",risk:"Élevé",riskColor:"#f97316",unit:"prises",unitShort:"prise",defaultOn:false,
+    recovery:[{t:"1 sem.",d:"Dissociation en régression"},{t:"1 mois",d:"Cognition s'améliore"},{t:"3 mois",d:"Voies urinaires en récupération"},{t:"6 mois",d:"Stabilisation psychologique complète"}]},
+  lsd:     {name:"LSD / Psychédéliques",emoji:"🔮",color:"#8b5cf6",risk:"Modéré",riskColor:"#a855f7",unit:"prises",unitShort:"prise",defaultOn:false,
+    recovery:[{t:"12h",d:"Effets aigus terminés"},{t:"3 jours",d:"Intégration psychologique"},{t:"1 mois",d:"HPPD résiduel en régression si présent"}]},
+  champi:  {name:"Champignons",emoji:"🍄",color:"#84cc16",risk:"Faible",riskColor:"#22c55e",unit:"prises",unitShort:"prise",defaultOn:false,
+    recovery:[{t:"6h",d:"Effets aigus terminés"},{t:"3 jours",d:"Intégration de l'expérience"},{t:"1 sem.",d:"Retour à l'état basal complet"}]},
+  crack:   {name:"Crack",emoji:"🪨",color:"#92400e",risk:"Extrême",riskColor:"#dc2626",unit:"prises",unitShort:"prise",defaultOn:false,
+    recovery:[{t:"1h",d:"Crash intense, craving immédiat"},{t:"1 sem.",d:"Craving intense mais gérable"},{t:"1 mois",d:"Circuits dopaminergiques en récupération"},{t:"6 mois",d:"Risque de rechute encore élevé"}]},
+  benzo:   {name:"Benzodiazépines",emoji:"💊",color:"#06b6d4",risk:"Élevé",riskColor:"#f97316",unit:"comprimés",unitShort:"cp",defaultOn:false,
+    recovery:[{t:"24-72h",d:"Début du sevrage, anxiété rebond"},{t:"1 sem.",d:"Pic du sevrage — NE PAS arrêter brutalement"},{t:"1 mois",d:"Stabilisation progressive"},{t:"3-6 mois",d:"Récupération cognitive complète"}]},
+  meth:    {name:"Méthamphétamine",emoji:"💎",color:"#f43f5e",risk:"Extrême",riskColor:"#dc2626",unit:"prises",unitShort:"prise",defaultOn:false,
+    recovery:[{t:"24h",d:"Crash, hypersomnie, dépression"},{t:"1 mois",d:"Dopamine très lentement en récupération"},{t:"6 mois",d:"Récupération neurologique partielle"},{t:"2 ans",d:"Récupération dopaminergique maximale"}]},
+  poppers: {name:"Poppers",emoji:"🧪",color:"#f59e0b",risk:"Faible",riskColor:"#22c55e",unit:"inhalations",unitShort:"inhal.",defaultOn:false,
+    recovery:[{t:"30 min",d:"Effets terminés"},{t:"1 sem.",d:"Vision se stabilise si pas de lésion rétinienne"}]},
+  ghb:     {name:"GHB / GBL",emoji:"🥤",color:"#0ea5e9",risk:"Très élevé",riskColor:"#ef4444",unit:"doses",unitShort:"dose",defaultOn:false,
+    recovery:[{t:"6h",d:"Effets aigus terminés"},{t:"72h",d:"Sevrage intense si dépendant"},{t:"1 mois",d:"Récupération mnésique"}]},
+  proto:   {name:"Protoxyde d'azote",emoji:"🎈",color:"#a3e635",risk:"Modéré",riskColor:"#a855f7",unit:"cartouches",unitShort:"cart.",defaultOn:false,
+    recovery:[{t:"30 min",d:"Effets aigus terminés"},{t:"3 mois",d:"Neuropathie légère peut régresser avec supplémentation B12"}]},
 };
 
-const DEFAULT_ACTIVE = Object.fromEntries(Object.entries(ALL_DRUGS).map(([k,v])=>[k,v.defaultOn]));
 const MONTHS=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 const MONTHS_S=["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
 const DAYS=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
@@ -216,45 +222,40 @@ const DAYS_S=["L","M","M","J","V","S","D"];
 const MOODS=[{e:"😣",l:"Dur",c:"#ef4444"},{e:"😕",l:"Moyen",c:"#f97316"},{e:"😐",l:"Ok",c:"#6b7280"},{e:"🙂",l:"Bien",c:"#22c55e"},{e:"😊",l:"Top",c:"#4ade80"}];
 const CTXS=["Stress","Ennui","Soirée","Social","Seul","Après repas","Au réveil","Travail","Anxiété","Fatigue","Craving","Douleur"];
 
-const STORE="recovery_v1",GSTORE="recovery_goals_v1",DSTORE="recovery_drugs_v1";
+const STORE="rec_v2",GSTORE="rec_goals_v2",DSTORE="rec_drugs_v2";
 const dk=(y,m,d)=>`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
 const daysIn=(y,m)=>new Date(y,m+1,0).getDate();
 const firstOff=(y,m)=>{const d=new Date(y,m,1).getDay();return d===0?6:d-1;};
 const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k))||def;}catch{return def;}};
+const DEFAULT_ACTIVE=Object.fromEntries(Object.entries(ALL_DRUGS).map(([k,v])=>[k,v.defaultOn]));
 
-function getDayTotal(entry, activeDrugs){
-  if(!entry) return 0;
-  return Object.keys(activeDrugs).filter(k=>activeDrugs[k]).reduce((s,k)=>s+(entry[k]||0),0);
+function isClean(e,active){
+  if(!e)return false;
+  if(e.clean)return true;
+  if(!e.logged)return false;
+  return Object.keys(active).filter(k=>active[k]).every(k=>(e[k]||0)===0);
 }
-function getDayColor(entry, activeDrugs){
-  if(!entry) return null;
-  if(entry.clean) return "#22c55e";
-  const total = getDayTotal(entry, activeDrugs);
-  if(total === 0) return null;
-  // Find primary drug (most consumed)
-  const drugs = Object.keys(activeDrugs).filter(k=>activeDrugs[k]&&(entry[k]||0)>0);
-  if(drugs.length === 0) return null;
-  if(drugs.length >= 3) return "#9f1239";
-  if(drugs.length === 2) return "#ef4444";
-  return ALL_DRUGS[drugs[0]]?.color || "#6b7280";
+function dayColor(e,active){
+  if(!e)return null;
+  if(isClean(e,active))return"#22c55e";
+  const used=Object.keys(active).filter(k=>active[k]&&(e[k]||0)>0);
+  if(!used.length)return null;
+  if(used.length>=3)return"#9f1239";
+  if(used.length===2)return"#ef4444";
+  return ALL_DRUGS[used[0]]?.color||"#6b7280";
 }
-function getDayEmoji(entry, activeDrugs){
-  if(!entry) return "·";
-  if(entry.clean) return "✦";
-  const drugs = Object.keys(activeDrugs).filter(k=>activeDrugs[k]&&(entry[k]||0)>0);
-  if(drugs.length === 0) return "·";
-  if(drugs.length >= 3) return "💀";
-  if(drugs.length === 2) return "⚠";
-  return ALL_DRUGS[drugs[0]]?.emoji || "·";
-}
-function isCleanDay(entry, activeDrugs){
-  if(!entry) return false;
-  if(entry.clean) return true;
-  return Object.keys(activeDrugs).filter(k=>activeDrugs[k]).every(k=>(entry[k]||0)===0) && entry.logged;
+function dayEmoji(e,active){
+  if(!e)return"·";
+  if(isClean(e,active))return"✦";
+  const used=Object.keys(active).filter(k=>active[k]&&(e[k]||0)>0);
+  if(!used.length)return"·";
+  if(used.length>=3)return"💀";
+  if(used.length===2)return"⚠";
+  return ALL_DRUGS[used[0]]?.emoji||"·";
 }
 
-/* SVG icon helper */
-const Ico=(d,w=18)=>()=>(<svg width={w} height={w} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{__html:d}}/>);
+// ── SVG Icons ────────────────────────────────────────────────────────────────
+const Ico=(d,w=18)=>()=><svg width={w} height={w} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{__html:d}}/>;
 const IcoCalendar=Ico('<rect x="3" y="4" width="18" height="18" rx="3"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><circle cx="8" cy="14" r="1" fill="currentColor"/><circle cx="12" cy="14" r="1" fill="currentColor"/><circle cx="16" cy="14" r="1" fill="currentColor"/>');
 const IcoChart=Ico('<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>');
 const IcoBadge=Ico('<path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>');
@@ -264,169 +265,251 @@ const IcoClose=Ico('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2=
 const IcoWeek=Ico('<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="4" x2="9" y2="20"/><line x1="15" y1="4" x2="15" y2="20"/>',12);
 const IcoMonth=Ico('<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="7" y1="4" x2="7" y2="9"/><line x1="12" y1="4" x2="12" y2="9"/><line x1="17" y1="4" x2="17" y2="9"/>',12);
 
-/* Animated bar */
+// ── Components ───────────────────────────────────────────────────────────────
 function Bar({pct,color,thick}){
   const ref=useRef(null);
-  useEffect(()=>{if(!ref.current)return;ref.current.style.width="0%";const t=setTimeout(()=>{if(ref.current)ref.current.style.width=pct+"%";},60);return()=>clearTimeout(t);},[pct]);
-  return(<div className={`pb${thick?" t":""}`}><div ref={ref} className="pf" style={{background:color}}/></div>);
+  useEffect(()=>{if(!ref.current)return;ref.current.style.width="0%";const t=setTimeout(()=>{if(ref.current)ref.current.style.width=pct+"%";},80);return()=>clearTimeout(t);},[pct]);
+  return<div className={`pb${thick?" t":""}`}><div ref={ref} className="pf" style={{background:color}}/></div>;
 }
 
-/* Sparkline */
 function Spark({data,height=50}){
   if(!data?.length)return null;
   const W=300,H=height,p=6,max=Math.max(...data.map(d=>d.v),1);
   const pts=data.map((d,i)=>({x:p+(i/Math.max(data.length-1,1))*(W-p*2),y:H-p-(d.v/max)*(H-p*2),c:d.color||"#6b7280"}));
   const path=pts.map((p,i)=>`${i===0?"M":"L"} ${p.x} ${p.y}`).join(" ");
   const area=`${path} L ${pts[pts.length-1].x} ${H} L ${pts[0].x} ${H} Z`;
-  return(<svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:H}}><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity=".25"/><stop offset="100%" stopColor="#22c55e" stopOpacity="0"/></linearGradient></defs><path d={area} fill="url(#sg)"/><path d={path} fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>{pts.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={2} fill={p.c} stroke="#0a0a0f" strokeWidth="1.5"/>)}</svg>);
+  return<svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:H}}>
+    <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity=".25"/><stop offset="100%" stopColor="#22c55e" stopOpacity="0"/></linearGradient></defs>
+    <path d={area} fill="url(#sg)"/>
+    <path d={path} fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    {pts.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r={2} fill={p.c} stroke="#0a0a0f" strokeWidth="1.5"/>)}
+  </svg>;
 }
 
-/* Counter */
-function Counter({value,onChange,color}){
-  return(<div className="ctr-right">
-    <button className="ctr-btn" style={{borderColor:value>0?color:"rgba(255,255,255,0.1)"}} onClick={()=>onChange(Math.max(0,value-1))}>−</button>
-    <div className="ctr-val" style={{color:value>0?color:"#4b5563"}}>{value}</div>
-    <button className="ctr-btn" style={{borderColor:value>0?color:"rgba(255,255,255,0.1)"}} onClick={()=>onChange(Math.min(99,value+1))}>+</button>
-  </div>);
-}
-
-/* Week bars */
 function WeekBars({weeks,metric,color}){
   const max=Math.max(...weeks.map(w=>w[metric]||0),1);
-  return(<div className="wbar-wrap">{weeks.map((w,i)=>{const val=w[metric]||0;const h=Math.max((val/max)*54,val>0?4:2);return(<div key={i} className="wbar-col"><div className="wbar-val" style={{color:val>0?color:"#4b5563"}}>{val>0?val:""}</div><div className="wbar" style={{height:h,background:val>0?color:"rgba(255,255,255,0.06)"}}/><div className="wbar-lbl">S{i+1}</div></div>);})}</div>);
+  return<div className="wbar-wrap">{weeks.map((w,i)=>{const v=w[metric]||0;const h=Math.max((v/max)*54,v>0?4:2);return<div key={i} className="wbar-col"><div className="wbar-val" style={{color:v>0?color:"#4b5563"}}>{v>0?v:""}</div><div className="wbar" style={{height:h,background:v>0?color:"rgba(255,255,255,0.06)"}}/><div className="wbar-lbl">S{i+1}</div></div>;})}</div>;
 }
 
-/* Expand overlay */
 function ExpandView({title,onClose,children}){
-  return(<div className="exp-overlay"><div className="exp-hdr"><div className="exp-title">{title}</div><button className="exp-close" onClick={onClose}><IcoClose/></button></div><div className="exp-body">{children}</div></div>);
+  return<div className="exp-overlay"><div className="exp-hdr"><div className="exp-title">{title}</div><button className="exp-close" onClick={onClose}><IcoClose/></button></div><div className="exp-body">{children}</div></div>;
 }
 
-/* AI Analysis */
+// ── AI Analysis ───────────────────────────────────────────────────────────────
 function AIAnalysis({stats,activeDrugs}){
   const [text,setText]=useState(null);
-  const [loading,setLoading]=useState(false);
+  const [loading,setLoading]=useState(true);
   const [err,setErr]=useState(null);
-
   useEffect(()=>{
-    setLoading(true);setText(null);setErr(null);
-    const activeList=Object.keys(activeDrugs).filter(k=>activeDrugs[k]);
-    const consumedThis=activeList.filter(k=>(stats.totals[k]||0)>0);
-
-    const lines=consumedThis.map(k=>{
-      const d=ALL_DRUGS[k];
-      return `- ${d.name}: ${stats.totals[k]} ${d.unit} ce mois`;
-    }).join('\n');
-
-    const prompt=`Tu es médecin addictologue. Analyse médicale factuelle et directe (pas de condescendance).
-Patient — données du mois :
-${lines||"Aucune consommation enregistrée"}
-Jours clean: ${stats.nClean}/${stats.daysCount} (${stats.pct}%)
-Streak clean actuel: ${stats.streak} jours
-Record streak: ${stats.longest} jours
-Score de sevrage: ${stats.score}/100
-
-Réponds UNIQUEMENT en JSON valide sans backticks :
-{"physique":"3-4 phrases effets physiques directs des substances consommées ce mois, données chiffrées si pertinent","mental":"2-3 phrases effets cognitifs et psychologiques","sevrage":"2-3 phrases bilan de progression du sevrage ce mois","conseil":"1 conseil médical précis et actionnable pour cette semaine","alerte":"null ou 1 phrase si risque médical urgent à signaler"}`;
-
-    fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:prompt}]})})
-      .then(r=>r.json())
-      .then(data=>{
-        const raw=data.content?.find(b=>b.type==="text")?.text||"{}";
-        const parsed=JSON.parse(raw.replace(/```json|```/g,"").trim());
-        setText(parsed);setLoading(false);
-      })
-      .catch(()=>{setErr("Analyse IA indisponible.");setLoading(false);});
+    const active=Object.keys(activeDrugs).filter(k=>activeDrugs[k]);
+    const consumed=active.filter(k=>(stats.totals[k]||0)>0);
+    const lines=consumed.map(k=>`- ${ALL_DRUGS[k].name}: ${stats.totals[k]} ${ALL_DRUGS[k].unit}`).join('\n')||"Aucune consommation enregistrée ce mois";
+    const prompt=`Tu es médecin addictologue. Analyse factuelle et directe, sans condescendance.
+Patient ce mois : ${lines}
+Jours clean: ${stats.nClean}/${stats.daysCount} (${stats.pct}%) | Streak: ${stats.streak}j | Record: ${stats.longest}j | Score sevrage: ${stats.score}/100
+Réponds UNIQUEMENT en JSON valide (pas de backticks) :
+{"physique":"3-4 phrases effets physiques des substances consommées","mental":"2-3 phrases effets cognitifs et mentaux","sevrage":"2-3 phrases bilan de progression","conseil":"1 conseil médical précis et actionnable cette semaine","alerte":null}`;
+    fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:700,messages:[{role:"user",content:prompt}]})})
+      .then(r=>r.json()).then(d=>{
+        const raw=d.content?.find(b=>b.type==="text")?.text||"{}";
+        setText(JSON.parse(raw.replace(/```json|```/g,"").trim()));
+        setLoading(false);
+      }).catch(()=>{setErr("Analyse IA indisponible.");setLoading(false);});
   },[]);
-
-  if(loading)return(<div className="ai-box"><div className="ai-hdr"><div className="ai-dot"/><span style={{fontSize:11,color:"#22c55e",fontWeight:600}}>Analyse médicale...</span></div><div className="ai-loading"><span/><span/><span/></div></div>);
-  if(err)return(<div className="ai-box"><div className="ai-text" style={{color:"#4b5563"}}>{err}</div></div>);
+  if(loading)return<div className="ai-box"><div className="ai-hdr"><div className="ai-dot"/><span style={{fontSize:11,color:"#22c55e",fontWeight:600}}>Analyse médicale...</span></div><div className="ai-loading"><span/><span/><span/></div></div>;
+  if(err)return<div className="ai-box"><p style={{fontSize:12,color:"#4b5563"}}>{err}</p></div>;
   if(!text)return null;
-  return(
-    <div className="ai-box">
-      <div className="ai-hdr"><div className="ai-dot"/><span style={{fontSize:10,color:"#22c55e",fontWeight:700,letterSpacing:".06em"}}>ANALYSE MÉDICALE IA</span></div>
-      {text.alerte&&text.alerte!=="null"&&<div style={{padding:"8px 10px",background:"rgba(239,68,68,0.12)",borderRadius:8,border:"1px solid rgba(239,68,68,0.25)",marginBottom:8}}><div style={{fontSize:9,color:"#ef4444",fontWeight:700,marginBottom:3}}>⚠ ALERTE</div><div className="ai-text" style={{color:"#fca5a5"}}>{text.alerte}</div></div>}
-      <div className="ai-sec"><div className="ai-sec-t">🫀 Effets physiques</div><div className="ai-text">{text.physique}</div></div>
-      <div className="ai-sec"><div className="ai-sec-t">🧠 Effets cognitifs & mentaux</div><div className="ai-text">{text.mental}</div></div>
-      <div className="ai-sec"><div className="ai-sec-t">📈 Bilan sevrage</div><div className="ai-text">{text.sevrage}</div></div>
-      <div className="ai-sec"><div style={{padding:"9px 11px",background:"rgba(34,197,94,0.08)",borderRadius:9,border:"1px solid rgba(34,197,94,0.15)"}}><div style={{fontSize:9,color:"#22c55e",fontWeight:700,marginBottom:3}}>CONSEIL CETTE SEMAINE</div><div className="ai-text" style={{color:"#86efac"}}>{text.conseil}</div></div></div>
-    </div>
-  );
+  return<div className="ai-box">
+    <div className="ai-hdr"><div className="ai-dot"/><span style={{fontSize:10,color:"#22c55e",fontWeight:700,letterSpacing:".06em"}}>ANALYSE MÉDICALE IA</span></div>
+    {text.alerte&&<div style={{padding:"8px 10px",background:"rgba(239,68,68,0.12)",borderRadius:8,border:"1px solid rgba(239,68,68,0.25)",marginBottom:8}}><div style={{fontSize:9,color:"#ef4444",fontWeight:700,marginBottom:3}}>⚠ ALERTE MÉDICALE</div><div className="ai-text" style={{color:"#fca5a5"}}>{text.alerte}</div></div>}
+    <div className="ai-sec"><div className="ai-sec-t">🫀 Effets physiques</div><div className="ai-text">{text.physique}</div></div>
+    <div className="ai-sec"><div className="ai-sec-t">🧠 Effets cognitifs & mentaux</div><div className="ai-text">{text.mental}</div></div>
+    <div className="ai-sec"><div className="ai-sec-t">📈 Bilan sevrage</div><div className="ai-text">{text.sevrage}</div></div>
+    <div className="ai-sec"><div style={{padding:"9px 11px",background:"rgba(34,197,94,0.08)",borderRadius:9,border:"1px solid rgba(34,197,94,0.15)"}}><div style={{fontSize:9,color:"#22c55e",fontWeight:700,marginBottom:3}}>CONSEIL CETTE SEMAINE</div><div className="ai-text" style={{color:"#86efac"}}>{text.conseil}</div></div></div>
+  </div>;
 }
 
-/* Sevrage score */
-function sevrageScore(streak,longest,pct,nClean,daysCount){
-  return Math.round(Math.min(Math.min(streak*3,30)+Math.min(longest*1.5,25)+pct*0.3+Math.min((nClean/Math.max(daysCount,1))*15,15),100));
+// ── Score & Badges ────────────────────────────────────────────────────────────
+function sevrageScore(streak,longest,pct,nClean,dc){
+  return Math.round(Math.min(Math.min(streak*3,30)+Math.min(longest*1.5,25)+pct*0.3+Math.min((nClean/Math.max(dc,1))*15,15),100));
 }
 
-/* Badges */
-function computeBadges(data,activeDrugs){
+function computeBadges(data,active){
   const vals=Object.values(data);
   const today=new Date();
-  const cleanFn=e=>e&&(e.clean||(e.logged&&Object.keys(activeDrugs).filter(k=>activeDrugs[k]).every(k=>(e[k]||0)===0)));
+  const cleanFn=e=>e&&isClean(e,active);
   const cleanDays=vals.filter(cleanFn).length;
-  const loggedDays=vals.filter(e=>e&&(e.clean||e.logged||Object.values(e).some(v=>typeof v==="number"&&v>0))).length;
-
-  let streak=0,longest=0,run=0,prevD=null,curD=new Date(today);
-  while(true){const k=dk(curD.getFullYear(),curD.getMonth(),curD.getDate());if(data[k]&&cleanFn(data[k])){streak++;curD.setDate(curD.getDate()-1);}else break;}
+  const loggedDays=vals.filter(e=>e&&e.logged).length;
+  let streak=0,longest=0,run=0,prevD=null,cur=new Date(today);
+  while(true){const k=dk(cur.getFullYear(),cur.getMonth(),cur.getDate());if(cleanFn(data[k])){streak++;cur.setDate(cur.getDate()-1);}else break;}
   for(const k of Object.keys(data).sort()){if(cleanFn(data[k])){const d=new Date(k);if(prevD&&(d-prevD)/86400000===1){run++;}else{run=1;}longest=Math.max(longest,run);prevD=d;}else{run=0;prevD=null;}}
-
-  function consecNo(drugKey){let s=0,c=new Date(today);for(let i=0;i<999;i++){const k=dk(c.getFullYear(),c.getMonth(),c.getDate());const e=data[k];if(e&&e.logged){if((e[drugKey]||0)===0)s++;else break;}c.setDate(c.getDate()-1);}return s;}
-
-  const totalTabac=vals.reduce((s,e)=>s+(e?.tabac||0),0);
-  const totalCannabis=vals.reduce((s,e)=>s+(e?.cannabis||0),0);
-  const totalAlcool=vals.reduce((s,e)=>s+(e?.alcool||0),0);
-  const goodMoodDays=vals.filter(e=>e?.mood>=3).length;
-  const multiDrugDays=vals.filter(e=>e&&Object.keys(activeDrugs).filter(k=>activeDrugs[k]&&(e[k]||0)>0).length>=3).length;
-
+  function consecNo(drug){let s=0,c=new Date(today);for(let i=0;i<999;i++){const k=dk(c.getFullYear(),c.getMonth(),c.getDate());const e=data[k];if(e&&e.logged){if((e[drug]||0)===0)s++;else break;}c.setDate(c.getDate()-1);}return s;}
+  const goodMood=vals.filter(e=>e?.mood>=3).length;
+  const triple=vals.filter(e=>e&&Object.keys(active).filter(k=>active[k]&&(e[k]||0)>0).length>=3).length;
   return[
     {cat:"🌱 Premiers pas",id:"f1",icon:"📓",name:"Premier journal",desc:"Premier jour renseigné",earned:loggedDays>=1},
     {cat:null,id:"f2",icon:"🌿",name:"Premier jour clean",desc:"Ta première journée sans aucune substance",earned:cleanDays>=1},
-    {cat:null,id:"f3",icon:"📅",name:"7 jours trackés",desc:"Une semaine de données enregistrées",earned:loggedDays>=7},
+    {cat:null,id:"f3",icon:"📅",name:"7 jours trackés",desc:"Une semaine de données",earned:loggedDays>=7},
     {cat:null,id:"f4",icon:"📚",name:"30 jours trackés",desc:"Un mois complet",earned:loggedDays>=30},
     {cat:null,id:"f5",icon:"🏛️",name:"100 jours de suivi",desc:"La constance comme mode de vie",earned:loggedDays>=100},
     {cat:null,id:"f6",icon:"💫",name:"1 an de suivi",desc:"365 jours de données",earned:loggedDays>=365},
-
     {cat:"🔥 Streaks clean",id:"s1",icon:"✨",name:"Première étincelle",desc:"1 jour sans aucune substance",earned:longest>=1},
     {cat:null,id:"s2",icon:"🔥",name:"3 jours",desc:"72h clean — nicotine éliminée",earned:longest>=3},
-    {cat:null,id:"s3",icon:"⚡",name:"Une semaine",desc:"7 jours — circulation sanguine améliorée",earned:longest>=7},
-    {cat:null,id:"s4",icon:"💎",name:"2 semaines",desc:"14 jours consécutifs sans rien",earned:longest>=14},
+    {cat:null,id:"s3",icon:"⚡",name:"1 semaine",desc:"7 jours — circulation sanguine améliorée",earned:longest>=7},
+    {cat:null,id:"s4",icon:"💎",name:"2 semaines",desc:"14 jours consécutifs",earned:longest>=14},
     {cat:null,id:"s5",icon:"🌙",name:"3 semaines",desc:"21 jours — nouvelles habitudes neurologiques",earned:longest>=21},
-    {cat:null,id:"s6",icon:"👑",name:"Un mois clean",desc:"30 jours — risque cardiovasculaire en baisse",earned:longest>=30},
+    {cat:null,id:"s6",icon:"👑",name:"1 mois clean",desc:"30 jours — risque cardiovasculaire en baisse",earned:longest>=30},
     {cat:null,id:"s7",icon:"🏆",name:"2 mois",desc:"60 jours — ton corps se régénère",earned:longest>=60},
     {cat:null,id:"s8",icon:"🦋",name:"3 mois — Renaissance",desc:"Poumons restaurés, cognition rétablie",earned:longest>=90},
     {cat:null,id:"s9",icon:"🌍",name:"6 mois",desc:"180 jours de liberté",earned:longest>=180},
     {cat:null,id:"s10",icon:"🌟",name:"1 an clean",desc:"365 jours — transformation complète",earned:longest>=365},
-
     {cat:"🚭 Sevrage tabac",id:"t1",icon:"🚭",name:"3 jours sans tabac",desc:"La nicotine quitte ton sang",earned:consecNo("tabac")>=3},
     {cat:null,id:"t2",icon:"💨",name:"1 semaine sans fumer",desc:"Cils bronchiques qui repoussent",earned:consecNo("tabac")>=7},
-    {cat:null,id:"t3",icon:"🫁",name:"1 mois sans tabac",desc:"Risque cardiovasculaire déjà réduit",earned:consecNo("tabac")>=30},
+    {cat:null,id:"t3",icon:"🫁",name:"1 mois sans tabac",desc:"Risque cardiovasculaire réduit",earned:consecNo("tabac")>=30},
     {cat:null,id:"t4",icon:"❤️",name:"3 mois sans tabac",desc:"+30% capacité pulmonaire",earned:consecNo("tabac")>=90},
-
     {cat:"🍃 Sevrage cannabis",id:"w1",icon:"🍃",name:"3 jours sans joints",desc:"THC sanguin en baisse",earned:consecNo("cannabis")>=3},
     {cat:null,id:"w2",icon:"🧠",name:"1 semaine sans weed",desc:"Mémoire en récupération",earned:consecNo("cannabis")>=7},
     {cat:null,id:"w3",icon:"💡",name:"2 semaines sans cannabis",desc:"Cognition et sommeil améliorés",earned:consecNo("cannabis")>=14},
     {cat:null,id:"w4",icon:"🌟",name:"1 mois sans cannabis",desc:"Système endocannabinoïde rétabli",earned:consecNo("cannabis")>=30},
-
     {cat:"🍺 Sevrage alcool",id:"a1",icon:"💧",name:"3 jours sans alcool",desc:"Foie en récupération",earned:consecNo("alcool")>=3},
     {cat:null,id:"a2",icon:"🫀",name:"2 semaines sans alcool",desc:"Tension artérielle normalisée",earned:consecNo("alcool")>=14},
     {cat:null,id:"a3",icon:"🌊",name:"1 mois sans alcool",desc:"Foie régénéré, sommeil profond restauré",earned:consecNo("alcool")>=30},
-
     {cat:"✦ Jours clean cumulés",id:"c1",icon:"🌱",name:"10 jours clean",desc:"Au total",earned:cleanDays>=10},
     {cat:null,id:"c2",icon:"🌿",name:"25 jours clean",desc:"Au total",earned:cleanDays>=25},
     {cat:null,id:"c3",icon:"🌳",name:"50 jours clean",desc:"Au total",earned:cleanDays>=50},
     {cat:null,id:"c4",icon:"🏔️",name:"100 jours clean",desc:"Un cap majeur",earned:cleanDays>=100},
     {cat:null,id:"c5",icon:"🌍",name:"200 jours clean",desc:"Tu as changé ta vie",earned:cleanDays>=200},
-
-    {cat:"😊 Bien-être",id:"b1",icon:"😊",name:"Bonne humeur × 5",desc:"5 jours avec humeur ≥ 4",earned:goodMoodDays>=5},
-    {cat:null,id:"b2",icon:"🌈",name:"20 jours positifs",desc:"20 jours avec humeur positive",earned:goodMoodDays>=20},
-    {cat:null,id:"b3",icon:"🛡️",name:"Jamais les 3 à la fois",desc:"Aucun jour avec 3+ substances simultanées",earned:loggedDays>=7&&multiDrugDays===0},
-
-    {cat:"🔒 Secrets",id:"x1",icon:"🦅",name:"Phénix",desc:"Rechute puis 7 jours clean",earned:(()=>{const keys=Object.keys(data).sort();let hadRelapse=false;for(let i=0;i<keys.length;i++){const e=data[keys[i]];if(e&&!cleanFn(e)&&Object.keys(activeDrugs).filter(k=>activeDrugs[k]).some(k=>(e[k]||0)>0))hadRelapse=true;if(hadRelapse){let s=0;for(let j=i;j<keys.length&&j<i+7;j++){if(cleanFn(data[keys[j]]))s++;}if(s===7)return true;}}return false;})()},
-    {cat:null,id:"x2",icon:"🌅",name:"Week-end propre",desc:"Samedi ET dimanche clean la même semaine",earned:(()=>{const d=new Date(today);const dow=d.getDay()===0?6:d.getDay()-1;const sat=new Date(d);sat.setDate(d.getDate()-(dow-5+7)%7);const sun=new Date(sat);sun.setDate(sat.getDate()+1);const ks=dk(sat.getFullYear(),sat.getMonth(),sat.getDate());const ksu=dk(sun.getFullYear(),sun.getMonth(),sun.getDate());return cleanFn(data[ks])&&cleanFn(data[ksu]);})()},
-    {cat:null,id:"x3",icon:"📆",name:"4 lundis clean",desc:"4 lundis consécutifs sans rien",earned:(()=>{const d=new Date(today);const dow=d.getDay()===0?6:d.getDay()-1;let c=0;for(let w=0;w<4;w++){const lun=new Date(d);lun.setDate(d.getDate()-dow-w*7);if(cleanFn(data[dk(lun.getFullYear(),lun.getMonth(),lun.getDate())]))c++;}return c>=4;})()},
+    {cat:"😊 Bien-être",id:"b1",icon:"😊",name:"5 jours positifs",desc:"5 jours avec humeur ≥ 4",earned:goodMood>=5},
+    {cat:null,id:"b2",icon:"🌈",name:"20 jours positifs",desc:"20 jours avec humeur positive",earned:goodMood>=20},
+    {cat:null,id:"b3",icon:"🛡️",name:"Jamais les 3 ensemble",desc:"Aucun jour avec 3+ substances simultanées",earned:loggedDays>=7&&triple===0},
+    {cat:"🔒 Secrets",id:"x1",icon:"🦅",name:"Phénix",desc:"Rechute puis 7 jours clean derrière",earned:(()=>{const keys=Object.keys(data).sort();let rel=false;for(let i=0;i<keys.length;i++){const e=data[keys[i]];if(e&&!cleanFn(e)&&e.logged)rel=true;if(rel){let s=0;for(let j=i;j<keys.length&&j<i+7;j++){if(cleanFn(data[keys[j]]))s++;}if(s===7)return true;}}return false;})()},
+    {cat:null,id:"x2",icon:"🌅",name:"Week-end propre",desc:"Samedi ET dimanche clean la même semaine",earned:(()=>{const d=new Date(today);const dow=d.getDay()===0?6:d.getDay()-1;const sat=new Date(d);sat.setDate(d.getDate()-(dow-5+7)%7);const sun=new Date(sat);sun.setDate(sat.getDate()+1);return cleanFn(data[dk(sat.getFullYear(),sat.getMonth(),sat.getDate())])&&cleanFn(data[dk(sun.getFullYear(),sun.getMonth(),sun.getDate())]);})()},
+    {cat:null,id:"x3",icon:"📆",name:"4 lundis clean",desc:"4 lundis consécutifs",earned:(()=>{const d=new Date(today);const dow=d.getDay()===0?6:d.getDay()-1;let c=0;for(let w=0;w<4;w++){const lun=new Date(d);lun.setDate(d.getDate()-dow-w*7);if(cleanFn(data[dk(lun.getFullYear(),lun.getMonth(),lun.getDate())]))c++;}return c>=4;})()},
   ];
 }
 
+// ── Modal Component (isolated state to prevent black screen) ──────────────────
+function DayModal({modal,data,activeDrugs,onSave,onClear,onClose}){
+  const selKey=dk(modal.y,modal.m,modal.d);
+  const raw=data[selKey]||null;
+
+  // Local state — completely isolated from parent re-renders
+  const [localData,setLocalData]=useState(()=>{
+    const base={logged:false,clean:false,note:"",mood:null,ctx:[]};
+    Object.keys(activeDrugs).filter(k=>activeDrugs[k]).forEach(k=>{base[k]=0;});
+    return raw?{...base,...raw}:base;
+  });
+
+  const activeList=Object.keys(activeDrugs).filter(k=>activeDrugs[k]);
+  const hasConsumption=activeList.some(k=>(localData[k]||0)>0);
+
+  function setVal(key,val){setLocalData(p=>({...p,[key]:val,clean:false,logged:true}));}
+  function toggleClean(){
+    setLocalData(p=>{
+      if(p.clean){return{...p,clean:false};}
+      const next={...p,clean:true,logged:true};
+      activeList.forEach(k=>{next[k]=0;});
+      return next;
+    });
+  }
+  function setMood(i){setLocalData(p=>({...p,mood:p.mood===i?null:i}));}
+  function toggleCtx(c){setLocalData(p=>({...p,ctx:(p.ctx||[]).includes(c)?(p.ctx||[]).filter(x=>x!==c):[...(p.ctx||[]),c]}));}
+
+  return(
+    <div className="mo mo-animate" onClick={onClose}>
+      <div className="mb" onClick={e=>e.stopPropagation()}>
+        <div className="mh"/>
+        <div style={{marginBottom:13}}>
+          <div style={{fontSize:9,color:"#6b7280",letterSpacing:".1em",textTransform:"uppercase"}}>Journal du</div>
+          <div style={{fontSize:16,fontFamily:"'DM Serif Display',serif",color:"#f0f0f8"}}>{modal.d} {MONTHS[modal.m]} {modal.y}</div>
+        </div>
+
+        {/* Clean toggle */}
+        <div className="slbl" style={{marginTop:0}}>Journée</div>
+        <div className={`ctr-row${localData.clean?" active":""}`}
+          style={{background:localData.clean?"rgba(34,197,94,0.12)":"rgba(255,255,255,0.04)",color:"#22c55e",cursor:"pointer"}}
+          onClick={toggleClean}>
+          <div className="ctr-left">
+            <div className="ctr-emoji">✦</div>
+            <div><div className="ctr-lbl" style={{color:"#22c55e"}}>Journée clean</div><div className="ctr-sub">Aucune substance aujourd'hui</div></div>
+          </div>
+          {localData.clean&&<span style={{color:"#22c55e",fontSize:16,marginRight:4}} className="chk">✓</span>}
+        </div>
+
+        {/* Drug counters */}
+        {activeList.map(k=>{
+          const d=ALL_DRUGS[k];if(!d)return null;
+          const val=localData[k]||0;
+          return(
+            <React.Fragment key={k}>
+              <div className="slbl">{d.name} {d.emoji}</div>
+              <div className={`ctr-row${val>0?" active":""}`}
+                style={{background:val>0?d.color+"1a":"rgba(255,255,255,0.04)",color:d.color}}>
+                <div className="ctr-left">
+                  <div className="ctr-emoji">{d.emoji}</div>
+                  <div>
+                    <div className="ctr-lbl" style={{color:val>0?d.color:"#e8e8f0"}}>{d.unit}</div>
+                    <div className="ctr-sub">{val>0?(d.gramPerUnit?`≈${(val*d.gramPerUnit).toFixed(1)}g`:`${val} ${val>1?d.unit:d.unitShort}`):"Combien ?"}</div>
+                  </div>
+                </div>
+                {/* Counter buttons — purely local, no parent state change */}
+                <div className="ctr-right">
+                  <button className="ctr-btn"
+                    style={{borderColor:val>0?d.color:"rgba(255,255,255,0.1)"}}
+                    onPointerDown={e=>{e.stopPropagation();setVal(k,Math.max(0,val-1));}}>{`−`}</button>
+                  <div className="ctr-val" style={{color:val>0?d.color:"#4b5563"}}>{val}</div>
+                  <button className="ctr-btn"
+                    style={{borderColor:val>0?d.color:"rgba(255,255,255,0.1)"}}
+                    onPointerDown={e=>{e.stopPropagation();setVal(k,Math.min(99,val+1));}}>{`+`}</button>
+                </div>
+              </div>
+            </React.Fragment>
+          );
+        })}
+
+        {/* Mood */}
+        <div className="slbl">Humeur 😊</div>
+        <div className="mood-row">
+          {MOODS.map((m,i)=>(
+            <button key={i} className={`mood-btn${localData.mood===i?" on":""}`}
+              style={{borderColor:localData.mood===i?m.c:"transparent",color:localData.mood===i?m.c:"#6b7280"}}
+              onClick={()=>setMood(i)}>
+              <span>{m.e}</span><span>{m.l}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Context tags — only if consumption */}
+        {hasConsumption&&<>
+          <div className="slbl">Contexte 🏷️</div>
+          <div className="tag-row">
+            {CTXS.map(c=>(
+              <button key={c} className={`tag${(localData.ctx||[]).includes(c)?" on":""}`} onClick={()=>toggleCtx(c)}>{c}</button>
+            ))}
+          </div>
+        </>}
+
+        {/* Note */}
+        <div className="slbl">Note</div>
+        <textarea rows={2} placeholder="Comment tu te sens ?"
+          value={localData.note||""}
+          onChange={e=>setLocalData(p=>({...p,note:e.target.value}))}/>
+
+        <div style={{display:"flex",gap:7,marginTop:12}}>
+          {raw&&<button onClick={()=>{onClear(selKey);onClose();}}
+            style={{flex:1,padding:"12px",borderRadius:10,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",color:"#6b7280",fontFamily:"inherit",fontWeight:600,fontSize:12,cursor:"pointer"}}>
+            Effacer
+          </button>}
+          <button className="bprim" style={{flex:2,margin:0}} onClick={()=>{onSave(selKey,{...localData,logged:true});onClose();}}>
+            Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main App ──────────────────────────────────────────────────────────────────
 function App(){
   const today=new Date();
   const [year,setYear]=useState(today.getFullYear());
@@ -453,22 +536,20 @@ function App(){
 
   const entries=useMemo(()=>Array.from({length:daysCount},(_,i)=>{
     const e=data[dk(year,month,i+1)]||null;
-    const clean=e?isCleanDay(e,activeDrugs):false;
-    return{d:i+1,e,clean};
+    return{d:i+1,e,clean:isClean(e,activeDrugs)};
   }),[data,year,month,daysCount,activeDrugs]);
 
-  const logged=entries.filter(x=>x.e).length;
+  const logged=entries.filter(x=>x.e?.logged).length;
   const nClean=entries.filter(x=>x.clean).length;
   const pct=logged?Math.round((nClean/logged)*100):0;
 
-  const totals=useMemo(()=>{
-    const t={};
-    activeList.forEach(k=>{t[k]=entries.reduce((s,x)=>s+(x.e?.(k)||0),0);});
-    return t;
-  },[entries,activeList]);
+  const totals=useMemo(()=>{const t={};activeList.forEach(k=>{t[k]=entries.reduce((s,x)=>s+(x.e?.[k]||0),0);});return t;},[entries,activeList]);
 
   const prevM=month===0?11:month-1,prevY=month===0?year-1:year;
-  const prevEntries=useMemo(()=>{const dim=daysIn(prevY,prevM);return Array.from({length:dim},(_,i)=>{const e=data[dk(prevY,prevM,i+1)]||null;return{e,clean:e?isCleanDay(e,activeDrugs):false};});},[data,prevY,prevM,activeDrugs]);
+  const prevEntries=useMemo(()=>{
+    const dim=daysIn(prevY,prevM);
+    return Array.from({length:dim},(_,i)=>{const e=data[dk(prevY,prevM,i+1)]||null;return{e,clean:isClean(e,activeDrugs)};});
+  },[data,prevY,prevM,activeDrugs]);
   const prevClean=prevEntries.filter(x=>x.clean).length;
 
   const weeklyData=useMemo(()=>{
@@ -484,27 +565,27 @@ function App(){
     return wks;
   },[entries,daysCount,activeList]);
 
-  // Streak
-  let streak=0,cur=new Date(today);
-  while(true){const k=dk(cur.getFullYear(),cur.getMonth(),cur.getDate());const e=data[k];if(e&&isCleanDay(e,activeDrugs)){streak++;cur.setDate(cur.getDate()-1);}else break;}
+  // Streak computation
+  let streak=0,curD=new Date(today);
+  while(true){const k=dk(curD.getFullYear(),curD.getMonth(),curD.getDate());if(isClean(data[k],activeDrugs)){streak++;curD.setDate(curD.getDate()-1);}else break;}
   useEffect(()=>{if(streak>prevStreak.current){setPulse(true);setTimeout(()=>setPulse(false),600);}prevStreak.current=streak;},[streak]);
   let longest=0,run=0,prevD=null;
-  for(const k of Object.keys(data).sort()){if(isCleanDay(data[k],activeDrugs)){const d=new Date(k);if(prevD&&(d-prevD)/86400000===1){run++;}else{run=1;}longest=Math.max(longest,run);prevD=d;}else{run=0;prevD=null;}}
+  for(const k of Object.keys(data).sort()){if(isClean(data[k],activeDrugs)){const d=new Date(k);if(prevD&&(d-prevD)/86400000===1){run++;}else{run=1;}longest=Math.max(longest,run);prevD=d;}else{run=0;prevD=null;}}
 
   const score=sevrageScore(streak,longest,pct,nClean,daysCount);
   const scoreColor=score>=70?"#22c55e":score>=40?"#f97316":"#ef4444";
+  const badges=useMemo(()=>computeBadges(data,activeDrugs),[data,activeDrugs]);
+  const earnedCount=badges.filter(b=>b.earned).length;
 
   const spark=useMemo(()=>Array.from({length:28},(_,i)=>{
     const d=new Date(today);d.setDate(d.getDate()-(27-i));
     const k=dk(d.getFullYear(),d.getMonth(),d.getDate());
-    const e=data[k];
-    const clean=e&&isCleanDay(e,activeDrugs);
-    const total=e?getDayTotal(e,activeDrugs):0;
-    return{v:clean?3:total===0?2:total<=2?1:0,color:clean?"#22c55e":total===0?"#4b5563":"#ef4444"};
-  }),[data,activeDrugs]);
+    const e=data[k];const cl=isClean(e,activeDrugs);
+    const tot=e?activeList.reduce((s,dr)=>s+(e[dr]||0),0):0;
+    return{v:cl?3:tot===0?2:tot<=2?1:0,color:cl?"#22c55e":tot===0?"#4b5563":"#ef4444"};
+  }),[data,activeDrugs,activeList]);
 
-  const badges=useMemo(()=>computeBadges(data,activeDrugs),[data,activeDrugs]);
-  const earnedCount=badges.filter(b=>b.earned).length;
+  const aiStats=useMemo(()=>({totals,nClean,daysCount,streak,longest,pct,score}),[totals,nClean,daysCount,streak,longest,pct,score]);
 
   // Calendar cells
   const cells=[];
@@ -517,35 +598,24 @@ function App(){
 
   function changeMonth(dir){if(dir<0){if(month===0){setMonth(11);setYear(y=>y-1);}else setMonth(m=>m-1);}else{if(month===11){setMonth(0);setYear(y=>y+1);}else setMonth(m=>m+1);}setCalKey(k=>k+1);}
 
-  function updateEntry(y,m,d,patch){
-    const key=dk(y,m,d);
-    setData(prev=>({...prev,[key]:{logged:true,...(prev[key]||{}),...patch}}));
+  function saveEntry(key,entryData){
+    setData(prev=>({...prev,[key]:entryData}));
+    setBop(parseInt(key.split("-")[2]));
+    setTimeout(()=>setBop(null),450);
   }
-
-  const selKey=modal?dk(modal.y,modal.m,modal.d):null;
-  const selRaw=selKey?data[selKey]:null;
-  const sel={logged:false,clean:false,note:"",mood:null,ctx:[],...(selRaw||{})};
-  activeList.forEach(k=>{if(sel[k]===undefined)sel[k]=0;});
-
-  function setClean(v){if(!modal)return;const patch={clean:v,logged:true};if(v)activeList.forEach(k=>{patch[k]=0;});updateEntry(modal.y,modal.m,modal.d,patch);if(v){setBop(modal.d);setTimeout(()=>setBop(null),450);}}
-  function setDrugVal(drugKey,val){if(!modal)return;updateEntry(modal.y,modal.m,modal.d,{[drugKey]:val,clean:false,logged:true});if(val>0){setBop(modal.d);setTimeout(()=>setBop(null),450);}}
-  function setMood(m){if(!modal)return;updateEntry(modal.y,modal.m,modal.d,{mood:sel.mood===m?null:m});}
-  function toggleCtx(c){if(!modal)return;const arr=sel.ctx||[];updateEntry(modal.y,modal.m,modal.d,{ctx:arr.includes(c)?arr.filter(x=>x!==c):[...arr,c]});}
-  function setNote(note){if(!modal)return;updateEntry(modal.y,modal.m,modal.d,{note});}
-  function clearDay(){if(!modal)return;setData(prev=>{const n={...prev};delete n[dk(modal.y,modal.m,modal.d)];return n;});}
+  function clearEntry(key){setData(prev=>{const n={...prev};delete n[key];return n;});}
   function exportJSON(){const blob=new Blob([JSON.stringify({data,goals,activeDrugs},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="recovery_tracker.json";a.click();}
 
-  const aiStats=useMemo(()=>({totals,nClean,daysCount,streak,longest,pct,score}),[totals,nClean,daysCount,streak,longest,pct,score]);
-
-  // Recovery steps for primary drug
-  const primaryDrug=activeList.find(k=>ALL_DRUGS[k]?.effects?.recovery?.length>0);
-  const recSteps=primaryDrug?ALL_DRUGS[primaryDrug].effects.recovery:[];
+  const primaryDrug=activeList.find(k=>ALL_DRUGS[k]?.recovery?.length>0);
+  const recSteps=primaryDrug?ALL_DRUGS[primaryDrug].recovery:[];
+  const streakThresholds=[0,0,2,3,7,14,30,90,365];
 
   const riskOrder={"Extrême":0,"Très élevé":1,"Élevé":2,"Modéré":3,"Faible":4};
   const sortedDrugs=Object.entries(ALL_DRUGS).sort((a,b)=>(riskOrder[a[1].risk]||9)-(riskOrder[b[1].risk]||9));
 
   return(
     <div className="shell">
+      {/* Header */}
       <div className="hdr">
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
           <div>
@@ -558,15 +628,14 @@ function App(){
 
       <div className="content">
 
-        {/* ══ MON PARCOURS (calendrier) ══ */}
-        {tab==="cal"&&(<div className="tc">
-
-          {/* Hero recovery banner */}
+        {/* ══ MON PARCOURS ══ */}
+        {tab==="cal"&&<div className="tc">
+          {/* Hero */}
           <div className="hero">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
               <div>
                 <div style={{fontSize:9,color:"#86efac",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:4}}>Score de guérison</div>
-                <div className="hero-score" style={{color:scoreColor}}>{score}<span style={{fontSize:18}}>/100</span></div>
+                <div style={{fontSize:50,fontWeight:700,fontFamily:"'DM Serif Display',serif",color:scoreColor,lineHeight:1}}>{score}<span style={{fontSize:18}}>/100</span></div>
                 <div style={{fontSize:11,color:"#9ca3af",marginTop:3}}>{score>=70?"Bonne progression 🌱":score>=40?"En chemin 🚶":score>=20?"Continue ✊":"Commence aujourd'hui"}</div>
               </div>
               <div style={{textAlign:"right"}}>
@@ -578,6 +647,7 @@ function App(){
             <div style={{marginTop:12}}><Bar pct={score} color={`linear-gradient(90deg,${scoreColor},${scoreColor}88)`} thick/></div>
           </div>
 
+          {/* Calendar nav */}
           <div className="nav">
             <button className="nbtn" onClick={()=>calView==="month"?changeMonth(-1):setWeekOffset(w=>w-1)}>‹</button>
             <div style={{display:"flex",alignItems:"center",gap:7}}>
@@ -590,126 +660,113 @@ function App(){
             <button className="nbtn" onClick={()=>calView==="month"?changeMonth(1):setWeekOffset(w=>w+1)}>›</button>
           </div>
 
+          {/* Month view */}
           {calView==="month"&&<>
             <div className="cal-hdr">{DAYS.map(d=><div key={d} className="cdl">{d}</div>)}</div>
             <div className="cal-grid" key={calKey}>
               {cells.map((d,i)=>{
-                if(!d)return <div key={`e${i}`}/>;
+                if(!d)return<div key={`e${i}`}/>;
                 const e=data[dk(year,month,d)]||null;
-                const col=getDayColor(e,activeDrugs);
+                const col=dayColor(e,activeDrugs);
                 const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();
-                return(<div key={d} className={`day${isToday?" td":""}${bop===d?" bop":""}`}
+                return<div key={d} className={`day${isToday?" td":""}${bop===d?" bop":""}`}
                   style={{background:col?col+"22":"rgba(255,255,255,0.03)",borderColor:col||(isToday?"rgba(34,197,94,0.5)":"transparent"),color:col||"#6b7280",animationDuration:`${Math.min(i*14,260)+160}ms`}}
                   onClick={()=>setModal({y:year,m:month,d})}>
                   <span style={{fontSize:11,fontWeight:isToday?700:500}}>{d}</span>
-                  {e&&<span style={{fontSize:8,marginTop:1}}>{getDayEmoji(e,activeDrugs)}</span>}
+                  {e&&<span style={{fontSize:8,marginTop:1}}>{dayEmoji(e,activeDrugs)}</span>}
                   {e?.mood!=null&&<span style={{position:"absolute",bottom:2,right:2,fontSize:7}}>{MOODS[e.mood]?.e}</span>}
                   {e?.note&&<div className="dot"/>}
-                </div>);
+                </div>;
               })}
             </div>
           </>}
 
-          {calView==="week"&&(<div className="week-grid">
+          {/* Week view */}
+          {calView==="week"&&<div className="week-grid">
             {weekDays.map(({date,key},i)=>{
-              const e=data[key]||null,col=getDayColor(e,activeDrugs);
+              const e=data[key]||null,col=dayColor(e,activeDrugs);
               const isToday=date.toDateString()===today.toDateString();
-              return(<div key={key} className={`wday${isToday?" td":""}`}
+              return<div key={key} className={`wday${isToday?" td":""}`}
                 style={{background:col?col+"18":"rgba(255,255,255,0.03)",borderColor:col||(isToday?"rgba(34,197,94,0.5)":"transparent")}}
                 onClick={()=>setModal({y:date.getFullYear(),m:date.getMonth(),d:date.getDate()})}>
                 <div style={{fontSize:9,fontWeight:600,color:"var(--m)",textTransform:"uppercase",marginBottom:2}}>{DAYS_S[i]}</div>
                 <div style={{fontSize:14,fontWeight:700,color:col||(isToday?"#4ade80":"#e8e8f0"),marginBottom:2}}>{date.getDate()}</div>
-                <div style={{fontSize:12}}>{e?getDayEmoji(e,activeDrugs):"·"}</div>
+                <div style={{fontSize:12}}>{e?dayEmoji(e,activeDrugs):"·"}</div>
                 {e&&activeList.filter(k=>(e[k]||0)>0).slice(0,2).map(k=><div key={k} style={{fontSize:8,color:ALL_DRUGS[k]?.color,marginTop:1}}>{e[k]}{ALL_DRUGS[k]?.emoji}</div>)}
                 {e?.mood!=null&&<div style={{fontSize:10,marginTop:1}}>{MOODS[e.mood]?.e}</div>}
-              </div>);
+              </div>;
             })}
-          </div>)}
+          </div>}
 
           <div className="leg">
             <div className="li"><div className="ld" style={{background:"#22c55e"}}/>Clean</div>
             {activeList.map(k=><div key={k} className="li"><div className="ld" style={{background:ALL_DRUGS[k]?.color}}/>{ALL_DRUGS[k]?.name}</div>)}
-            <div className="li"><div className="ld" style={{background:"#ef4444"}}/>2+ substances</div>
-            <div className="li"><div className="ld" style={{background:"#9f1239"}}/>3+ substances</div>
+            <div className="li"><div className="ld" style={{background:"#ef4444"}}/>2+ subst.</div>
+            <div className="li"><div className="ld" style={{background:"#9f1239"}}/>3+ subst.</div>
           </div>
-
           <div className="ss" style={{marginTop:10}}>
             <div className="m"><div className="v" style={{color:"#22c55e"}}>{nClean}</div><div className="l">jours clean</div></div>
             <div className="m"><div className={`v${pulse?" pulse":""}`} style={{color:"#4ade80",display:"inline-block"}}>{streak}j</div><div className="l">streak</div></div>
             <div className="m"><div className="v" style={{color:"#a3e635"}}>{pct}%</div><div className="l">taux</div></div>
           </div>
-        </div>)}
+        </div>}
 
-        {/* ══ GUÉRISON (stats) ══ */}
-        {tab==="stats"&&(<div className="tc">
-
-          {/* Score */}
+        {/* ══ GUÉRISON ══ */}
+        {tab==="stats"&&<div className="tc">
           <div className="sev-score">
             <div style={{fontSize:9,color:"#86efac",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:4}}>Score de guérison</div>
-            <div style={{fontSize:50,fontWeight:700,fontFamily:"'DM Serif Display',serif",color:scoreColor,lineHeight:1}}>{score}<span style={{fontSize:18}}>/100</span></div>
+            <div style={{fontSize:48,fontWeight:700,fontFamily:"'DM Serif Display',serif",color:scoreColor,lineHeight:1}}>{score}<span style={{fontSize:18}}>/100</span></div>
             <div style={{fontSize:11,color:"#9ca3af",marginTop:3}}>Streak {streak}j · Record {longest}j · {pct}% clean</div>
             <div style={{marginTop:10}}><Bar pct={score} color={`linear-gradient(90deg,${scoreColor},${scoreColor}66)`} thick/></div>
           </div>
 
-          {/* Recovery timeline */}
           {recSteps.length>0&&<div className="card">
-            <div className="clbl">Timeline de récupération — {ALL_DRUGS[primaryDrug]?.name}</div>
-            <div style={{fontSize:10,color:"#4b5563",marginBottom:10}}>Basé sur {streak} jour{streak>1?"s":""} de streak actuel</div>
+            <div className="clbl">Timeline — {ALL_DRUGS[primaryDrug]?.name}</div>
+            <div style={{fontSize:10,color:"#4b5563",marginBottom:10}}>Streak actuel : {streak} jour{streak>1?"s":""}</div>
             {recSteps.map((s,idx)=>{
-              const done=streak>=(idx===0?0:idx===1?0:idx===2?2:idx===3?3:idx===4?7:idx===5?14:idx===6?30:idx===7?90:365);
-              return(<div key={idx} className="rec-step">
+              const done=streak>=(streakThresholds[idx]||0);
+              return<div key={idx} className="rec-step">
                 <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}>
-                  <div className="rec-dot" style={{background:done?"#22c55e":"rgba(255,255,255,0.1)",boxShadow:done?"0 0 7px #22c55e44":""}}/>
+                  <div style={{width:9,height:9,borderRadius:"50%",background:done?"#22c55e":"rgba(255,255,255,0.1)",boxShadow:done?"0 0 7px #22c55e44":"",flexShrink:0,marginTop:4}}/>
                   {idx<recSteps.length-1&&<div style={{width:2,height:20,background:"rgba(255,255,255,0.06)",marginTop:2}}/>}
                 </div>
                 <div style={{paddingBottom:idx<recSteps.length-1?6:0}}>
                   <div style={{fontSize:11,fontWeight:700,color:done?"#22c55e":"#4b5563",marginBottom:1}}>{s.t}</div>
                   <div style={{fontSize:11,color:done?"#e8e8f0":"#4b5563",lineHeight:1.4}}>{s.d}</div>
                 </div>
-              </div>);
+              </div>;
             })}
           </div>}
 
-          {/* Totaux */}
           <div className="card">
             <div className="clbl">Consommation ce mois</div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:7}}>
-              {activeList.filter(k=>(totals[k]||0)>0||(ALL_DRUGS[k]?.defaultOn)).map(k=>{
+              {activeList.map(k=>{
                 const d=ALL_DRUGS[k];if(!d)return null;
-                return(<div key={k} style={{background:"rgba(255,255,255,0.04)",border:`1px solid ${d.color}22`,borderRadius:11,padding:"9px 5px",textAlign:"center"}}>
+                const v=totals[k]||0;
+                return<div key={k} style={{background:"rgba(255,255,255,0.04)",border:`1px solid ${d.color}22`,borderRadius:11,padding:"9px 5px",textAlign:"center"}}>
                   <div style={{fontSize:9,marginBottom:2}}>{d.emoji}</div>
-                  <div style={{fontSize:18,fontWeight:700,color:(totals[k]||0)>0?d.color:"#4b5563",fontFamily:"'DM Serif Display',serif"}}>{totals[k]||0}</div>
+                  <div style={{fontSize:18,fontWeight:700,color:v>0?d.color:"#4b5563",fontFamily:"'DM Serif Display',serif"}}>{v}</div>
                   <div style={{fontSize:9,color:"#e8e8f0",fontWeight:500}}>{d.unitShort}</div>
-                  {d.gramPerUnit&&(totals[k]||0)>0&&<div style={{fontSize:8,color:"#6b7280"}}>≈{((totals[k]||0)*d.gramPerUnit).toFixed(1)}g</div>}
-                </div>);
+                  {d.gramPerUnit&&v>0&&<div style={{fontSize:8,color:"#6b7280"}}>≈{(v*d.gramPerUnit).toFixed(1)}g</div>}
+                </div>;
               })}
             </div>
           </div>
 
-          {/* vs mois précédent */}
           <div className="card">
             <div className="clbl">vs {MONTHS_S[prevM]}</div>
-            <div style={{display:"flex",justifyContent:"space-between"}}>
-              {[{l:"Jours clean",cur:nClean,prev:prevClean,better:"up"}].map(s=>{
-                const diff=s.cur-s.prev;const improved=diff>0;
-                return(<div key={s.l} style={{flex:1,textAlign:"center"}}>
-                  <div style={{fontSize:24,fontWeight:700,color:"#22c55e",fontFamily:"'DM Serif Display',serif"}}>{s.cur}</div>
+            <div style={{display:"flex",justifyContent:"space-between",textAlign:"center"}}>
+              {[{l:"Jours clean",cur:nClean,prev:prevClean,better:"up"},{l:"Score",cur:score,prev:0,nocomp:true,c:scoreColor},{l:"Streak",cur:streak,prev:0,nocomp:true,c:"#a855f7"}].map(s=>(
+                <div key={s.l} style={{flex:1}}>
+                  <div style={{fontSize:22,fontWeight:700,color:s.c||"#22c55e",fontFamily:"'DM Serif Display',serif"}}>{s.cur}</div>
                   <div style={{fontSize:10,color:"#9ca3af",margin:"3px 0"}}>{s.l}</div>
-                  {diff!==0&&<div className={improved?"delta-up":"delta-dn"}>{improved?"↑":"↓"}{Math.abs(diff)}</div>}
-                </div>);
-              })}
-              <div style={{flex:1,textAlign:"center"}}>
-                <div style={{fontSize:24,fontWeight:700,color:scoreColor,fontFamily:"'DM Serif Display',serif"}}>{score}</div>
-                <div style={{fontSize:10,color:"#9ca3af",margin:"3px 0"}}>Score sevrage</div>
-              </div>
-              <div style={{flex:1,textAlign:"center"}}>
-                <div style={{fontSize:24,fontWeight:700,color:"#a855f7",fontFamily:"'DM Serif Display',serif"}}>{longest}</div>
-                <div style={{fontSize:10,color:"#9ca3af",margin:"3px 0"}}>Record streak</div>
-              </div>
+                  {!s.nocomp&&s.cur!==s.prev&&<div className={s.cur>s.prev?"delta-up":"delta-dn"}>{s.cur>s.prev?"↑":"↓"}{Math.abs(s.cur-s.prev)}</div>}
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Progression hebdo */}
           <div className="xcard">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
               <div className="clbl" style={{margin:0}}>Par semaine</div>
@@ -719,7 +776,6 @@ function App(){
             {activeList.slice(0,2).map(k=><div key={k} style={{marginBottom:7}}><div style={{fontSize:9,color:ALL_DRUGS[k]?.color,fontWeight:600,marginBottom:4}}>{ALL_DRUGS[k]?.emoji} {ALL_DRUGS[k]?.name}</div><WeekBars weeks={weeklyData} metric={k} color={ALL_DRUGS[k]?.color}/></div>)}
           </div>
 
-          {/* Tendance */}
           <div className="xcard">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}}>
               <div className="clbl" style={{margin:0}}>Tendance 28j</div>
@@ -730,18 +786,18 @@ function App(){
 
           <div className="motiv">
             <div className="mt">💊 Fact médical</div>
-            <p>{streak>=90?"90+ jours : tes poumons ont restauré leurs cils bronchiques. Capacité respiratoire +30%. Le risque cardiovasculaire est cliniquement réduit.":streak>=30?"30 jours : ton foie s'est partiellement régénéré. Les récepteurs dopaminergiques reprennent leur sensibilité normale.":streak>=14?"2 semaines : la mémoire à court terme s'améliore mesuralement. L'anxiété de sevrage atteint son pic puis décroît.":streak>=7?"7 jours : ta circulation sanguine s'est déjà améliorée. L'oxygénation cellulaire est optimisée.":streak>=3?"72h : les substances sont en cours d'élimination. Le système nerveux recalibre ses neurotransmetteurs.":"Chaque heure sans consommer modifie la chimie de ton cerveau. Le processus commence immédiatement."}</p>
+            <p>{streak>=90?"90+ jours : poumons restaurés. Capacité respiratoire +30%. Risque cardiovasculaire cliniquement réduit.":streak>=30?"30 jours : foie partiellement régénéré. Récepteurs dopaminergiques retrouvent leur sensibilité normale.":streak>=14?"2 semaines : mémoire à court terme mesurément améliorée. L'anxiété de sevrage atteint son pic puis décroît.":streak>=7?"7 jours : circulation sanguine déjà améliorée. Oxygénation cellulaire optimisée.":streak>=3?"72h : substances en cours d'élimination. Le SNC recalibre ses neurotransmetteurs.":"Chaque heure sans consommer modifie la chimie de ton cerveau. Le processus commence maintenant."}</p>
           </div>
-        </div>)}
+        </div>}
 
         {/* ══ BADGES ══ */}
-        {tab==="badges"&&(<div className="tc">
+        {tab==="badges"&&<div className="tc">
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-            <div style={{fontSize:12,color:"#9ca3af"}}><span style={{color:"#4ade80",fontWeight:700}}>{earnedCount}</span>/{badges.length}</div>
-            <div style={{fontSize:11,color:"#22c55e",fontWeight:700}}>{Math.round((earnedCount/badges.length)*100)}% obtenus</div>
+            <div style={{fontSize:12,color:"#9ca3af"}}><span style={{color:"#4ade80",fontWeight:700}}>{earnedCount}</span>/{badges.length} obtenus</div>
+            <div style={{fontSize:11,color:"#22c55e",fontWeight:700}}>{Math.round((earnedCount/badges.length)*100)}%</div>
           </div>
           <div style={{marginBottom:12}}><Bar pct={(earnedCount/badges.length)*100} color="linear-gradient(90deg,#22c55e,#4ade80)"/></div>
-          {badges.map((b)=>(
+          {badges.map(b=>(
             <React.Fragment key={b.id}>
               {b.cat&&<div className="badge-cat">{b.cat}</div>}
               <div className={`badge${b.earned?" earned":" locked"}`}>
@@ -754,15 +810,13 @@ function App(){
               </div>
             </React.Fragment>
           ))}
-        </div>)}
+        </div>}
 
-        {/* ══ RÉGLAGES ══ */}
-        {tab==="goals"&&(<div className="tc">
-
-          {/* Substances actives */}
+        {/* ══ CONFIG ══ */}
+        {tab==="goals"&&<div className="tc">
           <div className="card">
-            <div className="clbl">Substances à suivre</div>
-            <div style={{fontSize:11,color:"#4b5563",marginBottom:12}}>Active uniquement les substances que tu consommes ou as consommées.</div>
+            <div className="clbl">Substances actives</div>
+            <div style={{fontSize:11,color:"#4b5563",marginBottom:10}}>Active uniquement les substances que tu consommes ou as consommées.</div>
             {sortedDrugs.map(([k,d])=>(
               <div key={k} className={`drug-chip${activeDrugs[k]?" on":""}`} onClick={()=>setActiveDrugs(prev=>({...prev,[k]:!prev[k]}))}>
                 <div className="drug-chip-ico">{d.emoji}</div>
@@ -770,65 +824,67 @@ function App(){
                   <div className="drug-chip-name" style={{color:activeDrugs[k]?d.color:"#9ca3af"}}>{d.name}</div>
                   <div style={{fontSize:10,color:"#6b7280"}}>{d.unit}</div>
                 </div>
-                <div className="drug-chip-risk" style={{background:`${d.riskColor}22`,color:d.riskColor}}>{d.risk}</div>
-                <div style={{marginLeft:8}}>
-                  <div className={`toggle${activeDrugs[k]?" on":" off"}`} style={{background:activeDrugs[k]?d.color:"rgba(255,255,255,0.15)"}}/>
+                <div className="drug-chip-risk" style={{background:`${d.riskColor}22`,color:d.riskColor,flexShrink:0}}>{d.risk}</div>
+                <div style={{marginLeft:8,flexShrink:0}}>
+                  <div className={`toggle${activeDrugs[k]?" on":" off"}`} style={{background:activeDrugs[k]?d.color:undefined}}/>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Objectif */}
           <div className="card">
             <div className="clbl">Objectif mensuel</div>
             <div className="gr"><span>Jours clean visés / mois</span><input type="number" value={goals.target} onChange={e=>setGoals(p=>({...p,target:+e.target.value}))} min="1" max="31"/></div>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><span style={{fontSize:12,color:"#e8e8f0"}}>Progression</span><span style={{fontSize:12,fontWeight:700,color:"#22c55e"}}>{nClean} / {goals.target}</span></div>
             <Bar pct={Math.min((nClean/Math.max(goals.target,1))*100,100)} color="linear-gradient(90deg,#22c55e,#4ade80)" thick/>
-            {nClean>=goals.target&&<div style={{marginTop:8,padding:"7px 11px",background:"rgba(34,197,94,0.1)",borderRadius:8,fontSize:11,color:"#4ade80",textAlign:"center"}}>🎉 Objectif atteint !</div>}
+            {nClean>=goals.target&&<div className="sban">🎉 Objectif atteint !</div>}
           </div>
 
-          {/* Rappels */}
           <div className="card">
-            <div className="clbl">Rappels</div>
+            <div className="clbl">Rappel quotidien</div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:goals.notifOn?10:0}}>
               <div><div style={{fontSize:12,color:"#e8e8f0",fontWeight:500}}>Notification du soir</div><div style={{fontSize:10,color:"#6b7280",marginTop:1}}>Rappel de renseigner ta journée</div></div>
-              <button className={`toggle${goals.notifOn?" on":" off"}`} onClick={async()=>{if(!goals.notifOn){if("Notification" in window){const p=await Notification.requestPermission();if(p==="granted")setGoals(g=>({...g,notifOn:true}));}else setGoals(g=>({...g,notifOn:true}));}else setGoals(g=>({...g,notifOn:false}));}}/>
+              <button className={`toggle${goals.notifOn?" on":" off"}`} onClick={async()=>{
+                if(!goals.notifOn){
+                  if("Notification" in window){const p=await Notification.requestPermission();if(p==="granted")setGoals(g=>({...g,notifOn:true}));}
+                  else setGoals(g=>({...g,notifOn:true}));
+                }else setGoals(g=>({...g,notifOn:false}));
+              }}/>
             </div>
             {goals.notifOn&&<div className="gr" style={{marginBottom:0}}><span>Heure</span><input type="time" value={goals.notifTime||"22:00"} onChange={e=>setGoals(p=>({...p,notifTime:e.target.value}))}/></div>}
           </div>
 
-          {/* Résumé */}
           <div className="sg">
             <div className="sm"><div className="v" style={{color:"#22c55e"}}>{streak}j</div><div className="l">streak actuel</div></div>
             <div className="sm"><div className="v" style={{color:scoreColor}}>{score}</div><div className="l">score guérison</div></div>
             <div className="sm"><div className="v" style={{color:"#4ade80"}}>{earnedCount}</div><div className="l">badges</div></div>
-            <div className="sm"><div className="v" style={{color:"#a855f7"}}>{longest}j</div><div className="l">record streak</div></div>
+            <div className="sm"><div className="v" style={{color:"#a855f7"}}>{longest}j</div><div className="l">record</div></div>
           </div>
-        </div>)}
+        </div>}
       </div>
 
-      {/* Tabs */}
+      {/* ══ Tabs ══ */}
       <div className="tabs">
-        {[["cal",<IcoCalendar/>,"Mon parcours"],["stats",<IcoChart/>,"Guérison"],["badges",<IcoBadge/>,"Badges"],["goals",<IcoSettings/>,"Config"]].map(([k,icon,label])=>(<button key={k} className={`tb${tab===k?" on":""}`} onClick={()=>setTab(k)}>{icon}{label}</button>))}
+        {[["cal",<IcoCalendar/>,"Mon parcours"],["stats",<IcoChart/>,"Guérison"],["badges",<IcoBadge/>,"Badges"],["goals",<IcoSettings/>,"Config"]].map(([k,icon,label])=>(
+          <button key={k} className={`tb${tab===k?" on":""}`} onClick={()=>setTab(k)}>{icon}{label}</button>
+        ))}
       </div>
 
-      {/* Expand overlays */}
-      {expand==="weekly"&&(<ExpandView title="Progression hebdomadaire" onClose={()=>setExpand(null)}>
-        <div style={{background:"rgba(255,255,255,0.03)",borderRadius:13,padding:13}}>
-          <div style={{fontSize:11,color:"#22c55e",fontWeight:600,marginBottom:9}}>✦ Jours clean par semaine</div>
-          <WeekBars weeks={weeklyData} metric="clean" color="#22c55e"/>
-        </div>
-        {activeList.map(k=><div key={k} style={{background:"rgba(255,255,255,0.03)",borderRadius:13,padding:13}}>
-          <div style={{fontSize:11,color:ALL_DRUGS[k]?.color,fontWeight:600,marginBottom:9}}>{ALL_DRUGS[k]?.emoji} {ALL_DRUGS[k]?.name}</div>
-          <WeekBars weeks={weeklyData} metric={k} color={ALL_DRUGS[k]?.color}/>
-        </div>)}
+      {/* ══ Expand overlays ══ */}
+      {expand==="weekly"&&<ExpandView title="Progression hebdomadaire" onClose={()=>setExpand(null)}>
+        {[{metric:"clean",color:"#22c55e",label:"Jours clean",e:"✦"},...activeList.map(k=>({metric:k,color:ALL_DRUGS[k]?.color,label:ALL_DRUGS[k]?.name,e:ALL_DRUGS[k]?.emoji}))].map(m=>(
+          <div key={m.metric} style={{background:"rgba(255,255,255,0.03)",borderRadius:13,padding:13}}>
+            <div style={{fontSize:11,color:m.color,fontWeight:600,marginBottom:9}}>{m.e} {m.label}</div>
+            <WeekBars weeks={weeklyData} metric={m.metric} color={m.color}/>
+          </div>
+        ))}
         <AIAnalysis stats={aiStats} activeDrugs={activeDrugs}/>
-      </ExpandView>)}
+      </ExpandView>}
 
-      {expand==="spark"&&(<ExpandView title="Tendance 28 jours" onClose={()=>setExpand(null)}>
+      {expand==="spark"&&<ExpandView title="Tendance 28 jours" onClose={()=>setExpand(null)}>
         <div style={{background:"rgba(255,255,255,0.03)",borderRadius:14,padding:14}}><Spark data={spark} height={140}/></div>
         <div style={{background:"rgba(255,255,255,0.03)",borderRadius:13,padding:13}}>
-          {[{l:"Jours clean",v:nClean,c:"#22c55e"},...activeList.map(k=>({l:ALL_DRUGS[k]?.name,v:(totals[k]||0),c:ALL_DRUGS[k]?.color}))].map(b=>(
+          {[{l:"Jours clean",v:nClean,c:"#22c55e"},...activeList.map(k=>({l:ALL_DRUGS[k]?.name,v:totals[k]||0,c:ALL_DRUGS[k]?.color}))].map(b=>(
             <div key={b.l} style={{marginBottom:9}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:11,color:"#9ca3af"}}>{b.l}</span><span style={{fontSize:11,fontWeight:700,color:b.c}}>{b.v}</span></div>
               <Bar pct={Math.min((b.v/Math.max(daysCount,1))*100,100)} color={b.c}/>
@@ -836,67 +892,21 @@ function App(){
           ))}
         </div>
         <AIAnalysis stats={aiStats} activeDrugs={activeDrugs}/>
-      </ExpandView>)}
+      </ExpandView>}
 
-      {/* Modal */}
-      {modal&&(<div className="mo" onClick={()=>setModal(null)}>
-        <div className="mb" onClick={e=>e.stopPropagation()}>
-          <div className="mh"/>
-          <div style={{marginBottom:13}}>
-            <div style={{fontSize:9,color:"#6b7280",letterSpacing:".1em",textTransform:"uppercase"}}>Journal du</div>
-            <div style={{fontSize:15,fontFamily:"'DM Serif Display',serif",color:"#f0f0f8"}}>{modal.d} {MONTHS[modal.m]} {modal.y}</div>
-          </div>
-
-          {/* Clean */}
-          <div className="slbl">Journée</div>
-          <div className={`ctr-row${sel.clean?" active":""}`} style={{background:sel.clean?"rgba(34,197,94,0.12)":"rgba(255,255,255,0.04)",color:"#22c55e",cursor:"pointer",marginBottom:11}} onClick={()=>setClean(!sel.clean)}>
-            <div className="ctr-left"><div className="ctr-emoji">✦</div><div><div className="ctr-lbl" style={{color:"#22c55e"}}>Journée clean</div><div className="ctr-sub">Aucune substance aujourd'hui</div></div></div>
-            {sel.clean&&<span style={{color:"#22c55e",fontSize:15,marginRight:3}} className="chk">✓</span>}
-          </div>
-
-          {/* Drug counters */}
-          {activeList.map(k=>{
-            const d=ALL_DRUGS[k];if(!d)return null;
-            const val=sel[k]||0;
-            return(<React.Fragment key={k}>
-              <div className="slbl" style={{marginTop:7}}>{d.name} {d.emoji}</div>
-              <div className={`ctr-row${val>0?" active":""}`} style={{background:val>0?d.color+"1a":"rgba(255,255,255,0.04)",color:d.color}}>
-                <div className="ctr-left">
-                  <div className="ctr-emoji">{d.emoji}</div>
-                  <div>
-                    <div className="ctr-lbl" style={{color:val>0?d.color:"#e8e8f0"}}>{d.unit}</div>
-                    <div className="ctr-sub">{val>0?(d.gramPerUnit?`≈${(val*d.gramPerUnit).toFixed(1)}g`:val>1?`${val} ${d.unit}`:`1 ${d.unitShort}`):"Combien ?"}</div>
-                  </div>
-                </div>
-                <Counter value={val} onChange={v=>setDrugVal(k,v)} color={d.color}/>
-              </div>
-            </React.Fragment>);
-          })}
-
-          {/* Humeur */}
-          <div className="slbl" style={{marginTop:10}}>Humeur 😊</div>
-          <div className="mood-row">
-            {MOODS.map((m,i)=>(<button key={i} className={`mood-btn${sel.mood===i?" on":""}`} style={{borderColor:sel.mood===i?m.c:"transparent",color:sel.mood===i?m.c:"#6b7280"}} onClick={()=>setMood(i)}><span>{m.e}</span><span>{m.l}</span></button>))}
-          </div>
-
-          {/* Contexte si conso */}
-          {activeList.some(k=>(sel[k]||0)>0)&&<>
-            <div className="slbl">Contexte 🏷️</div>
-            <div className="tag-row">{CTXS.map(c=>(<button key={c} className={`tag${(sel.ctx||[]).includes(c)?" on":""}`} onClick={()=>toggleCtx(c)}>{c}</button>))}</div>
-          </>}
-
-          <div className="slbl">Note</div>
-          <textarea rows={2} placeholder="Comment tu te sens ?" value={sel.note||""} onChange={e=>setNote(e.target.value)}/>
-
-          <div style={{display:"flex",gap:7,marginTop:11}}>
-            {selRaw&&<button onClick={()=>{clearDay();setModal(null);}} style={{flex:1,padding:"11px",borderRadius:10,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",color:"#6b7280",fontFamily:"inherit",fontWeight:600,fontSize:12,cursor:"pointer"}}>Effacer</button>}
-            <button className="bprim" style={{flex:2,margin:0}} onClick={()=>setModal(null)}>Enregistrer</button>
-          </div>
-        </div>
-      </div>)}
+      {/* ══ Day Modal ══ */}
+      {modal&&<DayModal
+        modal={modal}
+        data={data}
+        activeDrugs={activeDrugs}
+        onSave={saveEntry}
+        onClear={clearEntry}
+        onClose={()=>setModal(null)}
+      />}
     </div>
   );
 }
+
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 <script>
