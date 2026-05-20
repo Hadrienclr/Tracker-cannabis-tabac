@@ -682,166 +682,196 @@ function Onboarding({onComplete}){
 
   const canNext=curStep==="name"?name.trim().length>0:curStep==="drugs"?activeDrugsList.length>0:true;
 
-  return<div className="onboard-wrap">
-    {/* Progress dots */}
-    <div style={{padding:"12px 24px 0",flexShrink:0}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-        {step>0&&<button onClick={prev} style={{background:"var(--s)",border:"1px solid var(--b)",borderRadius:8,width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"var(--t2)"}}>‹</button>}
-        <div style={{flex:1}}/>
-        <div style={{fontSize:10,color:"var(--t3)",fontWeight:600}}>{step+1}/{total}</div>
-      </div>
-      <div style={{height:3,background:"var(--s2)",borderRadius:2,overflow:"hidden"}}>
-        <div style={{height:"100%",background:"var(--green)",borderRadius:2,width:`${((step+1)/total)*100}%`,transition:"width .4s ease"}}/>
-      </div>
-    </div>
-
-      <div className="onboard-slides">
-        <div style={{display:"flex",width:`${steps.length*100}%`,height:"100%",transition:"transform .4s cubic-bezier(.4,0,.2,1)",transform:`translateX(-${(step/steps.length)*100}%)`}}>
-
-      {/* WELCOME */}
-      {steps.includes("welcome")&&<div className="onboard-slide" style={{justifyContent:"center",alignItems:"center",textAlign:"center"}}>
-        <div style={{fontSize:48,marginBottom:20}}>🌱</div>
-        <h1 style={{fontSize:26,fontWeight:700,color:"var(--t)",marginBottom:12,lineHeight:1.2}}>Bienvenue sur<br/>Habit Tracker</h1>
-        <p style={{fontSize:14,color:"var(--t2)",lineHeight:1.7,marginBottom:20}}>Ton compagnon personnel pour un parcours de guérison sur-mesure.</p>
-        <div style={{background:"var(--s)",border:"1px solid var(--b)",borderRadius:14,padding:"16px 18px",marginBottom:24}}>
-          <p style={{fontSize:13,color:"var(--t)",lineHeight:1.7,fontStyle:"italic"}}>"{quoteRef.current}"</p>
+  // Render current step content
+  function renderStep(){
+    switch(curStep){
+      case "welcome": return(
+        <div className="onboard-slide" style={{justifyContent:"center",alignItems:"center",textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:20}}>🌱</div>
+          <h1 style={{fontSize:26,fontWeight:700,color:"var(--t)",marginBottom:12,lineHeight:1.2}}>Bienvenue sur<br/>Habit Tracker</h1>
+          <p style={{fontSize:14,color:"var(--t2)",lineHeight:1.7,marginBottom:20}}>Ton compagnon personnel pour un parcours de guérison sur-mesure.</p>
+          <div style={{background:"var(--s)",border:"1px solid var(--b)",borderRadius:14,padding:"16px 18px",marginBottom:24}}>
+            <p style={{fontSize:13,color:"var(--t)",lineHeight:1.7,fontStyle:"italic"}}>"{quoteRef.current}"</p>
+          </div>
+          <p style={{fontSize:12,color:"var(--t3)",lineHeight:1.6}}>On va créer ton profil personnalisé en 2 minutes pour que tout soit parfaitement adapté à toi.</p>
         </div>
-        <p style={{fontSize:12,color:"var(--t3)",lineHeight:1.6}}>On va créer ton profil personnalisé en 2 minutes pour que tout soit parfaitement adapté à toi.</p>
-      </div>}
-
-      {/* NAME */}
-      {steps.includes("name")&&<div className="onboard-slide" style={{paddingTop:32}}>
-        <div style={{fontSize:32,marginBottom:16}}>👋</div>
-        <h2 style={{fontSize:22,fontWeight:700,color:"var(--t)",marginBottom:8}}>Comment tu t'appelles ?</h2>
-        <p style={{fontSize:13,color:"var(--t2)",marginBottom:24,lineHeight:1.6}}>Ton prénom pour personnaliser ton parcours.</p>
-        <input type="text" className="big" placeholder="Ton prénom" value={name} onChange={e=>setName(e.target.value)} autoFocus/>
-        <div style={{marginTop:20,display:"flex",gap:12,alignItems:"center"}}>
-          <div style={{fontSize:13,color:"var(--t2)"}}>Ton âge</div>
-          <input type="number" value={age} onChange={e=>setAge(e.target.value)} min="13" max="99" placeholder="30" style={{width:80}}/>
-        </div>
-        <div style={{marginTop:24}}>
-          <div style={{fontSize:13,color:"var(--t2)",marginBottom:10}}>Photo de profil (optionnel)</div>
-          <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={handlePhoto}/>
-          <div style={{display:"flex",alignItems:"center",gap:12}}>
-            {photo?<img src={photo} alt="" style={{width:60,height:60,borderRadius:"50%",objectFit:"cover",border:"2px solid rgba(34,197,94,0.4)"}}/>:<div style={{width:60,height:60,borderRadius:"50%",background:"var(--s2)",border:"1px dashed var(--b2)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--t3)"}}><IcoUser/></div>}
-            <button onClick={()=>fileRef.current?.click()} style={{background:"var(--s)",border:"1px solid var(--b)",borderRadius:8,padding:"8px 14px",color:"var(--t2)",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>Choisir une photo</button>
+      );
+      case "name": return(
+        <div className="onboard-slide" style={{paddingTop:32}}>
+          <div style={{fontSize:32,marginBottom:16}}>👋</div>
+          <h2 style={{fontSize:22,fontWeight:700,color:"var(--t)",marginBottom:8}}>Comment tu t'appelles ?</h2>
+          <p style={{fontSize:13,color:"var(--t2)",marginBottom:24,lineHeight:1.6}}>Ton prénom pour personnaliser ton parcours.</p>
+          <input type="text" className="big" placeholder="Ton prénom" value={name} onChange={e=>setName(e.target.value)}/>
+          <div style={{marginTop:20,display:"flex",gap:12,alignItems:"center"}}>
+            <div style={{fontSize:13,color:"var(--t2)"}}>Ton âge</div>
+            <input type="number" value={age} onChange={e=>setAge(e.target.value)} min="13" max="99" placeholder="30" style={{width:80}}/>
+          </div>
+          <div style={{marginTop:24}}>
+            <div style={{fontSize:13,color:"var(--t2)",marginBottom:10}}>Photo de profil (optionnel)</div>
+            <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={handlePhoto}/>
+            <div style={{display:"flex",alignItems:"center",gap:12}}>
+              {photo
+                ?<img src={photo} alt="" style={{width:60,height:60,borderRadius:"50%",objectFit:"cover",border:"2px solid rgba(34,197,94,0.4)"}}/>
+                :<div style={{width:60,height:60,borderRadius:"50%",background:"var(--s2)",border:"1px dashed var(--b2)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--t3)"}}><IcoUser/></div>}
+              <button onClick={()=>fileRef.current?.click()} style={{background:"var(--s)",border:"1px solid var(--b)",borderRadius:8,padding:"8px 14px",color:"var(--t2)",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>Choisir une photo</button>
+            </div>
           </div>
         </div>
-      </div>}
-
-      {/* DRUGS */}
-      {steps.includes("drugs")&&<div className="onboard-slide" style={{paddingTop:32}}>
-        <div style={{fontSize:32,marginBottom:16}}>💊</div>
-        <h2 style={{fontSize:22,fontWeight:700,color:"var(--t)",marginBottom:8}}>Quelles substances consommes-tu ?</h2>
-        <p style={{fontSize:13,color:"var(--t2)",marginBottom:16,lineHeight:1.6}}>Sélectionne tout ce que tu veux arrêter ou réduire. Aucun jugement — c'est pour personnaliser ton suivi.</p>
-        <div className="drug-select-grid">
-          {sortedDrugs.map(([k,d])=><div key={k} className={`drug-select-item${selectedDrugs[k]?" on":""}`} onClick={()=>setSelectedDrugs(p=>({...p,[k]:!p[k]}))}>
-            <div style={{fontSize:20}}>{d.emoji}</div>
-            <div>
-              <div style={{fontSize:12,fontWeight:600,color:selectedDrugs[k]?d.color:"var(--t)"}}>{d.name}</div>
-              <div style={{fontSize:9,color:"var(--t3)"}}>{DRUG_SEVRAGE_DAYS[k]}j sevrage</div>
-            </div>
-            {selectedDrugs[k]&&<div style={{marginLeft:"auto",color:"var(--green)",fontSize:14}}>✓</div>}
-          </div>)}
-        </div>
-      </div>}
-
-      {/* CIGARETTES */}
-      {steps.includes("cig")&&<div className="onboard-slide" style={{paddingTop:32}}>
-        <div style={{fontSize:40,marginBottom:16}}>🚬</div>
-        <h2 style={{fontSize:22,fontWeight:700,color:"var(--t)",marginBottom:8}}>Ta consommation de tabac</h2>
-        <p style={{fontSize:13,color:"var(--t2)",marginBottom:24,lineHeight:1.6}}>Pour calculer exactement combien tu économises chaque jour sans fumer.</p>
-        <div style={{display:"flex",flexDirection:"column",gap:16}}>
-          {[{l:"Cigarettes par jour",k:"cigPerDay",step:1,placeholder:"20"},{l:"Prix d'un paquet (€)",k:"cigPackCost",step:0.5,placeholder:"10"}].map(g=><div key={g.k}>
-            <div style={{fontSize:13,color:"var(--t)",fontWeight:500,marginBottom:6}}>{g.l}</div>
-            <input type="number" value={goalsLocal[g.k]||""} onChange={e=>setGoalsLocal(p=>({...p,[g.k]:+e.target.value}))} min="0" step={g.step} placeholder={g.placeholder} style={{width:"100%",fontSize:16}}/>
-          </div>)}
-        </div>
-        <div style={{marginTop:16,padding:"10px 12px",background:"var(--green3)",borderRadius:10,border:"1px solid rgba(34,197,94,0.2)"}}>
-          <div style={{fontSize:12,color:"var(--t)",lineHeight:1.5}}>Coût quotidien estimé : <span style={{color:"var(--green2)",fontWeight:700}}>{((goalsLocal.cigPerDay||20)/20*(goalsLocal.cigPackCost||10)).toFixed(2)}€</span></div>
-        </div>
-      </div>}
-
-      {/* WEED */}
-      {steps.includes("weed")&&<div className="onboard-slide" style={{paddingTop:32}}>
-        <div style={{fontSize:40,marginBottom:16}}>🍃</div>
-        <h2 style={{fontSize:22,fontWeight:700,color:"var(--t)",marginBottom:8}}>Ta consommation de cannabis</h2>
-        <p style={{fontSize:13,color:"var(--t2)",marginBottom:24,lineHeight:1.6}}>Pour calculer tes vraies économies.</p>
-        <div style={{display:"flex",flexDirection:"column",gap:16}}>
-          {[{l:"Joints par jour",k:"jointsPerDay",step:0.5,placeholder:"1"},{l:"Grammes par joint",k:"weedGPerJoint",step:0.1,placeholder:"0.3"},{l:"Prix du cannabis / g (€)",k:"weedGCost",step:0.5,placeholder:"15"}].map(g=><div key={g.k}>
-            <div style={{fontSize:13,color:"var(--t)",fontWeight:500,marginBottom:6}}>{g.l}</div>
-            <input type="number" value={goalsLocal[g.k]||""} onChange={e=>setGoalsLocal(p=>({...p,[g.k]:+e.target.value}))} min="0" step={g.step} placeholder={g.placeholder} style={{width:"100%",fontSize:16}}/>
-          </div>)}
-        </div>
-        <div style={{marginTop:16,padding:"10px 12px",background:"rgba(168,85,247,0.1)",borderRadius:10,border:"1px solid rgba(168,85,247,0.2)"}}>
-          <div style={{fontSize:12,color:"var(--t)",lineHeight:1.5}}>Coût quotidien estimé : <span style={{color:"#d8b4fe",fontWeight:700}}>{((goalsLocal.jointsPerDay||1)*(goalsLocal.weedGPerJoint||0.3)*(goalsLocal.weedGCost||15)).toFixed(2)}€</span></div>
-        </div>
-      </div>}
-
-      {/* OTHER DRUGS */}
-      {steps.includes("other")&&<div className="onboard-slide" style={{paddingTop:32}}>
-        <div style={{fontSize:40,marginBottom:16}}>💰</div>
-        <h2 style={{fontSize:22,fontWeight:700,color:"var(--t)",marginBottom:8}}>Coûts des autres substances</h2>
-        <p style={{fontSize:13,color:"var(--t2)",marginBottom:20,lineHeight:1.6}}>Pour calculer tes économies. Remplis ce que tu sais.</p>
-        <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          {activeDrugsList.filter(k=>k!=="tabac"&&k!=="cannabis").map(k=>{
-            const d=ALL_DRUGS[k];
-            return<div key={k} style={{background:"var(--s)",border:"1px solid var(--b)",borderRadius:12,padding:12}}>
-              <div style={{fontSize:13,fontWeight:600,color:d.color,marginBottom:10}}>{d.emoji} {d.name}</div>
-              <div style={{display:"flex",gap:12}}>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:11,color:"var(--t3)",marginBottom:4}}>Coût / {d.unitShort} (€)</div>
-                  <input type="number" value={otherCosts[`${k}_cost`]||""} onChange={e=>setOtherCosts(p=>({...p,[`${k}_cost`]:+e.target.value}))} min="0" step="1" placeholder={String(DRUG_DEFAULT_COST[k]||10)} style={{width:"100%"}}/>
+      );
+      case "drugs": return(
+        <div className="onboard-slide" style={{paddingTop:24}}>
+          <div style={{fontSize:32,marginBottom:12}}>💊</div>
+          <h2 style={{fontSize:22,fontWeight:700,color:"var(--t)",marginBottom:8}}>Quelles substances consommes-tu ?</h2>
+          <p style={{fontSize:13,color:"var(--t2)",marginBottom:14,lineHeight:1.6}}>Sélectionne tout ce que tu veux arrêter. Aucun jugement.</p>
+          <div className="drug-select-grid">
+            {sortedDrugs.map(([k,d])=>(
+              <div key={k} className={`drug-select-item${selectedDrugs[k]?" on":""}`} onClick={()=>setSelectedDrugs(p=>({...p,[k]:!p[k]}))}>
+                <div style={{fontSize:20}}>{d.emoji}</div>
+                <div>
+                  <div style={{fontSize:12,fontWeight:600,color:selectedDrugs[k]?d.color:"var(--t)"}}>{d.name}</div>
+                  <div style={{fontSize:9,color:"var(--t3)"}}>{DRUG_SEVRAGE_DAYS[k]}j sevrage</div>
                 </div>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:11,color:"var(--t3)",marginBottom:4}}>{d.unitShort}/semaine</div>
-                  <input type="number" value={otherCosts[`${k}_freq`]||""} onChange={e=>setOtherCosts(p=>({...p,[`${k}_freq`]:+e.target.value}))} min="0" step="1" placeholder="0" style={{width:"100%"}}/>
-                </div>
+                {selectedDrugs[k]&&<div style={{marginLeft:"auto",color:"var(--green)",fontSize:14}}>✓</div>}
               </div>
-            </div>;
-          })}
+            ))}
+          </div>
         </div>
-      </div>}
+      );
+      case "cig": return(
+        <div className="onboard-slide" style={{paddingTop:32}}>
+          <div style={{fontSize:40,marginBottom:16}}>🚬</div>
+          <h2 style={{fontSize:22,fontWeight:700,color:"var(--t)",marginBottom:8}}>Ta consommation de tabac</h2>
+          <p style={{fontSize:13,color:"var(--t2)",marginBottom:24,lineHeight:1.6}}>Pour calculer exactement combien tu économises.</p>
+          <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            {[{l:"Cigarettes par jour",k:"cigPerDay",s:1,ph:"20"},{l:"Prix d'un paquet (€)",k:"cigPackCost",s:0.5,ph:"10"}].map(g=>(
+              <div key={g.k}>
+                <div style={{fontSize:13,color:"var(--t)",fontWeight:500,marginBottom:6}}>{g.l}</div>
+                <input type="number" value={goalsLocal[g.k]||""} onChange={e=>setGoalsLocal(p=>({...p,[g.k]:+e.target.value}))} min="0" step={g.s} placeholder={g.ph} style={{width:"100%"}}/>
+              </div>
+            ))}
+          </div>
+          <div style={{marginTop:16,padding:"10px 12px",background:"var(--green3)",borderRadius:10,border:"1px solid rgba(34,197,94,0.2)"}}>
+            <div style={{fontSize:12,color:"var(--t)"}}>Coût quotidien estimé : <span style={{color:"var(--green2)",fontWeight:700}}>{((goalsLocal.cigPerDay||20)/20*(goalsLocal.cigPackCost||10)).toFixed(2)}€</span></div>
+          </div>
+        </div>
+      );
+      case "weed": return(
+        <div className="onboard-slide" style={{paddingTop:32}}>
+          <div style={{fontSize:40,marginBottom:16}}>🍃</div>
+          <h2 style={{fontSize:22,fontWeight:700,color:"var(--t)",marginBottom:8}}>Ta consommation de cannabis</h2>
+          <p style={{fontSize:13,color:"var(--t2)",marginBottom:24,lineHeight:1.6}}>Pour calculer tes vraies économies.</p>
+          <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            {[{l:"Joints par jour",k:"jointsPerDay",s:0.5,ph:"1"},{l:"Grammes par joint",k:"weedGPerJoint",s:0.1,ph:"0.3"},{l:"Prix cannabis / g (€)",k:"weedGCost",s:0.5,ph:"15"}].map(g=>(
+              <div key={g.k}>
+                <div style={{fontSize:13,color:"var(--t)",fontWeight:500,marginBottom:6}}>{g.l}</div>
+                <input type="number" value={goalsLocal[g.k]||""} onChange={e=>setGoalsLocal(p=>({...p,[g.k]:+e.target.value}))} min="0" step={g.s} placeholder={g.ph} style={{width:"100%"}}/>
+              </div>
+            ))}
+          </div>
+          <div style={{marginTop:16,padding:"10px 12px",background:"rgba(168,85,247,0.1)",borderRadius:10,border:"1px solid rgba(168,85,247,0.2)"}}>
+            <div style={{fontSize:12,color:"var(--t)"}}>Coût quotidien estimé : <span style={{color:"#d8b4fe",fontWeight:700}}>{((goalsLocal.jointsPerDay||1)*(goalsLocal.weedGPerJoint||0.3)*(goalsLocal.weedGCost||15)).toFixed(2)}€</span></div>
+          </div>
+        </div>
+      );
+      case "other": return(
+        <div className="onboard-slide" style={{paddingTop:32}}>
+          <div style={{fontSize:40,marginBottom:16}}>💰</div>
+          <h2 style={{fontSize:22,fontWeight:700,color:"var(--t)",marginBottom:8}}>Coûts des autres substances</h2>
+          <p style={{fontSize:13,color:"var(--t2)",marginBottom:20,lineHeight:1.6}}>Pour calculer tes économies. Remplis ce que tu connais.</p>
+          <div style={{display:"flex",flexDirection:"column",gap:14}}>
+            {activeDrugsList.filter(k=>k!=="tabac"&&k!=="cannabis").map(k=>{
+              const d=ALL_DRUGS[k];
+              return(
+                <div key={k} style={{background:"var(--s)",border:"1px solid var(--b)",borderRadius:12,padding:12}}>
+                  <div style={{fontSize:13,fontWeight:600,color:d.color,marginBottom:10}}>{d.emoji} {d.name}</div>
+                  <div style={{display:"flex",gap:12}}>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:11,color:"var(--t3)",marginBottom:4}}>Coût / {d.unitShort} (€)</div>
+                      <input type="number" value={otherCosts[`${k}_cost`]||""} onChange={e=>setOtherCosts(p=>({...p,[`${k}_cost`]:+e.target.value}))} min="0" step="1" placeholder={String(DRUG_DEFAULT_COST[k]||10)} style={{width:"100%"}}/>
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:11,color:"var(--t3)",marginBottom:4}}>{d.unitShort}/semaine</div>
+                      <input type="number" value={otherCosts[`${k}_freq`]||""} onChange={e=>setOtherCosts(p=>({...p,[`${k}_freq`]:+e.target.value}))} min="0" step="1" placeholder="0" style={{width:"100%"}}/>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+      case "motivation": return(
+        <div className="onboard-slide" style={{paddingTop:32}}>
+          <div style={{fontSize:40,marginBottom:16}}>💪</div>
+          <h2 style={{fontSize:22,fontWeight:700,color:"var(--t)",marginBottom:8}}>Pourquoi tu veux arrêter ?</h2>
+          <p style={{fontSize:13,color:"var(--t2)",marginBottom:16,lineHeight:1.6}}>Tes motivations sont ton ancre dans les moments difficiles.</p>
+          <div style={{background:"var(--s)",borderRadius:12,padding:"12px 14px",marginBottom:16,border:"1px solid var(--b)"}}>
+            <div style={{fontSize:11,color:"var(--t3)",marginBottom:8,fontWeight:600,textTransform:"uppercase",letterSpacing:".08em"}}>Durées de sevrage pour toi</div>
+            {activeDrugsList.map(k=>(
+              <div key={k} style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--t2)",marginBottom:4}}>
+                <span>{ALL_DRUGS[k]?.emoji} {ALL_DRUGS[k]?.name}</span>
+                <span style={{color:"var(--green2)",fontWeight:600}}>{DRUG_SEVRAGE_DAYS[k]} jours</span>
+              </div>
+            ))}
+          </div>
+          <textarea style={{minHeight:100,marginTop:0}} placeholder="Je veux arrêter pour retrouver ma liberté, ma santé, mon énergie..."/>
+        </div>
+      );
+      case "done": return(
+        <div className="onboard-slide" style={{justifyContent:"center",alignItems:"center",textAlign:"center"}}>
+          <div style={{fontSize:52,marginBottom:20}}>✨</div>
+          <h2 style={{fontSize:26,fontWeight:700,color:"var(--t)",marginBottom:12}}>Ton profil est prêt{name?`, ${name}`:""}  !</h2>
+          <p style={{fontSize:14,color:"var(--t2)",lineHeight:1.7,marginBottom:24}}>Tout est configuré pour toi. Commence par renseigner ta première journée.</p>
+          <div style={{display:"flex",flexDirection:"column",gap:10,width:"100%"}}>
+            {activeDrugsList.map(k=>(
+              <div key={k} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:"var(--s)",borderRadius:11,border:"1px solid var(--b)"}}>
+                <span style={{fontSize:18}}>{ALL_DRUGS[k]?.emoji}</span>
+                <span style={{fontSize:13,fontWeight:500,color:"var(--t)",flex:1}}>{ALL_DRUGS[k]?.name}</span>
+                <span style={{fontSize:11,color:"var(--green2)",fontWeight:600}}>{DRUG_SEVRAGE_DAYS[k]}j</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+      default: return null;
+    }
+  }
 
-      {/* MOTIVATION */}
-      {steps.includes("motivation")&&<div className="onboard-slide" style={{paddingTop:32}}>
-        <div style={{fontSize:40,marginBottom:16}}>💪</div>
-        <h2 style={{fontSize:22,fontWeight:700,color:"var(--t)",marginBottom:8}}>Pourquoi tu veux arrêter ?</h2>
-        <p style={{fontSize:13,color:"var(--t2)",marginBottom:16,lineHeight:1.6}}>Tes motivations sont ton ancre dans les moments difficiles. Plus c'est personnel, plus c'est puissant.</p>
-        <div style={{background:"var(--s)",borderRadius:12,padding:"12px 14px",marginBottom:16,border:"1px solid var(--b)"}}>
-          <div style={{fontSize:11,color:"var(--t3)",marginBottom:8,fontWeight:600,textTransform:"uppercase",letterSpacing:".08em"}}>Durées de sevrage pour toi</div>
-          {activeDrugsList.map(k=><div key={k} style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--t2)",marginBottom:4}}><span>{ALL_DRUGS[k]?.emoji} {ALL_DRUGS[k]?.name}</span><span style={{color:"var(--green2)",fontWeight:600}}>{DRUG_SEVRAGE_DAYS[k]} jours</span></div>)}
+  return(
+    <div className="onboard-wrap">
+      {/* Progress bar */}
+      <div style={{padding:"12px 24px 0",flexShrink:0}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+          {step>0
+            ?<button onClick={prev} style={{background:"var(--s)",border:"1px solid var(--b)",borderRadius:8,width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"var(--t2)"}}>‹</button>
+            :<div style={{width:28}}/>}
+          <div style={{flex:1}}/>
+          <div style={{fontSize:10,color:"var(--t3)",fontWeight:600}}>{step+1}/{total}</div>
         </div>
-        <textarea style={{minHeight:100,marginTop:0}} placeholder={`Je veux arrêter pour retrouver ma liberté, ma santé, mon énergie...`}/>
-      </div>}
+        <div style={{height:3,background:"var(--s2)",borderRadius:2,overflow:"hidden"}}>
+          <div style={{height:"100%",background:"var(--green)",borderRadius:2,width:`${((step+1)/total)*100}%`,transition:"width .4s ease"}}/>
+        </div>
+      </div>
 
-      {/* DONE */}
-      {steps.includes("done")&&<div className="onboard-slide" style={{justifyContent:"center",alignItems:"center",textAlign:"center"}}>
-        <div style={{fontSize:52,marginBottom:20}}>✨</div>
-        <h2 style={{fontSize:26,fontWeight:700,color:"var(--t)",marginBottom:12}}>Ton profil est prêt{name?`, ${name}`:""}  !</h2>
-        <p style={{fontSize:14,color:"var(--t2)",lineHeight:1.7,marginBottom:24}}>Tout est configuré pour toi. Commence par renseigner ta première journée d'aujourd'hui.</p>
-        <div style={{display:"flex",flexDirection:"column",gap:10,width:"100%"}}>
-          {activeDrugsList.map(k=><div key={k} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:"var(--s)",borderRadius:11,border:"1px solid var(--b)"}}>
-            <span style={{fontSize:18}}>{ALL_DRUGS[k]?.emoji}</span>
-            <span style={{fontSize:13,fontWeight:500,color:"var(--t)",flex:1}}>{ALL_DRUGS[k]?.name}</span>
-            <span style={{fontSize:11,color:"var(--green2)",fontWeight:600}}>{DRUG_SEVRAGE_DAYS[k]}j</span>
-          </div>)}
+      {/* Current slide */}
+      <div style={{flex:1,overflow:"hidden",position:"relative"}}>
+        <div key={curStep} style={{position:"absolute",inset:0,animation:"tcIn .25s cubic-bezier(.22,1,.36,1)",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+          {renderStep()}
         </div>
-        </div>
-      </div>}
-        </div>{/* end inner track */}
-      </div>{/* end onboard-slides */}
+      </div>
 
-    <div className="onboard-footer">
-      {curStep==="done"?
-        <button onClick={finish} style={{width:"100%",padding:"15px",borderRadius:13,background:"var(--green)",border:"none",color:"#fff",fontFamily:"inherit",fontWeight:700,fontSize:16,cursor:"pointer"}}>
-          Commencer mon parcours →
-        </button>
-        :<button onClick={next} disabled={!canNext} style={{width:"100%",padding:"14px",borderRadius:13,background:canNext?"rgba(34,197,94,0.15)":"var(--s)",border:canNext?"1.5px solid rgba(34,197,94,0.3)":"1.5px solid var(--b)",color:canNext?"var(--green2)":"var(--t3)",fontFamily:"inherit",fontWeight:600,fontSize:14,cursor:canNext?"pointer":"default",transition:"all .2s"}}>
-          Continuer
-        </button>}
+      {/* Footer button */}
+      <div className="onboard-footer">
+        {curStep==="done"
+          ?<button onClick={finish} style={{width:"100%",padding:"15px",borderRadius:13,background:"var(--green)",border:"none",color:"#fff",fontFamily:"inherit",fontWeight:700,fontSize:16,cursor:"pointer"}}>
+            Commencer mon parcours →
+          </button>
+          :<button onClick={next} disabled={!canNext} style={{width:"100%",padding:"14px",borderRadius:13,background:canNext?"rgba(34,197,94,0.15)":"var(--s)",border:canNext?"1.5px solid rgba(34,197,94,0.3)":"1.5px solid var(--b)",color:canNext?"var(--green2)":"var(--t3)",fontFamily:"inherit",fontWeight:600,fontSize:14,cursor:canNext?"pointer":"default",transition:"all .2s"}}>
+            Continuer
+          </button>}
+      </div>
     </div>
-  </div>;
+  );
 }
 
 // ── Profile Modal ─────────────────────────────────────────────────────────────
