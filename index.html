@@ -217,8 +217,97 @@
 </head>
 <body>
 <div id="root"></div>
+  <!-- Firebase -->
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script>
+// ── Firebase Init ─────────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyCU94wAPpotmswqtOn7Vb9ygPWSn9lEDAI",
+  authDomain: "habit-tracker-29350.firebaseapp.com",
+  projectId: "habit-tracker-29350",
+  storageBucket: "habit-tracker-29350.firebasestorage.app",
+  messagingSenderId: "386768073633",
+  appId: "1:386768073633:web:67bb6016742ef3d19d91e0",
+  measurementId: "G-579NSE5MRL"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// ── Auth providers ────────────────────────────────────────────────────────────
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+// ── Global auth state (accessed from React) ───────────────────────────────────
+window._fbUser = null;
+window._fbAuthReady = false;
+window._fbAuthCallbacks = [];
+
+auth.onAuthStateChanged(user => {
+  window._fbUser = user;
+  window._fbAuthReady = true;
+  window._fbAuthCallbacks.forEach(cb => cb(user));
+  window._fbAuthCallbacks = [];
+});
+
+// ── Firestore helpers ─────────────────────────────────────────────────────────
+window.fbSaveData = async function(uid, key, value) {
+  try {
+    await db.collection('users').doc(uid).collection('data').doc(key).set({ value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    return true;
+  } catch(e) { console.warn('fbSave error', e); return false; }
+};
+
+window.fbLoadData = async function(uid, key) {
+  try {
+    const doc = await db.collection('users').doc(uid).collection('data').doc(key).get();
+    return doc.exists ? doc.data().value : null;
+  } catch(e) { console.warn('fbLoad error', e); return null; }
+};
+
+window.fbSaveAllData = async function(uid, allData) {
+  const batch = db.batch();
+  Object.entries(allData).forEach(([key, value]) => {
+    const ref = db.collection('users').doc(uid).collection('data').doc(key);
+    batch.set(ref, { value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  });
+  await batch.commit();
+};
+
+window.fbLoadAllData = async function(uid) {
+  const snap = await db.collection('users').doc(uid).collection('data').get();
+  const result = {};
+  snap.forEach(doc => { result[doc.id] = doc.data().value; });
+  return result;
+};
+
+// ── Sign in helpers ───────────────────────────────────────────────────────────
+window.signInGoogle = function() {
+  return auth.signInWithPopup(googleProvider);
+};
+
+window.signInApple = function() {
+  const provider = new firebase.auth.OAuthProvider('apple.com');
+  provider.addScope('email');
+  provider.addScope('name');
+  return auth.signInWithPopup(provider);
+};
+
+window.signOut = function() {
+  return auth.signOut();
+};
+
+window.onAuthReady = function(cb) {
+  if (window._fbAuthReady) cb(window._fbUser);
+  else window._fbAuthCallbacks.push(cb);
+};
+</script>
+
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script type="text/babel">
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
@@ -916,16 +1005,74 @@ function Onboarding({onComplete}){
 }
 
 // ── Profile Modal ─────────────────────────────────────────────────────────────
-function ProfileModal({profile,setProfile,activeDrugs,onClose}){
+function ProfileModal({profile,setProfile,activeDrugs,onClose,data,goals,activeDrugs:ad,widgets}){
   const fileRef=useRef(null);
   const [gen,setGen]=useState(false);
   const [saved,setSaved]=useState(false);
+  const [loading,setLoading]=useState(false);
+  const [syncMsg,setSyncMsg]=useState(null);
   const [draft,setDraft]=useState({...profile});
   const isIn=profile.loggedIn;
+
   function handlePhoto(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=ev=>setDraft(p=>({...p,photo:ev.target.result}));r.readAsDataURL(f);}
-  function connect(provider){const p={...profile,loggedIn:true,provider};setProfile(p);setDraft(p);}
-  function disconnect(){const p={...profile,loggedIn:false,provider:null};setProfile(p);setDraft(p);}
-  function save(){setProfile({...draft});setSaved(true);setTimeout(()=>setSaved(false),2000);}
+
+  async function connect(providerName){
+    setLoading(true);
+    try{
+      let result;
+      if(providerName==='google') result=await window.signInGoogle();
+      else if(providerName==='apple') result=await window.signInApple();
+      else { setLoading(false); return; }
+      const user=result.user;
+      const p={...profile,loggedIn:true,provider:providerName,uid:user.uid,name:profile.name||user.displayName||'',photo:profile.photo||user.photoURL||null,email:user.email||''};
+      setProfile(p);
+      setDraft(p);
+      // Migrate local data to cloud on first login
+      await migrateToCloud(user.uid);
+      setSyncMsg('✓ Connecté et données synchronisées !');
+      setTimeout(()=>setSyncMsg(null),3000);
+    }catch(e){
+      console.error('Auth error',e);
+      setSyncMsg('Erreur de connexion. Réessaie.');
+      setTimeout(()=>setSyncMsg(null),3000);
+    }
+    setLoading(false);
+  }
+
+  async function migrateToCloud(uid){
+    // Load existing cloud data
+    const cloudData=await window.fbLoadAllData(uid);
+    // If cloud has data, use it (cloud wins)
+    if(cloudData && Object.keys(cloudData).length>0){
+      // Restore from cloud
+      if(cloudData.ht_v7) try{localStorage.setItem('ht_v7',JSON.stringify(cloudData.ht_v7));}catch{}
+      if(cloudData.ht_goals_v7) try{localStorage.setItem('ht_goals_v7',JSON.stringify(cloudData.ht_goals_v7));}catch{}
+      if(cloudData.ht_drugs_v7) try{localStorage.setItem('ht_drugs_v7',JSON.stringify(cloudData.ht_drugs_v7));}catch{}
+    } else {
+      // First login: push local data to cloud
+      const local={};
+      ['ht_v7','ht_goals_v7','ht_drugs_v7','ht_profile_v5','ht_widgets_v2','ht_onboard_v1'].forEach(k=>{
+        try{const v=localStorage.getItem(k);if(v)local[k]=JSON.parse(v);}catch{}
+      });
+      if(Object.keys(local).length>0) await window.fbSaveAllData(uid,local);
+    }
+  }
+
+  async function disconnect(){
+    await window.signOut();
+    const p={...profile,loggedIn:false,provider:null,uid:null,email:''};
+    setProfile(p);setDraft(p);
+  }
+
+  async function save(){
+    setProfile({...draft});
+    // Save profile to cloud if logged in
+    if(draft.uid){
+      await window.fbSaveData(draft.uid,'ht_profile_v5',{...draft});
+    }
+    setSaved(true);
+    setTimeout(()=>setSaved(false),2000);
+  }
   async function genMotiv(){setGen(true);const active=Object.keys(activeDrugs).filter(k=>activeDrugs[k]);const names=active.map(k=>ALL_DRUGS[k]?.name).filter(Boolean).join(", ")||"substances";try{const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":"","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:350,messages:[{role:"user",content:`Génère un texte de motivation personnel (6 phrases, première personne, sincère) pour quelqu'un qui veut se sevrer de : ${names}. Commence par "Je me bats pour...". Texte uniquement.`}]})});const d=await r.json();const txt=d.content?.find(b=>b.type==="text")?.text||"";if(txt)setDraft(p=>({...p,motivations:txt}));}catch{}setGen(false);}
   return<div className="mo" onClick={onClose}>
     <div className="mb" style={{maxHeight:"92vh"}} onClick={e=>e.stopPropagation()}>
@@ -935,7 +1082,9 @@ function ProfileModal({profile,setProfile,activeDrugs,onClose}){
           <div style={{width:56,height:56,borderRadius:"50%",background:"var(--s2)",border:"1px solid var(--b)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 10px",color:"var(--t2)"}}><IcoUser/></div>
           <div style={{fontSize:16,fontWeight:700,color:"var(--t)",marginBottom:4}}>Connexion</div>
         </div>
-        {[{icon:<svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>,label:"Continuer avec Apple",provider:"apple"},{icon:<span style={{fontWeight:800,fontSize:16,color:"#4285f4",width:18,display:"block",textAlign:"center"}}>G</span>,label:"Continuer avec Google",provider:"google"},{icon:<svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>,label:"Continuer avec l'email",provider:"email"}].map((s,i)=><button key={i} className="social-btn" onClick={()=>connect(s.provider)}><div style={{width:28,height:28,borderRadius:8,background:"var(--s2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{s.icon}</div><span>{s.label}</span><svg style={{marginLeft:"auto",color:"var(--t3)",flexShrink:0}} width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>)}
+        {syncMsg&&<div style={{padding:"10px 12px",borderRadius:10,background:syncMsg.startsWith('✓')?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)",border:`1px solid ${syncMsg.startsWith('✓')?"rgba(34,197,94,0.3)":"rgba(239,68,68,0.3)"}`,marginBottom:12,fontSize:12,color:syncMsg.startsWith('✓')?"var(--green2)":"#f87171",textAlign:"center"}}>{syncMsg}</div>}
+        {loading&&<div style={{textAlign:"center",padding:"20px 0",color:"var(--t3)",fontSize:13}}>Connexion en cours...</div>}
+        {!loading&&[{icon:<svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>,label:"Continuer avec Apple",provider:"apple"},{icon:<span style={{fontWeight:800,fontSize:16,color:"#4285f4",width:18,display:"block",textAlign:"center"}}>G</span>,label:"Continuer avec Google",provider:"google"}].map((s,i)=><button key={i} className="social-btn" onClick={()=>connect(s.provider)}><div style={{width:28,height:28,borderRadius:8,background:"var(--s2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{s.icon}</div><span>{s.label}</span><svg style={{marginLeft:"auto",color:"var(--t3)",flexShrink:0}} width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>)}
       </>}
       {isIn&&<>
         <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:16}}>
@@ -943,13 +1092,14 @@ function ProfileModal({profile,setProfile,activeDrugs,onClose}){
           {draft.photo?<img src={draft.photo} alt="" className="profile-avatar" onClick={()=>fileRef.current?.click()}/>:<div className="avatar-icon" onClick={()=>fileRef.current?.click()}><IcoUser/></div>}
           <div>
             <input type="text" value={draft.name||""} onChange={e=>setDraft(p=>({...p,name:e.target.value}))} placeholder="Ton prénom" style={{width:150,marginBottom:6}}/>
-            <div style={{fontSize:10,padding:"2px 8px",borderRadius:10,background:"var(--green3)",color:"var(--green2)",fontWeight:600,border:"1px solid rgba(34,197,94,0.2)",display:"inline-block"}}>{draft.provider==="apple"?"Apple":draft.provider==="google"?"Google":"Email"} · Connecté</div>
+            <div style={{fontSize:10,padding:"2px 8px",borderRadius:10,background:"var(--green3)",color:"var(--green2)",fontWeight:600,border:"1px solid rgba(34,197,94,0.2)",display:"inline-block"}}>{draft.provider==="apple"?"Apple":draft.provider==="google"?"Google":"Email"} · Connecté {draft.email?`· ${draft.email}`:``}</div>
           </div>
         </div>
         <div style={{fontSize:10,color:"var(--t3)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:6}}>Mes motivations</div>
         <textarea className="motiv-area" rows={5} value={draft.motivations||""} onChange={e=>setDraft(p=>({...p,motivations:e.target.value}))} placeholder="Je me bats pour me libérer de..."/>
         <button onClick={genMotiv} disabled={gen} style={{width:"100%",marginTop:8,padding:"10px",borderRadius:10,background:gen?"var(--s)":"rgba(168,85,247,0.15)",border:"1px solid rgba(168,85,247,0.25)",color:gen?"var(--t3)":"#d8b4fe",fontFamily:"inherit",fontWeight:600,fontSize:13,cursor:gen?"default":"pointer"}}>{gen?"Génération...":"Générer avec l'IA"}</button>
         {draft.motivations&&<div style={{marginTop:10,padding:"12px 14px",background:"rgba(168,85,247,0.07)",border:"1px solid rgba(168,85,247,0.15)",borderRadius:12}}><p style={{fontSize:12,color:"var(--t)",lineHeight:1.7,fontStyle:"italic"}}>{draft.motivations}</p></div>}
+        {syncMsg&&<div style={{padding:"8px 12px",borderRadius:9,background:syncMsg.startsWith('✓')?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)",border:`1px solid ${syncMsg.startsWith('✓')?"rgba(34,197,94,0.3)":"rgba(239,68,68,0.3)"}`,marginTop:8,fontSize:11,color:syncMsg.startsWith('✓')?"var(--green2)":"#f87171",textAlign:"center"}}>{syncMsg}</div>}
         <button onClick={save} style={{width:"100%",marginTop:14,padding:"13px",borderRadius:11,background:saved?"rgba(34,197,94,0.25)":"rgba(34,197,94,0.15)",border:"1.5px solid rgba(34,197,94,0.3)",color:"var(--green2)",fontFamily:"inherit",fontWeight:700,fontSize:14,cursor:"pointer",transition:"all .2s"}}>{saved?"✓ Enregistré !":"Enregistrer"}</button>
         <button onClick={disconnect} style={{width:"100%",marginTop:8,padding:"10px",borderRadius:10,background:"var(--s)",border:"1px solid var(--b)",color:"var(--t3)",fontFamily:"inherit",fontSize:12,cursor:"pointer"}}>Se déconnecter</button>
       </>}
@@ -1007,10 +1157,36 @@ function MainApp(){
   const [pulse,setPulse]=useState(false);
   const prevStreak=useRef(0);
 
-  useEffect(()=>{try{localStorage.setItem(STORE,JSON.stringify(data));}catch{}},[data]);
-  useEffect(()=>{try{localStorage.setItem(GSTORE,JSON.stringify(goals));}catch{}},[goals]);
-  useEffect(()=>{try{localStorage.setItem(DSTORE,JSON.stringify(activeDrugs));}catch{}},[activeDrugs]);
-  useEffect(()=>{try{localStorage.setItem(PSTORE,JSON.stringify(profile));}catch{}},[profile]);
+  useEffect(()=>{
+    try{localStorage.setItem(STORE,JSON.stringify(data));}catch{}
+    // Sync to Firestore if logged in
+    const user=window._fbUser;
+    if(user) window.fbSaveData(user.uid,STORE,data).catch(()=>{});
+  },[data]);
+  useEffect(()=>{
+    try{localStorage.setItem(GSTORE,JSON.stringify(goals));}catch{}
+    const user=window._fbUser;
+    if(user) window.fbSaveData(user.uid,GSTORE,goals).catch(()=>{});
+  },[goals]);
+  useEffect(()=>{
+    try{localStorage.setItem(DSTORE,JSON.stringify(activeDrugs));}catch{}
+    const user=window._fbUser;
+    if(user) window.fbSaveData(user.uid,DSTORE,activeDrugs).catch(()=>{});
+  },[activeDrugs]);
+  useEffect(()=>{
+    try{localStorage.setItem(PSTORE,JSON.stringify(profile));}catch{}
+    const user=window._fbUser;
+    if(user) window.fbSaveData(user.uid,PSTORE,profile).catch(()=>{});
+  },[profile]);
+  // Listen for Firebase auth state changes
+  useEffect(()=>{
+    window.onAuthReady((user)=>{
+      if(user&&!profile.loggedIn){
+        // Restore profile from Firebase user
+        setProfile(p=>({...p,loggedIn:true,uid:user.uid,name:p.name||user.displayName||'',photo:p.photo||user.photoURL||null,email:user.email||'',provider:p.provider||'google'}));
+      }
+    });
+  },[]);
   useEffect(()=>{try{localStorage.setItem(WSTORE,JSON.stringify(widgets));}catch{}},[widgets]);
 
   // ALL hooks BEFORE any conditional return
@@ -1357,6 +1533,18 @@ function App(){
     setGoals(g);
     setProfile(newProfile);
     setOnboarded(true);
+    // If user is already logged in, sync new onboarding data to cloud
+    window.onAuthReady(async (user)=>{
+      if(user){
+        await window.fbSaveAllData(user.uid,{
+          'ht_v7': JSON.parse(localStorage.getItem('ht_v7')||'{}'),
+          'ht_goals_v7': g,
+          'ht_drugs_v7': ad,
+          'ht_profile_v5': newProfile,
+          'ht_onboard_v1': true,
+        });
+      }
+    });
   }
 
   if(!onboarded)return<Onboarding onComplete={completeOnboarding}/>;
