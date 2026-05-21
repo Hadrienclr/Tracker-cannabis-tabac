@@ -978,9 +978,8 @@ function WidgetManager({widgets,setWidgets,onClose}){
 }
 
 // ── Main App ──────────────────────────────────────────────────────────────────
-function App(){
+function MainApp(){
   const today=new Date();
-  const [onboarded,setOnboarded]=useState(()=>load(OSTORE,false));
   const [year,setYear]=useState(today.getFullYear());
   const [month,setMonth]=useState(today.getMonth());
   const [data,setData]=useState(()=>load(STORE,{}));
@@ -1006,12 +1005,6 @@ function App(){
   useEffect(()=>{try{localStorage.setItem(DSTORE,JSON.stringify(activeDrugs));}catch{}},[activeDrugs]);
   useEffect(()=>{try{localStorage.setItem(PSTORE,JSON.stringify(profile));}catch{}},[profile]);
   useEffect(()=>{try{localStorage.setItem(WSTORE,JSON.stringify(widgets));}catch{}},[widgets]);
-  useEffect(()=>{try{localStorage.setItem(OSTORE,JSON.stringify(onboarded));}catch{}},[onboarded]);
-
-  function completeOnboarding({name,age,photo,activeDrugs:ad,goals:g}){
-    setActiveDrugs(ad);setGoals(g);setProfile(p=>({...p,name,age,photo}));
-    setOnboarded(true);
-  }
 
   // ALL hooks BEFORE any conditional return
   const activeList=useMemo(()=>Object.keys(activeDrugs).filter(k=>activeDrugs[k]),[activeDrugs]);
@@ -1049,10 +1042,6 @@ function App(){
   }),[data,activeDrugs,activeList]);
 
   const aiStats=useMemo(()=>({totals,nClean,daysCount,streak,longest,pct,score}),[totals,nClean,daysCount,streak,longest,pct,score]);
-
-  if(!onboarded)return <Onboarding onComplete={completeOnboarding}/>;
-
-
 
   // Calendar — blocked to today
   const cells=[];for(let i=0;i<offset;i++)cells.push(null);for(let d=1;d<=daysCount;d++)cells.push(d);while(cells.length%7!==0)cells.push(null);
@@ -1344,7 +1333,30 @@ function App(){
   </div>;
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+function App(){
+  const [onboarded,setOnboarded]=useState(()=>load(OSTORE,false));
+  const [activeDrugs,setActiveDrugs]=useState(()=>load(DSTORE,DEFAULT_ACTIVE));
+  const [goals,setGoals]=useState(()=>load(GSTORE,{target:20,notifOn:false,notifTime:"22:00",cigPerDay:20,cigPackCost:10,jointsPerDay:1,weedGPerJoint:0.3,weedGCost:15}));
+  const [profile,setProfile]=useState(()=>load(PSTORE,{loggedIn:false,name:"",photo:null,motivations:"",provider:null}));
+
+  function completeOnboarding({name,age,photo,activeDrugs:ad,goals:g}){
+    // Save to localStorage immediately
+    try{localStorage.setItem(DSTORE,JSON.stringify(ad));}catch{}
+    try{localStorage.setItem(GSTORE,JSON.stringify(g));}catch{}
+    const newProfile={...profile,name,age,photo};
+    try{localStorage.setItem(PSTORE,JSON.stringify(newProfile));}catch{}
+    try{localStorage.setItem(OSTORE,JSON.stringify(true));}catch{}
+    setActiveDrugs(ad);
+    setGoals(g);
+    setProfile(newProfile);
+    setOnboarded(true);
+  }
+
+  if(!onboarded)return<Onboarding onComplete={completeOnboarding}/>;
+  return<MainApp/>;
+}
+
+console.log("Habit Tracker v3.0 - fixed hooks"); ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});});}</script>
 </body>
